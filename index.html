@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0d12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>HTMLシングルファイル簡易デバッガ（iPhone）</title>
+
+  <!-- “単一ファイルでできる範囲”のManifest（※SWなしなので完全PWAではありません） -->
+  <link id="manifestLink" rel="manifest" />
+
+  <style>
+    :root{
+      --bg:#0b0d12;
+      --panel:#111523;
+      --panel2:#0f1320;
+      --text:#e8eefc;
+      --muted:#9aa7c0;
+      --border:#232a3d;
+      --btn:#1d2740;
+      --btn2:#243052;
+      --danger:#8a2d2d;
+      --warn:#8a6a1f;
+      --ok:#1f6f3d;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background:var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      padding:12px 12px 10px;
+      background:linear-gradient(#0b0d12 70%, rgba(11,13,18,0));
+      border-bottom:1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    header .row{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    header h1{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+      color:var(--text);
+      font-weight:650;
+    }
+    header .hint{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      padding:12px;
+    }
+    @media (min-width: 980px){
+      .layout{ grid-template-columns: 1.15fr .85fr; align-items:start; }
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .panelHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      background:var(--panel2);
+    }
+    .panelHeader .title{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:650;
+      letter-spacing:.2px;
+    }
+    .panelHeader .actions{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    }
+
+    select, input[type="text"]{
+      background:#0c1020;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:12px;
+      outline:none;
+    }
+    input[type="text"]{ width:min(320px, 70vw); }
+
+    button{
+      appearance:none;
+      border:1px solid var(--border);
+      background:var(--btn);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:650;
+      letter-spacing:.2px;
+    }
+    button:active{ transform: translateY(1px); }
+    button:hover{ background:var(--btn2); cursor:pointer; }
+    button.danger{ background: #2a1417; border-color:#3a1f24; }
+    button.danger:hover{ background:#36181c; }
+    button:disabled{ opacity:.5; cursor:not-allowed; }
+
+    .editorArea{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:10px;
+    }
+    textarea{
+      width:100%;
+      min-height: 44vh;
+      resize: vertical;
+      background:#070a14;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.45;
+      outline:none;
+      tab-size: 2;
+      -webkit-text-size-adjust: 100%;
+    }
+    .editorFooter{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+    label{
+      display:flex; gap:6px; align-items:center;
+      user-select:none;
+    }
+    .smallNote{
+      color:var(--muted);
+      font-size:12px;
+      padding:0 10px 12px;
+    }
+
+    .previewWrap{
+      padding:10px;
+      border-top:1px solid var(--border);
+      background: #0b0f1d;
+    }
+    .previewWrap.hidden{ display:none; }
+    iframe{
+      width:100%;
+      height: 40vh;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:white;
+    }
+
+    .logList{
+      list-style:none;
+      padding:0;
+      margin:0;
+      max-height: 55vh;
+      overflow:auto;
+    }
+    .logItem{
+      border-bottom:1px solid rgba(35,42,61,.7);
+      padding:10px 10px;
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .metaLine{
+      display:flex; gap:8px; flex-wrap:wrap;
+      font-family:var(--sans);
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .pill{
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#0c1020;
+      color:var(--muted);
+    }
+    .pill.level-log{ border-color:#2b3550; color:#b7c6e6; }
+    .pill.level-info{ border-color:#264a71; color:#a9d2ff; }
+    .pill.level-warn{ border-color:#6b5a26; color:#ffe2a1; }
+    .pill.level-error{ border-color:#6c2a2a; color:#ffb5b5; }
+    .pill.level-debug{ border-color:#2d3c2a; color:#c8f0c2; }
+
+    .repl{
+      border-top:1px solid var(--border);
+      padding:10px;
+      background: #0b0f1d;
+    }
+    .replRow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    #evalOut{
+      margin:10px 0 0;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#070a14;
+      color:var(--text);
+      font-family:var(--mono);
+      font-size:12px;
+      min-height: 52px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .toast{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(17,21,35,.92);
+      color:var(--text);
+      font-size:12px;
+      display:none;
+      z-index:999;
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="row">
+      <h1>HTMLシングルファイル簡易デバッガ（iPhone / GitHub Pages想定）</h1>
+      <span class="hint">新規タブで実行 → ログ/例外/通信の概要をこの画面へ転送</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panelHeader">
+        <div class="title">入力HTML</div>
+        <div class="actions">
+          <select id="sampleSelect" title="サンプル">
+            <option value="basic">サンプル: 基本</option>
+            <option value="error">サンプル: 例外</option>
+            <option value="fetch">サンプル: fetch</option>
+          </select>
+          <button id="loadSample">サンプル挿入</button>
+        </div>
+      </div>
+
+      <div class="editorArea">
+        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+
+        <div class="editorFooter">
+          <button id="runTab">新規タブで実行</button>
+          <button id="runPreview">この画面でプレビュー</button>
+          <button id="stopPreview" class="danger" disabled>プレビュー停止</button>
+
+          <label><input type="checkbox" id="clearOnRun" checked>実行時にログクリア</label>
+          <label title="プレビューはiframeなので互換性と隔離がトレードオフです">
+            <input type="checkbox" id="previewSameOrigin">
+            プレビューを同一オリジン寄せ（高互換/低隔離）
+          </label>
+        </div>
+      </div>
+
+      <div id="previewWrap" class="previewWrap hidden">
+        <iframe id="previewFrame" title="preview" sandbox="allow-scripts"></iframe>
+      </div>
+
+      <div class="smallNote">
+        注意：このツールは“本物のDevTools”ではなく、入力HTMLに計測スクリプトを注入してログ等を転送する方式です。<br/>
+        CSPでインラインscript禁止のHTMLだと注入が無効化され、ログ転送できない場合があります。
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panelHeader">
+        <div class="title">ログ / エラー / 通信</div>
+        <div class="actions">
+          <select id="sessionFilter" title="セッション絞り込み"></select>
+          <input id="textFilter" type="text" placeholder="filter（文字列で絞り込み）" />
+          <button id="copyLogs">コピー</button>
+          <button id="clearLogs" class="danger">クリア</button>
+        </div>
+      </div>
+
+      <ol id="logList" class="logList"></ol>
+
+      <div class="repl">
+        <div class="replRow">
+          <input id="evalInput" type="text" placeholder="Runnerで評価（例: document.title / location.href）" />
+          <button id="evalBtn">Eval</button>
+        </div>
+        <pre id="evalOut">Eval結果がここに表示されます（Runner実行後）</pre>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ==============
+  // Transport
+  // ==============
+  const CHANNEL_NAME = 'html_debugger_channel_v1';
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel(CHANNEL_NAME) : null;
+
+  // localStorage fallback keys
+  const LS_OUT = '__html_debugger_msg__'; // runner/preview -> debugger
+  const LS_IN  = '__html_debugger_cmd__'; // debugger -> runner
+
+  function lsPost(key, msg){
+    try{
+      const payload = JSON.stringify({ ...msg, _nonce: Math.random().toString(16).slice(2) });
+      localStorage.setItem(key, payload);
+    }catch(_e){}
+  }
+  function postToRunner(cmd){
+    if (bc) bc.postMessage(cmd);
+    else lsPost(LS_IN, cmd);
+  }
+
+  function onRunnerMessage(handler){
+    if (bc){
+      bc.addEventListener('message', (ev) => handler(ev.data));
+      return;
+    }
+    window.addEventListener('storage', (ev) => {
+      if (ev.key !== LS_OUT || !ev.newValue) return;
+      try{ handler(JSON.parse(ev.newValue)); }catch(_e){}
+    });
+  }
+
+  // ==============
+  // UI refs
+  // ==============
+  const editor = document.getElementById('editor');
+  const runTabBtn = document.getElementById('runTab');
+  const runPreviewBtn = document.getElementById('runPreview');
+  const stopPreviewBtn = document.getElementById('stopPreview');
+  const previewWrap = document.getElementById('previewWrap');
+  const previewFrame = document.getElementById('previewFrame');
+
+  const clearOnRun = document.getElementById('clearOnRun');
+  const previewSameOrigin = document.getElementById('previewSameOrigin');
+
+  const logList = document.getElementById('logList');
+  const clearLogsBtn = document.getElementById('clearLogs');
+  const copyLogsBtn = document.getElementById('copyLogs');
+
+  const sessionFilter = document.getElementById('sessionFilter');
+  const textFilter = document.getElementById('textFilter');
+
+  const evalInput = document.getElementById('evalInput');
+  const evalBtn = document.getElementById('evalBtn');
+  const evalOut = document.getElementById('evalOut');
+
+  const sampleSelect = document.getElementById('sampleSelect');
+  const loadSampleBtn = document.getElementById('loadSample');
+
+  const toastEl = document.getElementById('toast');
+
+  // ==============
+  // State
+  // ==============
+  let runnerWin = null;
+  let sessionCounter = 0;
+  let activeRunnerSession = null;
+
+  const sessions = new Map(); // sessionId -> label
+  const logs = []; // {t, session, source, event, payload}
+
+  // ==============
+  // Helpers
+  // ==============
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.style.display = 'block';
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(() => toastEl.style.display = 'none', 3500);
+  }
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function timeStr(ts){
+    const d = new Date(ts);
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+  }
+
+  function ensureSession(sessionId, label){
+    if (!sessions.has(sessionId)){
+      sessions.set(sessionId, label || sessionId);
+      rebuildSessionFilter();
+    }
+  }
+
+  function rebuildSessionFilter(){
+    const current = sessionFilter.value || '__all__';
+    sessionFilter.innerHTML = '';
+    const optAll = document.createElement('option');
+    optAll.value = '__all__';
+    optAll.textContent = 'すべて';
+    sessionFilter.appendChild(optAll);
+
+    for (const [id,label] of sessions.entries()){
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = label;
+      sessionFilter.appendChild(opt);
+    }
+    sessionFilter.value = current;
+  }
+
+  function matchesFilter(entry){
+    const s = (textFilter.value || '').trim();
+    if (!s) return true;
+    const hay = JSON.stringify(entry).toLowerCase();
+    return hay.includes(s.toLowerCase());
+  }
+
+  function render(){
+    const targetSession = sessionFilter.value || '__all__';
+    logList.innerHTML = '';
+
+    for (const entry of logs){
+      if (targetSession !== '__all__' && entry.session !== targetSession) continue;
+      if (!matchesFilter(entry)) continue;
+
+      const li = document.createElement('li');
+      li.className = 'logItem';
+
+      const meta = document.createElement('div');
+      meta.className = 'metaLine';
+
+      const pTime = document.createElement('span');
+      pTime.className = 'pill';
+      pTime.textContent = timeStr(entry.t);
+
+      const pSession = document.createElement('span');
+      pSession.className = 'pill';
+      pSession.textContent = sessions.get(entry.session) || entry.session;
+
+      const level = (entry.payload && entry.payload.level) ? entry.payload.level : entry.event;
+      const pLevel = document.createElement('span');
+      pLevel.className = `pill level-${(level||'log').toLowerCase()}`;
+      pLevel.textContent = (entry.event === 'console') ? `console.${level}` : entry.event;
+
+      const pSrc = document.createElement('span');
+      pSrc.className = 'pill';
+      pSrc.textContent = entry.source;
+
+      meta.append(pTime, pSession, pLevel, pSrc);
+
+      const body = document.createElement('div');
+      body.textContent = formatBody(entry);
+
+      li.append(meta, body);
+      logList.appendChild(li);
+    }
+  }
+
+  function formatBody(entry){
+    const p = entry.payload || {};
+    switch(entry.event){
+      case 'ready':
+        return `READY: ${p.title || '(no title)'}\nURL: ${p.href || ''}`;
+      case 'console':
+        return (p.args || []).join(' ');
+      case 'error':
+        return `ERROR: ${p.message || ''}\n${p.stack || ''}`.trim();
+      case 'unhandledrejection':
+        return `UNHANDLED REJECTION: ${p.reason || ''}\n${p.stack || ''}`.trim();
+      case 'fetch':
+        if (p.phase === 'start') return `fetch start: ${p.url || ''}`;
+        if (p.phase === 'end') return `fetch end: ${p.url || ''}  status=${p.status}  ${p.ms}ms`;
+        return `fetch error: ${p.url || ''}\n${p.error || ''}  ${p.ms}ms`;
+      case 'xhr':
+        if (p.phase === 'start') return `xhr start: ${p.method || ''} ${p.url || ''}`;
+        return `xhr end: ${p.method || ''} ${p.url || ''}  status=${p.status}  ${p.ms}ms`;
+      case 'evalResult':
+        return `EVAL: ${p.expr || ''}\nRESULT: ${p.result || ''}`;
+      default:
+        return JSON.stringify(p, null, 2);
+    }
+  }
+
+  function addLog(entry){
+    logs.push(entry);
+    // keep last 400
+    if (logs.length > 400) logs.splice(0, logs.length - 400);
+    render();
+    // autoscroll
+    try{ logList.scrollTop = logList.scrollHeight; }catch(_e){}
+  }
+
+  function clearLogs(){
+    logs.length = 0;
+    render();
+  }
+
+  async function copyLogs(){
+    const targetSession = sessionFilter.value || '__all__';
+    const lines = [];
+    for (const entry of logs){
+      if (targetSession !== '__all__' && entry.session !== targetSession) continue;
+      lines.push(`[${timeStr(entry.t)}] [${sessions.get(entry.session)||entry.session}] [${entry.source}] ${entry.event}`);
+      lines.push(formatBody(entry));
+      lines.push('');
+    }
+    const text = lines.join('\n');
+    try{
+      await navigator.clipboard.writeText(text);
+      toast('ログをコピーしました');
+    }catch(_e){
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); toast('ログをコピーしました'); }catch(_e2){ toast('コピーに失敗しました'); }
+      ta.remove();
+    }
+  }
+
+  // ==============
+  // Instrumentation injection
+  // ==============
+  function buildBridgeScript({ sessionId, transport }){
+    // transport: 'broadcast' | 'postmessage'
+    // NOTE: This string is injected into the user's HTML as an inline script.
+    return `
+(() => {
+  'use strict';
+  const SESSION = ${JSON.stringify(sessionId)};
+  const SOURCE = ${JSON.stringify(transport === 'postmessage' ? 'preview' : 'runner')};
+  const CHANNEL = ${JSON.stringify(CHANNEL_NAME)};
+  const LS_OUT = ${JSON.stringify(LS_OUT)};
+  const LS_IN  = ${JSON.stringify(LS_IN)};
+  const TRANSPORT = ${JSON.stringify(transport)};
+
+  function now(){ return Date.now(); }
+
+  function safeRepr(v){
+    try{
+      if (v === null) return 'null';
+      if (v === undefined) return 'undefined';
+      const t = typeof v;
+      if (t === 'string') return v;
+      if (t === 'number' || t === 'boolean') return String(v);
+      if (t === 'bigint') return String(v) + 'n';
+      if (t === 'symbol') return String(v);
+      if (t === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
+
+      // DOM-ish
+      if (v && v.nodeType && v.nodeName){
+        let s = '<' + String(v.nodeName).toLowerCase();
+        if (v.id) s += '#' + v.id;
+        if (v.className && typeof v.className === 'string') s += '.' + v.className.trim().split(/\\s+/).slice(0,3).join('.');
+        s += '>';
+        return s;
+      }
+
+      if (v instanceof Error){
+        return (v.name || 'Error') + ': ' + (v.message || '') + (v.stack ? '\\n' + v.stack : '');
+      }
+
+      // structured-ish
+      const seen = new WeakSet();
+      const MAX_DEPTH = 3;
+      const MAX_KEYS = 60;
+
+      function walk(x, depth){
+        if (depth > MAX_DEPTH) return '[MaxDepth]';
+        if (x === null) return null;
+        const tt = typeof x;
+        if (tt === 'string' || tt === 'number' || tt === 'boolean') return x;
+        if (tt === 'bigint') return String(x) + 'n';
+        if (tt === 'symbol') return String(x);
+        if (tt === 'function') return '[Function ' + (x.name || 'anonymous') + ']';
+        if (x instanceof Error) return { name: x.name, message: x.message, stack: x.stack };
+
+        if (tt === 'object'){
+          if (seen.has(x)) return '[Circular]';
+          seen.add(x);
+          if (Array.isArray(x)){
+            return x.slice(0, 80).map(vv => walk(vv, depth+1));
+          }
+          const out = {};
+          const keys = Object.keys(x).slice(0, MAX_KEYS);
+          for (const k of keys){
+            try{ out[k] = walk(x[k], depth+1); }catch(_e){ out[k] = '[Unserializable]'; }
+          }
+          return out;
+        }
+        return String(x);
+      }
+
+      const json = JSON.stringify(walk(v, 0));
+      return (json && json.length > 2400) ? (json.slice(0, 2400) + '…') : json;
+    }catch(e){
+      try{ return String(v); }catch(_e){ return '[Unrepr]'; }
+    }
+  }
+
+  function send(msg){
+    const payload = { __htmlDebugger: true, t: now(), session: SESSION, source: SOURCE, ...msg };
+
+    try{
+      if (TRANSPORT === 'postmessage'){
+        // For iframe preview
+        window.parent && window.parent.postMessage(payload, '*');
+        return;
+      }
+
+      // Runner: prefer BroadcastChannel
+      if ('BroadcastChannel' in self){
+        const ch = new BroadcastChannel(CHANNEL);
+        ch.postMessage(payload);
+        ch.close();
+        return;
+      }
+
+      // Fallback: localStorage -> storage event
+      localStorage.setItem(LS_OUT, JSON.stringify({ ...payload, _nonce: Math.random().toString(16).slice(2) }));
+    }catch(_e){}
+  }
+
+  // Receive commands (Eval) for runner
+  function onCommand(handler){
+    if (TRANSPORT === 'postmessage') return; // preview doesn't accept commands by default
+
+    if ('BroadcastChannel' in self){
+      const ch = new BroadcastChannel(CHANNEL);
+      ch.addEventListener('message', (ev) => {
+        const d = ev.data;
+        if (!d || !d.__htmlDebugger) return;
+        if (d.kind !== 'command') return;
+        if (d.session !== SESSION) return;
+        handler(d);
+      });
+      // keep channel open in background
+      // (Do not close)
+      return;
+    }
+
+    window.addEventListener('storage', (ev) => {
+      if (ev.key !== LS_IN || !ev.newValue) return;
+      let d;
+      try{ d = JSON.parse(ev.newValue); }catch(_e){ return; }
+      if (!d || !d.__htmlDebugger) return;
+      if (d.kind !== 'command') return;
+      if (d.session !== SESSION) return;
+      handler(d);
+    });
+  }
+
+  // Override console
+  (function(){
+    const levels = ['log','info','warn','error','debug'];
+    for (const level of levels){
+      const orig = console[level];
+      console[level] = (...args) => {
+        try{ send({ event: 'console', payload: { level, args: args.map(safeRepr) } }); }catch(_e){}
+        try{ orig.apply(console, args); }catch(_e){}
+      };
+    }
+  })();
+
+  // Global errors
+  window.addEventListener('error', (ev) => {
+    try{
+      const stack = ev.error && ev.error.stack ? String(ev.error.stack) : '';
+      send({ event: 'error', payload: { message: String(ev.message || 'Error'), stack } });
+    }catch(_e){}
+  });
+
+  window.addEventListener('unhandledrejection', (ev) => {
+    try{
+      const reason = safeRepr(ev.reason);
+      const stack = ev.reason && ev.reason.stack ? String(ev.reason.stack) : '';
+      send({ event: 'unhandledrejection', payload: { reason, stack } });
+    }catch(_e){}
+  });
+
+  // fetch / XHR (lightweight)
+  if (window.fetch){
+    const origFetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+      const start = (performance && performance.now) ? performance.now() : Date.now();
+      let url = '';
+      try{ url = (typeof args[0] === 'string') ? args[0] : (args[0] && args[0].url) || ''; }catch(_e){}
+      send({ event: 'fetch', payload: { phase: 'start', url } });
+      try{
+        const res = await origFetch(...args);
+        const end = (performance && performance.now) ? performance.now() : Date.now();
+        send({ event: 'fetch', payload: { phase: 'end', url, status: res.status, ok: !!res.ok, ms: Math.round(end - start) } });
+        return res;
+      }catch(err){
+        const end = (performance && performance.now) ? performance.now() : Date.now();
+        send({ event: 'fetch', payload: { phase: 'error', url, error: safeRepr(err), ms: Math.round(end - start) } });
+        throw err;
+      }
+    };
+  }
+
+  if (window.XMLHttpRequest){
+    const XHR = window.XMLHttpRequest;
+    const origOpen = XHR.prototype.open;
+    const origSend = XHR.prototype.send;
+
+    XHR.prototype.open = function(method, url, ...rest){
+      try{ this.__dbg = { method: String(method || ''), url: String(url || ''), start: 0 }; }catch(_e){}
+      return origOpen.call(this, method, url, ...rest);
+    };
+    XHR.prototype.send = function(body){
+      try{
+        if (this.__dbg){
+          this.__dbg.start = (performance && performance.now) ? performance.now() : Date.now();
+          send({ event: 'xhr', payload: { phase: 'start', method: this.__dbg.method, url: this.__dbg.url } });
+          this.addEventListener('loadend', () => {
+            const end = (performance && performance.now) ? performance.now() : Date.now();
+            send({ event: 'xhr', payload: { phase: 'end', method: this.__dbg.method, url: this.__dbg.url, status: this.status, ms: Math.round(end - this.__dbg.start) } });
+          }, { once: true });
+        }
+      }catch(_e){}
+      return origSend.call(this, body);
+    };
+  }
+
+  // Ready
+  try{
+    send({ event: 'ready', payload: { href: location.href, title: document.title } });
+  }catch(_e){}
+
+  // Eval command support (runner)
+  onCommand((cmd) => {
+    if (cmd.cmd !== 'eval') return;
+    const expr = String(cmd.expr || '');
+    try{
+      // Evaluate in page context
+      const result = (0, eval)(expr);
+      send({ event: 'evalResult', payload: { expr, result: safeRepr(result) } });
+    }catch(e){
+      send({ event: 'evalResult', payload: { expr, result: safeRepr(e) } });
+    }
+  });
+
+})();
+    `.trim();
+  }
+
+  function injectBridgeIntoHtml(userHtml, bridgeScript){
+    const scriptTag = `<script>\n${bridgeScript}\n<\/script>\n`;
+
+    const html = String(userHtml || '');
+    const hasHtmlTag = /<html[\s>]/i.test(html) || /<!doctype/i.test(html);
+
+    if (!hasHtmlTag){
+      // Fragment -> wrap
+      return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+${scriptTag}
+</head>
+<body>
+${html}
+</body>
+</html>`;
+    }
+
+    // Full document: inject right after <head ...>
+    const headOpen = html.match(/<head[^>]*>/i);
+    if (headOpen){
+      return html.replace(headOpen[0], headOpen[0] + '\n' + scriptTag);
+    }
+
+    // No head: inject after <html ...> by creating head
+    const htmlOpen = html.match(/<html[^>]*>/i);
+    if (htmlOpen){
+      return html.replace(htmlOpen[0], htmlOpen[0] + `\n<head>\n${scriptTag}</head>\n`);
+    }
+
+    // Fallback: prepend
+    return scriptTag + html;
+  }
+
+  function instrumentForRunner(userHtml, sessionId){
+    const bridge = buildBridgeScript({ sessionId, transport: 'broadcast' });
+    return injectBridgeIntoHtml(userHtml, bridge);
+  }
+
+  function instrumentForPreview(userHtml, sessionId){
+    const bridge = buildBridgeScript({ sessionId, transport: 'postmessage' });
+    return injectBridgeIntoHtml(userHtml, bridge);
+  }
+
+  // ==============
+  // Run actions
+  // ==============
+  function runInNewTab(){
+    const userHtml = editor.value || '';
+
+    sessionCounter++;
+    const sessionId = `runner-${sessionCounter}`;
+    activeRunnerSession = sessionId;
+    ensureSession(sessionId, `Runner #${sessionCounter}`);
+
+    if (clearOnRun.checked) clearLogs();
+
+    const instrumented = instrumentForRunner(userHtml, sessionId);
+
+    // IMPORTANT: Must be called directly on user gesture to avoid pop-up blocker.
+    const name = 'html_debug_runner';
+    const win = (runnerWin && !runnerWin.closed) ? runnerWin : window.open('about:blank', name);
+
+    if (!win){
+      toast('ポップアップがブロックされました。Safari設定でポップアップ許可、または“押してすぐ開く”動作にしてください。');
+      return;
+    }
+    runnerWin = win;
+
+    try{
+      win.document.open();
+      win.document.write(instrumented);
+      win.document.close();
+      toast('Runnerタブで実行しました（ログはこの画面へ）');
+    }catch(_e){
+      toast('Runnerタブへ書き込めませんでした（別オリジンへ遷移している等）。新規タブで再実行してください。');
+    }
+  }
+
+  function runInPreview(){
+    const userHtml = editor.value || '';
+
+    sessionCounter++;
+    const sessionId = `preview-${sessionCounter}`;
+    ensureSession(sessionId, `Preview #${sessionCounter}`);
+
+    if (clearOnRun.checked) clearLogs();
+
+    // sandbox tuning
+    // - same-origin ON: more compatible (same-origin fetch等が通りやすい)が、親DOMへ触れる危険が上がる
+    // - same-origin OFF: 親DOMへ触れないが、相対URLや同一オリジン前提が壊れることがある
+    const sandbox = previewSameOrigin.checked
+      ? 'allow-scripts allow-same-origin allow-forms allow-modals allow-popups'
+      : 'allow-scripts allow-forms allow-modals allow-popups';
+
+    previewFrame.setAttribute('sandbox', sandbox);
+
+    const instrumented = instrumentForPreview(userHtml, sessionId);
+    previewFrame.srcdoc = instrumented;
+
+    previewWrap.classList.remove('hidden');
+    stopPreviewBtn.disabled = false;
+
+    toast('この画面内でプレビュー実行しました');
+  }
+
+  function stopPreview(){
+    previewFrame.srcdoc = '<!doctype html><meta charset="utf-8"><title>stopped</title>';
+    previewWrap.classList.add('hidden');
+    stopPreviewBtn.disabled = true;
+    toast('プレビューを停止しました');
+  }
+
+  // ==============
+  // Receive preview messages via postMessage
+  // ==============
+  window.addEventListener('message', (ev) => {
+    const d = ev.data;
+    if (!d || !d.__htmlDebugger) return;
+    if (!d.session) return;
+
+    ensureSession(d.session, sessions.get(d.session) || d.session);
+    addLog({ t: d.t || Date.now(), session: d.session, source: d.source || 'preview', event: d.event || 'message', payload: d.payload || {} });
+  });
+
+  // ==============
+  // Receive runner messages via BroadcastChannel / storage
+  // ==============
+  onRunnerMessage((d) => {
+    if (!d || !d.__htmlDebugger) return;
+    if (!d.session) return;
+
+    ensureSession(d.session, sessions.get(d.session) || d.session);
+    addLog({ t: d.t || Date.now(), session: d.session, source: d.source || 'runner', event: d.event || 'message', payload: d.payload || {} });
+  });
+
+  // ==============
+  // Eval
+  // ==============
+  function evalInRunner(){
+    const expr = (evalInput.value || '').trim();
+    if (!expr) return;
+
+    if (!activeRunnerSession){
+      toast('まず「新規タブで実行」でRunnerを起動してください');
+      return;
+    }
+
+    evalOut.textContent = '... evaluating ...';
+
+    const cmd = {
+      __htmlDebugger: true,
+      kind: 'command',
+      cmd: 'eval',
+      session: activeRunnerSession,
+      expr,
+      t: Date.now()
+    };
+
+    postToRunner(cmd);
+  }
+
+  // ==============
+  // Samples + persistence
+  // ==============
+  const samples = {
+    basic: `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sample: Basic</title>
+  <style>
+    body{ font-family: system-ui; padding: 14px; }
+    button{ font-size:16px; padding:10px 12px; }
+  </style>
+</head>
+<body>
+  <h2>Basic</h2>
+  <button id="btn">console.logしてみる</button>
+  <script>
+    console.log("Hello from user app!");
+    document.getElementById('btn').addEventListener('click', () => {
+      console.log("clicked!", { time: new Date().toISOString() });
+    });
+  </script>
+</body>
+</html>`,
+
+    error: `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sample: Error</title>
+</head>
+<body>
+  <h2>Error sample</h2>
+  <button onclick="boom()">例外を投げる</button>
+  <script>
+    function boom(){
+      console.warn("About to throw...");
+      throw new Error("Boom! (sample)");
+    }
+
+    // Unhandled rejection sample:
+    Promise.reject(new Error("Unhandled rejection sample"));
+  </script>
+</body>
+</html>`,
+
+    fetch: `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sample: fetch</title>
+</head>
+<body>
+  <h2>fetch sample</h2>
+  <button id="go">Fetch example.com</button>
+  <pre id="out"></pre>
+  <script>
+    const out = document.getElementById('out');
+    document.getElementById('go').addEventListener('click', async () => {
+      console.log("fetch start");
+      const r = await fetch("https://example.com", { mode: "cors" });
+      console.log("fetch done", r.status);
+      out.textContent = "status=" + r.status;
+    });
+  </script>
+</body>
+</html>`
+  };
+
+  const EDITOR_KEY = 'html_debugger_editor_v1';
+  function saveEditor(){ try{ localStorage.setItem(EDITOR_KEY, editor.value); }catch(_e){} }
+
+  function loadEditor(){
+    try{
+      const v = localStorage.getItem(EDITOR_KEY);
+      if (v) return v;
+    }catch(_e){}
+    return samples.basic;
+  }
+
+  // ==============
+  // Events
+  // ==============
+  runTabBtn.addEventListener('click', runInNewTab);
+  runPreviewBtn.addEventListener('click', runInPreview);
+  stopPreviewBtn.addEventListener('click', stopPreview);
+
+  clearLogsBtn.addEventListener('click', clearLogs);
+  copyLogsBtn.addEventListener('click', copyLogs);
+
+  sessionFilter.addEventListener('change', render);
+  textFilter.addEventListener('input', render);
+
+  evalBtn.addEventListener('click', evalInRunner);
+  evalInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      evalInRunner();
+    }
+  });
+
+  loadSampleBtn.addEventListener('click', () => {
+    const key = sampleSelect.value;
+    editor.value = samples[key] || samples.basic;
+    saveEditor();
+    toast('サンプルを挿入しました');
+  });
+
+  editor.addEventListener('input', saveEditor);
+
+  // ==============
+  // Init
+  // ==============
+  editor.value = loadEditor();
+  rebuildSessionFilter();
+  render();
+
+  // Manifest as data URI (single file)
+  const manifest = {
+    name: "HTML Debugger",
+    short_name: "HTMLDbg",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#0b0d12",
+    theme_color: "#0b0d12"
+  };
+  try{
+    document.getElementById('manifestLink').href =
+      "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifest));
+  }catch(_e){}
+})();
+</script>
+</body>
+</html>
