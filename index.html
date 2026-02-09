@@ -3,301 +3,368 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <title>Liquid Studio</title>
+  <meta name="theme-color" content="#0d1117">
+  <title>Liquid Ultimate</title>
   <style>
-    /* --- LIQUID GLASS THEME SYSTEM --- */
     :root {
-      --bg-deep: #000000;
-      --glass-surface: rgba(255, 255, 255, 0.08);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-highlight: rgba(255, 255, 255, 0.2);
-      --glass-blur: blur(20px);
-      
-      --accent-gradient: linear-gradient(135deg, rgba(60, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.5) 100%);
-      --danger-gradient: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.2) 100%);
-      
-      --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.6);
-      
-      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-code: "SF Mono", "Menlo", "Monaco", monospace;
+      --bg: #0d1117;
+      --glass: rgba(22, 27, 34, 0.85);
+      --border: rgba(255,255,255,0.1);
+      --accent: #58a6ff;
+      --text: #c9d1d9;
+      --font-code: "SF Mono", "Menlo", monospace;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    
+    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
     body {
-      margin: 0; background: var(--bg-deep); color: var(--text-main);
-      font-family: var(--font-ui); height: 100dvh;
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, sans-serif; height: 100dvh;
       display: flex; flex-direction: column; overflow: hidden;
-      /* 背景にわずかなグラデーション配置 */
-      background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 60%);
     }
 
-    /* --- GLASS COMPONENT MIXIN --- */
-    .glass {
-      background: var(--glass-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    }
-
-    /* --- HEADER --- */
+    /* --- UI COMPONENTS --- */
     header {
-      height: 60px; padding: 0 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      z-index: 100; border-bottom: 1px solid var(--glass-border);
+      height: 50px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;
+      background: var(--glass); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); z-index: 100;
     }
-    
-    .logo { 
-      font-weight: 800; font-size: 16px; letter-spacing: -0.5px;
-      background: linear-gradient(to right, #fff, #aaa);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      display: flex; align-items: center; gap: 8px;
+    .brand { font-weight: 700; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+
+    .icon-btn {
+      background: transparent; border: none; color: #fff; padding: 8px;
+      font-size: 16px; border-radius: 8px; cursor: pointer;
     }
+    .icon-btn:active { background: rgba(255,255,255,0.1); }
 
-    .actions { display: flex; gap: 10px; }
-
-    /* --- LIQUID BUTTONS --- */
-    button { cursor: pointer; user-select: none; }
-
-    .btn-liquid {
-      position: relative;
-      padding: 8px 16px; border-radius: 20px;
-      font-size: 13px; font-weight: 600; color: #fff;
-      border: 1px solid var(--glass-border);
-      background: var(--glass-surface);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    .btn-run {
+      background: #238636; color: white; border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold;
     }
 
-    .btn-liquid:active { transform: scale(0.94); opacity: 0.8; }
+    /* --- SEARCH BAR (Slide Down) --- */
+    #searchBar {
+      position: absolute; top: 50px; left: 0; right: 0;
+      background: #161b22; border-bottom: 1px solid var(--border);
+      padding: 8px 12px; display: flex; gap: 8px; align-items: center;
+      transform: translateY(-100%); transition: transform 0.2s ease-out;
+      z-index: 90;
+    }
+    #searchBar.active { transform: translateY(0); }
 
-    /* Reset Button (Red Glass) */
-    .btn-danger {
-      background: var(--danger-gradient);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
+    .search-input {
+      flex: 1; background: #0d1117; border: 1px solid var(--border);
+      color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 13px;
     }
-
-    /* Launch Button (Blue/Purple Glass) */
-    .btn-primary {
-      background: var(--accent-gradient);
-      border-color: rgba(139, 92, 246, 0.4);
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-    }
-
-    /* --- TABS --- */
-    .tabs-container {
-      display: flex; gap: 8px; padding: 12px 16px;
-      overflow-x: auto; scrollbar-width: none;
-    }
-    .tab {
-      padding: 8px 16px; border-radius: 12px;
-      font-size: 12px; font-family: var(--font-code);
-      color: var(--text-muted); transition: 0.3s;
-      background: transparent; border: 1px solid transparent;
-      white-space: nowrap;
-    }
-    .tab.active {
-      background: rgba(255,255,255,0.1);
-      border-color: var(--glass-border);
-      color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    .nav-btn {
+      background: #21262d; border: 1px solid var(--border); color: #c9d1d9;
+      padding: 6px 10px; border-radius: 4px; font-size: 12px;
     }
 
     /* --- EDITOR --- */
-    .editor-wrapper { flex: 1; position: relative; }
-    
+    .editor-container {
+      flex: 1; position: relative; display: flex; overflow: hidden;
+    }
+    .gutter {
+      width: 40px; background: #0d1117; color: #484f58;
+      font-family: var(--font-code); font-size: 13px; padding: 10px 4px;
+      text-align: right; border-right: 1px solid var(--border);
+      line-height: 1.5; overflow: hidden;
+    }
     textarea {
-      width: 100%; height: 100%; background: transparent; border: none;
-      color: #e5e5e5; padding: 16px; font-family: var(--font-code);
-      font-size: 14px; line-height: 1.6; resize: none; white-space: pre;
+      flex: 1; height: 100%; border: none; background: transparent;
+      color: var(--text); padding: 10px; font-family: var(--font-code);
+      font-size: 13px; line-height: 1.5; resize: none; white-space: pre;
+      overflow: auto; tab-size: 2;
     }
 
-    /* --- KEYBOARD TOOLBAR --- */
-    .glass-toolbar {
-      padding: 10px; display: flex; gap: 8px; overflow-x: auto;
-      border-top: 1px solid var(--glass-border);
-      background: rgba(0,0,0,0.6); backdrop-filter: blur(30px);
-      padding-bottom: max(10px, env(safe-area-inset-bottom));
+    /* --- ZOOM INDICATOR --- */
+    #zoomToast {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.7); color: white; padding: 15px 25px;
+      border-radius: 30px; font-size: 20px; font-weight: bold;
+      backdrop-filter: blur(10px); pointer-events: none; opacity: 0;
+      transition: opacity 0.3s; z-index: 200;
     }
-    
-    .key-btn {
-      flex: 0 0 auto; min-width: 40px; height: 40px;
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.05);
-      color: #fff; font-family: var(--font-code); font-size: 15px;
-      transition: 0.2s;
-    }
-    .key-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.9); }
 
+    /* --- TOOLBAR --- */
+    .toolbar {
+      padding: 8px; background: var(--glass); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border); display: flex; gap: 8px;
+      overflow-x: auto; align-items: center; padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+    .key {
+      min-width: 32px; height: 32px; border-radius: 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05);
+      color: #fff; font-family: var(--font-code); font-size: 14px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .key:active { background: var(--accent); }
+
+    /* Color Picker */
+    #colorTrigger {
+      display: none; padding: 0 10px; gap: 6px; border: 1px solid var(--accent); color: var(--accent);
+    }
+    .swatch { width: 12px; height: 12px; border-radius: 2px; border: 1px solid #fff; }
   </style>
 </head>
 <body>
 
-  <header class="glass">
-    <div class="logo">Liquid Studio</div>
-    <div class="actions">
-      <button class="btn-liquid btn-danger" onclick="resetCode()">
-        <span style="font-size:10px; opacity:0.7;">✕</span> Reset
-      </button>
-      <button class="btn-liquid btn-primary" onclick="launchProduction()">
-        Run
-      </button>
+  <header>
+    <div class="brand"><div class="dot"></div> Liquid Ult</div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+      <button class="icon-btn" onclick="reset()">✕</button>
+      <button class="btn-run" onclick="launch()">Run ▶</button>
     </div>
   </header>
 
-  <div class="tabs-container" id="tabContainer">
-    </div>
-  
-  <div class="editor-wrapper">
-    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
+  <div id="searchBar">
+    <input type="text" id="searchInput" class="search-input" placeholder="Find..." onkeyup="if(event.key==='Enter') findNext()">
+    <button class="nav-btn" onclick="findPrev()">▲</button>
+    <button class="nav-btn" onclick="findNext()">▼</button>
+    <button class="nav-btn" onclick="toggleSearch()" style="color:#f85149">✕</button>
   </div>
 
-  <div class="glass-toolbar" id="toolbar">
+  <div class="editor-container">
+    <div class="gutter" id="gutter"></div>
+    <textarea id="editor" spellcheck="false" autocomplete="off"></textarea>
+    <div id="zoomToast">13px</div>
+  </div>
+
+  <div class="toolbar" id="toolbar">
+    <button id="colorTrigger" class="key" onclick="document.getElementById('nativePicker').click()">
+      <div id="swatch" class="swatch"></div> <span id="colorLabel">#fff</span>
+    </button>
     </div>
 
+  <input type="color" id="nativePicker" style="visibility:hidden; position:absolute;">
+
   <script>
-    // --- Data Store ---
-    const defaultFiles = {
-      'index.html': 
-`<div class="glass-card">
-  <h1>Hello Liquid</h1>
-  <p>This is a production-ready preview.</p>
-  <button onclick="alert('Touched!')">Tap Me</button>
-</div>`,
-      'style.css': 
-`body {
-  margin: 0; min-height: 100vh;
-  background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
-  display: flex; align-items: center; justify-content: center;
-  font-family: sans-serif;
-}
-.glass-card {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  backdrop-filter: blur(4px);
-  border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 2rem; text-align: center; color: white;
-}
-h1 { margin-top: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-button {
-  background: white; border: none; padding: 10px 20px;
-  border-radius: 20px; color: #ff9a9e; font-weight: bold;
-  cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}`,
-      'script.js': `console.log('Liquid Environment Ready');`
+    // --- APP STATE ---
+    const defaultData = {
+      'index.html': '\n<div class="hero">\n  <h1>Pinch to Zoom</h1>\n  <p>Try searching for "hero"</p>\n</div>',
+      'style.css': '.hero {\n  text-align: center;\n  color: #58a6ff;\n  font-size: 2rem;\n}',
+      'script.js': 'console.log("Ready");'
     };
-
-    let files = JSON.parse(localStorage.getItem('liquid_files')) || JSON.parse(JSON.stringify(defaultFiles));
+    let files = JSON.parse(localStorage.getItem('liquid_ult')) || defaultData;
     let currentTab = 'index.html';
-
-    // --- Core Logic ---
+    
+    // Editor State
+    let fontSize = 13;
+    let searchIndex = -1;
+    
     const editor = document.getElementById('editor');
-    const tabContainer = document.getElementById('tabContainer');
-    const toolbar = document.getElementById('toolbar');
+    const gutter = document.getElementById('gutter');
+    const zoomToast = document.getElementById('zoomToast');
 
     function init() {
-      renderTabs();
+      // 1. Initial Load
+      editor.value = files[currentTab];
+      updateGutter();
       renderKeys();
-      loadFile(currentTab);
-      
+
+      // 2. Event Listeners
       editor.addEventListener('input', () => {
         files[currentTab] = editor.value;
-        localStorage.setItem('liquid_files', JSON.stringify(files));
+        localStorage.setItem('liquid_ult', JSON.stringify(files));
+        updateGutter();
+      });
+      editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
+      editor.addEventListener('click', checkContext);
+      editor.addEventListener('keyup', checkContext);
+      
+      // Color Picker
+      document.getElementById('nativePicker').addEventListener('input', (e) => applyColor(e.target.value));
+
+      // 3. Pinch Zoom Logic
+      setupPinchZoom();
+    }
+
+    // --- PINCH ZOOM IMPLEMENTATION ---
+    function setupPinchZoom() {
+      let initialDist = 0;
+      let startSize = 13;
+
+      editor.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          e.preventDefault(); // Prevent page zoom
+          initialDist = Math.hypot(
+            e.touches[0].pageX - e.touches[1].pageX,
+            e.touches[0].pageY - e.touches[1].pageY
+          );
+          startSize = fontSize;
+          zoomToast.style.opacity = '1';
+        }
+      }, { passive: false });
+
+      editor.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          const dist = Math.hypot(
+            e.touches[0].pageX - e.touches[1].pageX,
+            e.touches[0].pageY - e.touches[1].pageY
+          );
+          
+          const ratio = dist / initialDist;
+          let newSize = startSize * ratio;
+          
+          // Clamp (10px - 32px)
+          newSize = Math.max(10, Math.min(32, newSize));
+          
+          setFontSize(newSize);
+        }
+      }, { passive: false });
+
+      editor.addEventListener('touchend', () => {
+        zoomToast.style.opacity = '0';
       });
     }
 
-    function loadFile(filename) {
-      files[currentTab] = editor.value; 
-      currentTab = filename;
-      editor.value = files[filename];
-      renderTabs();
+    function setFontSize(size) {
+      fontSize = size;
+      const px = size.toFixed(1) + 'px';
+      editor.style.fontSize = px;
+      gutter.style.fontSize = px;
+      zoomToast.textContent = Math.round(size) + 'px';
     }
 
-    function renderTabs() {
-      tabContainer.innerHTML = '';
-      Object.keys(files).forEach(name => {
-        const btn = document.createElement('button');
-        btn.className = `tab ${name === currentTab ? 'active' : ''}`;
-        btn.textContent = name;
-        btn.onclick = () => loadFile(name);
-        tabContainer.appendChild(btn);
-      });
+    // --- SEARCH FUNCTIONALITY ---
+    function toggleSearch() {
+      const bar = document.getElementById('searchBar');
+      bar.classList.toggle('active');
+      if (bar.classList.contains('active')) {
+        document.getElementById('searchInput').focus();
+      }
+    }
+
+    function findNext() {
+      const query = document.getElementById('searchInput').value;
+      if (!query) return;
+      
+      const text = editor.value;
+      // Start searching from current cursor position or last match
+      let startPos = editor.selectionEnd;
+      let idx = text.indexOf(query, startPos);
+      
+      if (idx === -1) {
+        // Wrap around
+        idx = text.indexOf(query, 0);
+      }
+      
+      if (idx !== -1) {
+        selectAndScroll(idx, idx + query.length);
+      } else {
+        alert('Not found');
+      }
+    }
+
+    function findPrev() {
+      const query = document.getElementById('searchInput').value;
+      if (!query) return;
+      
+      const text = editor.value;
+      let startPos = editor.selectionStart;
+      // Search backwards is harder with indexOf, simple approach: find all, pick one before
+      // Or use lastIndexOf
+      let idx = text.lastIndexOf(query, startPos - 1);
+      
+      if (idx === -1) {
+        idx = text.lastIndexOf(query); // Wrap to end
+      }
+      
+      if (idx !== -1) {
+        selectAndScroll(idx, idx + query.length);
+      }
+    }
+
+    function selectAndScroll(start, end) {
+      editor.focus();
+      editor.setSelectionRange(start, end);
+      
+      // Calculate scroll position (approximate)
+      const textBefore = editor.value.substring(0, start);
+      const lines = textBefore.split('\n').length;
+      const lineHeight = fontSize * 1.5;
+      
+      // Center the view
+      editor.scrollTop = (lines * lineHeight) - (editor.clientHeight / 2);
+    }
+
+    // --- UTILS ---
+    function updateGutter() {
+      const lines = editor.value.split('\n').length;
+      gutter.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('<br>');
     }
 
     function renderKeys() {
-      const keys = ['<','>','/','=','"',"'",'{','}','(',')',';','!','class','$'];
+      const keys = ['<','>','/','=','{','}','(',')',';','"',"'",'class','id'];
+      const bar = document.getElementById('toolbar');
       keys.forEach(k => {
-        const btn = document.createElement('button');
-        btn.className = 'key-btn';
-        btn.textContent = k;
-        btn.onclick = (e) => {
-          e.preventDefault(); // Prevent focus loss
-          insert(k);
+        const b = document.createElement('button');
+        b.className = 'key';
+        b.textContent = k;
+        b.onclick = (e) => {
+          e.preventDefault();
+          const s = editor.selectionStart;
+          editor.value = editor.value.slice(0,s) + k + editor.value.slice(editor.selectionEnd);
+          editor.selectionStart = editor.selectionEnd = s + k.length;
+          files[currentTab] = editor.value;
         };
-        toolbar.appendChild(btn);
+        bar.appendChild(b);
       });
     }
 
-    function insert(txt) {
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      editor.value = editor.value.substring(0, start) + txt + editor.value.substring(end);
-      editor.selectionStart = editor.selectionEnd = start + txt.length;
+    // Color Logic (Smart Context)
+    let colorRange = null;
+    function checkContext() {
+      const pos = editor.selectionStart;
+      const match = /#([0-9a-f]{3,6})\b/gi.exec(editor.value.slice(pos-7, pos+7)); // Look around cursor
+      // Simplified regex check for demo
+      const fullText = editor.value;
+      const regex = /#([0-9a-fA-F]{3,6})\b/g;
+      let m;
+      let found = null;
+      while((m = regex.exec(fullText)) !== null) {
+        if(pos >= m.index && pos <= m.index + m[0].length) {
+          found = m; break;
+        }
+      }
+
+      const trig = document.getElementById('colorTrigger');
+      if(found) {
+        trig.style.display = 'flex';
+        document.getElementById('swatch').style.background = found[0];
+        document.getElementById('colorLabel').textContent = found[0];
+        colorRange = {start: found.index, end: found.index + found[0].length};
+      } else {
+        trig.style.display = 'none';
+      }
+    }
+
+    function applyColor(hex) {
+      if(!colorRange) return;
+      editor.value = editor.value.slice(0, colorRange.start) + hex + editor.value.slice(colorRange.end);
+      colorRange.end = colorRange.start + hex.length;
       editor.focus();
-      files[currentTab] = editor.value; 
+      checkContext();
     }
 
-    // --- Reset Logic ---
-    function resetCode() {
-      // ユーザーに確認をとる
-      if(confirm('⚠️ Reset all code to default? This cannot be undone.')) {
-        // デフォルトのディープコピーを作成して代入
-        files = JSON.parse(JSON.stringify(defaultFiles));
-        localStorage.removeItem('liquid_files'); // ストレージクリア
-        
-        // 画面更新
-        loadFile('index.html');
-        
-        // フィードバック（軽いアニメーション）
-        editor.style.opacity = '0';
-        setTimeout(() => editor.style.opacity = '1', 200);
-      }
-    }
-
-    // --- Production Launch ---
-    function launchProduction() {
-      files[currentTab] = editor.value;
-
-      const html = files['index.html'];
-      const css = files['style.css'];
-      const js = files['script.js'];
-      
-      // Viewport自動補正
-      let finalHtml = html;
-      if (!finalHtml.includes('<meta name="viewport"')) {
-         const vp = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
-         finalHtml = finalHtml.replace('<head>', `<head>${vp}`) || `${vp}${finalHtml}`;
-      }
-
-      const blobContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>${css}</style>
-        </head>
-        <body>
-          ${finalHtml}
-          <script>${js}<\/script>
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob([blobContent], { type: 'text/html' });
+    function launch() {
+      const blob = new Blob([
+        `<!DOCTYPE html><html><head><style>${files['style.css']}</style></head>
+         <body>${files['index.html']}<script>${files['script.js']}<\/script></body></html>`
+      ], {type:'text/html'});
       window.open(URL.createObjectURL(blob), '_blank');
+    }
+
+    function reset() {
+      if(confirm('Reset?')) {
+        files = JSON.parse(JSON.stringify(defaultData));
+        localStorage.removeItem('liquid_ult');
+        location.reload();
+      }
     }
 
     init();
