@@ -2,68 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#010409">
-  <title>Onyx Color</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1117">
+  <title>Onyx Native</title>
   <style>
-    /* --- SYSTEM TOKENS --- */
     :root {
-      --bg: #010409;
-      --surface: #0d1117;
+      --bg: #0d1117;
       --border: #30363d;
       --accent: #2f81f7;
       --text: #e6edf3;
-      --text-muted: #7d8590;
+      --toolbar-bg: #161b22;
       --font-code: "SF Mono", "Menlo", monospace;
-      --font-ui: -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
     body {
       margin: 0; background: var(--bg); color: var(--text);
-      font-family: var(--font-ui); height: 100dvh;
-      display: flex; flex-direction: column; overflow: hidden;
+      font-family: -apple-system, sans-serif;
+      /* スクロール禁止。JSで高さを制御します */
+      overflow: hidden; 
+      position: fixed; width: 100%; height: 100%;
+    }
+
+    /* アプリ全体のレイアウトコンテナ */
+    #app {
+      display: flex; flex-direction: column;
+      height: 100%; width: 100%;
     }
 
     /* --- HEADER --- */
     header {
-      height: 48px; padding: 0 12px;
-      background: var(--surface); border-bottom: 1px solid var(--border);
+      height: 48px; padding: 0 16px; flex-shrink: 0;
+      background: var(--bg); border-bottom: 1px solid var(--border);
       display: flex; justify-content: space-between; align-items: center;
-      flex-shrink: 0;
     }
-    .brand { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-    .status-dot { width: 8px; height: 8px; background: #238636; border-radius: 50%; }
-
-    .actions button {
+    .brand { font-weight: 700; font-size: 14px; color: var(--text); }
+    .actions { display: flex; gap: 10px; }
+    .btn {
       background: transparent; border: 1px solid var(--border); color: var(--text);
       padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
-      cursor: pointer; margin-left: 8px;
     }
-    .actions .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
 
-    /* --- EDITOR --- */
-    .editor-wrapper {
-      flex: 1; position: relative; display: flex;
-      background: var(--bg); overflow: hidden;
+    /* --- EDITOR AREA --- */
+    .editor-area {
+      flex: 1; display: flex; overflow: hidden; position: relative;
     }
+    
     .gutter {
-      width: 40px; padding: 12px 6px 12px 0; text-align: right;
+      width: 42px; background: var(--bg); border-right: 1px solid var(--border);
       font-family: var(--font-code); font-size: 13px; line-height: 1.5;
-      color: #484f58; border-right: 1px solid var(--border);
-    }
-    textarea {
-      flex: 1; border: none; background: transparent; color: var(--text);
-      padding: 12px; font-family: var(--font-code); font-size: 13px;
-      line-height: 1.5; resize: none; white-space: pre;
+      color: #484f58; text-align: right; padding: 12px 6px 12px 0;
+      overflow: hidden; user-select: none;
     }
 
-    /* --- ACCESSORY BAR --- */
-    .accessory-bar {
-      background: var(--surface); border-top: 1px solid var(--border);
-      padding: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+    textarea {
+      flex: 1; height: 100%; border: none; background: transparent;
+      color: var(--text); padding: 12px; font-family: var(--font-code);
+      font-size: 13px; line-height: 1.5; resize: none; white-space: pre;
+      /* iOSでのスクロールを滑らかに */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* --- KEYBOARD TOOLBAR --- */
+    .toolbar {
+      background: var(--toolbar-bg); border-top: 1px solid var(--border);
+      padding: 8px; flex-shrink: 0;
       display: flex; gap: 8px; overflow-x: auto; align-items: center;
+      /* iOSのセーフエリア（ホームバー）対応 */
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
     }
     
     .key {
@@ -73,232 +81,233 @@
       display: flex; align-items: center; justify-content: center;
       font-family: var(--font-code); font-size: 15px;
     }
-    .key:active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .key:active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    /* --- COLOR TRIGGER BUTTON (Hidden by default) --- */
+    /* Color Picker Trigger */
     #colorBtn {
-      display: none; /* Auto-show */
-      padding: 0 12px; gap: 8px;
-      border: 1px solid var(--accent); color: var(--accent);
-      background: rgba(47, 129, 247, 0.1);
-      font-size: 12px; font-weight: bold;
-      animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: none; border: 1px solid var(--accent); color: var(--accent);
+      padding: 0 12px; gap: 8px; font-size: 12px; font-weight: bold;
     }
-    #swatch {
-      width: 14px; height: 14px; border-radius: 3px;
-      border: 1px solid rgba(255,255,255,0.4);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+    #swatch { width: 12px; height: 12px; background: #fff; border: 1px solid rgba(255,255,255,0.5); }
 
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand"><div class="status-dot"></div> &nbsp; Onyx Color</div>
-    <div class="actions">
-      <button onclick="reset()">Reset</button>
-      <button class="btn-primary" onclick="launch()">Run ▶</button>
+  <div id="app">
+    <header>
+      <div class="brand">Onyx iOS</div>
+      <div class="actions">
+        <button class="btn" style="color:#f85149; border-color:rgba(248,81,73,0.5);" onclick="resetCode()">Reset</button>
+        <button class="btn btn-primary" onclick="launch()">Run</button>
+      </div>
+    </header>
+
+    <div class="editor-area">
+      <div class="gutter" id="gutter">1</div>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
     </div>
-  </header>
 
-  <div class="editor-wrapper">
-    <div class="gutter" id="gutter">1</div>
-    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
-  </div>
-
-  <div class="accessory-bar" id="bar">
-    <button id="colorBtn" class="key" onclick="openPicker()">
-      <div id="swatch"></div> <span id="colorLabel">Color</span>
-    </button>
-
-    <button class="key" onclick="moveCursor(-1)">←</button>
-    <button class="key" onclick="moveCursor(1)">→</button>
-    <button class="key" onclick="insert('  ')">TAB</button>
-    <button class="key" onclick="insert('#')">#</button>
-    <button class="key" onclick="insert(':')">:</button>
-    <button class="key" onclick="insert(';')">;</button>
+    <div class="toolbar" id="toolbar">
+      <button id="colorBtn" class="key" onclick="nativePicker.click()">
+        <div id="swatch"></div> Color
+      </button>
+      
+      <button class="key" onclick="moveCursor(-1)">←</button>
+      <button class="key" onclick="moveCursor(1)">→</button>
+      <button class="key" onclick="insert('  ')">TAB</button>
+      
+      <button class="key" onclick="insert('=')">=</button>
+      <button class="key" onclick="insert('<')">&lt;</button>
+      <button class="key" onclick="insert('>')">&gt;</button>
+      <button class="key" onclick="insert('/')">/</button>
+      <button class="key" onclick="insert('{')">{</button>
+      <button class="key" onclick="insert('}')">}</button>
+      <button class="key" onclick="insert(';')">;</button>
+      <button class="key" onclick="insert('#')">#</button>
+    </div>
   </div>
 
   <input type="color" id="nativePicker" style="visibility:hidden; position:absolute; top:-1000px;">
 
   <script>
-    // --- STATE ---
-    const defaultData = {
-      content: 
+    // --- DEFAULT CONTENT ---
+    const DEFAULT_CODE = 
 `<style>
   body {
-    background: #0d1117;
-    color: #e6edf3;
+    margin: 0; background: #000; color: #fff;
     display: flex; justify-content: center;
     align-items: center; height: 100vh;
-    font-family: sans-serif;
-  }
-  .box {
-    background: #161b22;
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid #30363d;
-    text-align: center;
+    font-family: system-ui;
   }
   h1 { color: #2f81f7; }
 </style>
+<div>
+  <h1>Hello iOS</h1>
+  <p>Keyboard is safe now.</p>
+</div>`;
 
-<div class="box">
-  <h1>Onyx Color</h1>
-  <p>Real-time Hex Editing</p>
-</div>`
-    };
-
-    let content = localStorage.getItem('onyx_color') || defaultData.content;
-
-    // --- DOM ---
+    // --- DOM REFERENCES ---
+    const app = document.getElementById('app');
     const editor = document.getElementById('editor');
     const gutter = document.getElementById('gutter');
     const colorBtn = document.getElementById('colorBtn');
     const swatch = document.getElementById('swatch');
-    const picker = document.getElementById('nativePicker');
+    const nativePicker = document.getElementById('nativePicker');
 
-    // --- INIT ---
-    editor.value = content;
-    updateGutter();
+    // --- 1. iOS VIEWPORT FIX (THE CORE SOLUTION) ---
+    // キーボードが出たり画面が回転したりするたびに実行
+    function handleResize() {
+      // Visual Viewportの高さを取得し、アプリ全体の高さに適用
+      // これにより、キーボードが出現してもレイアウトが押し上げられず、
+      // 表示領域内に収まるようにリサイズされます。
+      if (window.visualViewport) {
+        app.style.height = window.visualViewport.height + 'px';
+        // スクロール位置の補正
+        window.scrollTo(0, 0);
+      }
+    }
 
-    // --- EVENTS ---
+    // イベントリスナー登録
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
+    }
+    window.addEventListener('resize', handleResize);
+    
+    // 初回実行
+    handleResize();
+
+
+    // --- 2. EDITOR LOGIC ---
+    function init() {
+      const saved = localStorage.getItem('onyx_ios_code');
+      editor.value = saved ? saved : DEFAULT_CODE;
+      updateGutter();
+    }
+
+    // Input Handling
     editor.addEventListener('input', () => {
-      content = editor.value;
-      localStorage.setItem('onyx_color', content);
+      save();
       updateGutter();
     });
-
-    editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
     
-    // カーソル移動やタップ時に「色コードの上にいるか？」を判定
-    editor.addEventListener('click', detectColor);
-    editor.addEventListener('keyup', detectColor);
-
-    // ネイティブカラーピッカーの変更を監視 (Real-time)
-    picker.addEventListener('input', (e) => {
-      applyColor(e.target.value);
+    // Sync Scroll
+    editor.addEventListener('scroll', () => {
+      gutter.scrollTop = editor.scrollTop;
     });
 
-    // --- CORE LOGIC ---
-    let currentColorRange = null;
-
-    function detectColor() {
-      const pos = editor.selectionStart;
-      const text = editor.value;
-      
-      // カーソル周辺のテキストを取得 (前後10文字程度)
-      // これにより全テキスト走査を避けて軽量化
-      const lookAround = 10;
-      const startSearch = Math.max(0, pos - lookAround);
-      const endSearch = Math.min(text.length, pos + lookAround);
-      const snippet = text.substring(startSearch, endSearch);
-
-      // 正規表現でHexコード(#fff or #000000)を探す
-      // カーソル位置(pos)がその範囲内にあるかチェック
-      const regex = /#([0-9a-fA-F]{3,6})\b/g;
-      let match;
-      let found = null;
-
-      // snippet内でのマッチ位置を全体位置に変換して判定
-      while ((match = regex.exec(snippet)) !== null) {
-        const absStart = startSearch + match.index;
-        const absEnd = absStart + match[0].length;
-        
-        if (pos >= absStart && pos <= absEnd) {
-          found = {
-            hex: match[0],
-            start: absStart,
-            end: absEnd
-          };
-          break;
-        }
-      }
-
-      if (found) {
-        // 色が見つかったらボタンを表示
-        currentColorRange = found;
-        colorBtn.style.display = 'flex';
-        swatch.style.background = found.hex;
-        // ピッカーに現在の値をセット (3桁なら6桁に変換)
-        picker.value = normalizeHex(found.hex);
-      } else {
-        colorBtn.style.display = 'none';
-        currentColorRange = null;
-      }
+    // Save
+    function save() {
+      localStorage.setItem('onyx_ios_code', editor.value);
     }
 
-    function openPicker() {
-      picker.click(); // システムピッカーを起動
-    }
-
-    function applyColor(newHex) {
-      if (!currentColorRange) return;
-
-      const { start, end } = currentColorRange;
-      
-      // テキストの置換
-      const before = editor.value.substring(0, start);
-      const after = editor.value.substring(end);
-      
-      editor.value = before + newHex + after;
-      
-      // カーソル位置と選択範囲情報の更新
-      // これをしないと連続操作で位置がずれる
-      const newEnd = start + newHex.length;
-      currentColorRange = { hex: newHex, start: start, end: newEnd };
-      
-      // フォーカス維持
-      editor.setSelectionRange(newEnd, newEnd);
-      
-      // UI更新
-      swatch.style.background = newHex;
-      content = editor.value; // 保存
-    }
-
-    // #fff -> #ffffff 変換ヘルパー
-    function normalizeHex(hex) {
-      if (hex.length === 4) {
-        return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
-      }
-      return hex;
-    }
-
-    // --- UTILS ---
+    // Gutter Update
     function updateGutter() {
       const lines = editor.value.split('\n').length;
       gutter.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('<br>');
     }
 
-    function insert(text) {
-      const s = editor.selectionStart;
-      const e = editor.selectionEnd;
-      editor.value = editor.value.substring(0, s) + text + editor.value.substring(e);
-      editor.selectionStart = editor.selectionEnd = s + text.length;
-      editor.focus();
-      editor.dispatchEvent(new Event('input')); // トリガー
+    // --- 3. RESET LOGIC (FIXED) ---
+    function resetCode() {
+      if (confirm('Reset all code to default?')) {
+        // 1. ローカルストレージをクリア
+        localStorage.removeItem('onyx_ios_code');
+        // 2. エディタの値を強制的にデフォルトへ
+        editor.value = DEFAULT_CODE;
+        // 3. 画面（行番号など）を更新
+        updateGutter();
+        // 4. フォーカスを戻す（任意）
+        editor.focus();
+      }
     }
 
-    function moveCursor(offset) {
-      const pos = editor.selectionStart + offset;
+    // --- 4. COLOR PICKER LOGIC ---
+    let colorRange = null;
+
+    // Detect color under cursor
+    function detectColor() {
+      const pos = editor.selectionStart;
+      const text = editor.value;
+      const regex = /#([0-9a-fA-F]{3,6})\b/g;
+      let match;
+      let found = null;
+
+      // Scan nearby text only for performance
+      const startScan = Math.max(0, pos - 15);
+      const endScan = Math.min(text.length, pos + 15);
+      const slice = text.substring(startScan, endScan);
+
+      while ((match = regex.exec(slice)) !== null) {
+        const absStart = startScan + match.index;
+        const absEnd = absStart + match[0].length;
+        if (pos >= absStart && pos <= absEnd) {
+          found = { hex: match[0], start: absStart, end: absEnd };
+          break;
+        }
+      }
+
+      if (found) {
+        colorBtn.style.display = 'flex';
+        swatch.style.background = found.hex;
+        colorRange = found;
+        
+        // Convert #fff to #ffffff for input value
+        let val = found.hex;
+        if (val.length === 4) val = '#' + val[1]+val[1] + val[2]+val[2] + val[3]+val[3];
+        nativePicker.value = val;
+      } else {
+        colorBtn.style.display = 'none';
+        colorRange = null;
+      }
+    }
+
+    editor.addEventListener('click', detectColor);
+    editor.addEventListener('keyup', detectColor);
+
+    // Apply color change
+    nativePicker.addEventListener('input', (e) => {
+      if (!colorRange) return;
+      const newHex = e.target.value;
+      const before = editor.value.substring(0, colorRange.start);
+      const after = editor.value.substring(colorRange.end);
+      
+      editor.value = before + newHex + after;
+      
+      const newEnd = colorRange.start + newHex.length;
+      editor.setSelectionRange(newEnd, newEnd);
+      colorRange = { hex: newHex, start: colorRange.start, end: newEnd };
+      
+      swatch.style.background = newHex;
+      save();
+    });
+
+    // --- 5. HELPER FUNCTIONS ---
+    function insert(txt) {
+      const s = editor.selectionStart;
+      const e = editor.selectionEnd;
+      editor.value = editor.value.substring(0, s) + txt + editor.value.substring(e);
+      editor.selectionStart = editor.selectionEnd = s + txt.length;
+      editor.focus();
+      save();
+      editor.dispatchEvent(new Event('input')); // Trigger updates
+    }
+
+    function moveCursor(step) {
+      const pos = editor.selectionStart + step;
       editor.setSelectionRange(pos, pos);
       editor.focus();
-      detectColor(); // 移動後にも判定
+      detectColor();
     }
 
     function launch() {
-      const blob = new Blob([editor.value], {type: 'text/html'});
+      const blob = new Blob([editor.value], {type:'text/html'});
       window.open(URL.createObjectURL(blob), '_blank');
     }
-    
-    function reset() {
-      if(confirm('Reset code?')) {
-        localStorage.removeItem('onyx_color');
-        location.reload();
-      }
-    }
+
+    // Start
+    init();
+
   </script>
 </body>
 </html>
