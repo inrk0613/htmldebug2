@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
@@ -15,20 +16,30 @@
     /* --- THEME SYSTEM --- */
     :root {
       --bg-root: #000000;
-      --bg-mesh: radial-gradient(circle at 50% 0%, #111827 0%, #000000 90%);
+      /* 画面全体を覆う黒のグラデーション */
+      --bg-mesh: radial-gradient(circle at 50% 0%, #111827 0%, #000000 85%);
+      
       --glass-panel: rgba(18, 18, 23, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      
       --accent: #3b82f6;
       --text-main: #f3f4f6;
-      --font-code: "SF Mono", "Menlo", monospace;
+      --font-code: "SF Mono", "Menlo", "Consolas", monospace;
+      
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
+    /* 【重要】ここが修正点です */
+    html {
+      background-color: #000000; /* 最下層を黒にする */
+      height: 100%;
+    }
+
     body {
-      margin: 0; background: var(--bg-root);
+      margin: 0; background-color: var(--bg-root);
       background-image: var(--bg-mesh);
       background-attachment: fixed;
       color: var(--text-main);
@@ -55,6 +66,7 @@
       background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
+    
     .brand-icon {
       width: 20px; height: 20px; border-radius: 6px;
       background: linear-gradient(135deg, var(--accent), #2563eb);
@@ -108,19 +120,16 @@
       caret-color: var(--accent); -webkit-overflow-scrolling: touch;
     }
 
-    /* --- RESIZER HANDLE --- */
+    /* Resizer */
     #resizer {
       height: 24px; flex-shrink: 0;
       background: var(--glass-panel);
       backdrop-filter: blur(10px);
       border-top: 1px solid var(--glass-border);
       border-bottom: 1px solid var(--glass-border);
-      display: none; /* Hidden by default */
-      justify-content: center; align-items: center;
-      cursor: row-resize; z-index: 40;
-      touch-action: none; /* Prevent scroll */
+      display: none; justify-content: center; align-items: center;
+      cursor: row-resize; z-index: 40; touch-action: none;
     }
-    /* The pill shape handle */
     #resizer::after {
       content: ''; width: 36px; height: 4px;
       background: rgba(255,255,255,0.2); border-radius: 2px;
@@ -128,13 +137,11 @@
     #resizer.active { background: rgba(59, 130, 246, 0.1); }
     #resizer.active::after { background: var(--accent); }
 
-    /* --- PREVIEW PANE --- */
+    /* Preview Pane */
     .preview-pane {
-      height: 40%; /* Default height */
-      background: #fff; display: none; flex-direction: column;
+      height: 40%; background: #fff; display: none; flex-direction: column;
       box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 20;
     }
-    /* Visible state controlled by JS */
     .preview-pane.visible { display: flex; }
 
     .preview-header {
@@ -148,12 +155,16 @@
 
     iframe { width: 100%; height: 100%; border: none; background: #fff; }
 
-    /* --- TOOLBAR --- */
+    /* --- TOOLBAR (Immersive) --- */
     .toolbar {
-      background: rgba(10, 10, 12, 0.85);
+      /* 背景色を少し濃くして透過させる */
+      background: rgba(10, 10, 12, 0.9);
       backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
       border-top: 1px solid var(--glass-border);
-      padding: 10px; padding-bottom: max(10px, var(--safe-bottom));
+      padding: 10px;
+      /* ホームバーの下まで背景色を伸ばす */
+      padding-bottom: max(10px, var(--safe-bottom));
+      
       display: flex; gap: 8px; overflow-x: auto; align-items: center;
       flex-shrink: 0; z-index: 50;
     }
@@ -203,9 +214,7 @@
         <div class="gutter" id="gutter">1</div>
         <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
       </div>
-
       <div id="resizer"></div>
-
       <div class="preview-pane" id="previewPane">
         <div class="preview-header" id="previewHeader">
           <span>LIVE PREVIEW</span>
@@ -242,7 +251,7 @@
       const u=c.toDataURL('image/png');document.getElementById('appIcon').href=u;document.getElementById('favIcon').href=u;
     })();
 
-    // --- 1. RESIZE LOGIC ---
+    // --- 1. RESIZE & VIEWPORT ---
     const app = document.getElementById('app');
     const editor = document.getElementById('editor');
     const gutter = document.getElementById('gutter');
@@ -251,69 +260,37 @@
     const splitContainer = document.getElementById('splitContainer');
     const toggleBtn = document.getElementById('toggleViewBtn');
 
-    // Resize Handlers
     let isResizing = false;
+    resizer.addEventListener('touchstart', (e) => { isResizing=true; resizer.classList.add('active'); e.preventDefault(); }, {passive:false});
+    resizer.addEventListener('mousedown', () => { isResizing=true; resizer.classList.add('active'); });
+    
+    const handleMove = (y) => {
+      const rect = splitContainer.getBoundingClientRect();
+      const h = rect.bottom - y;
+      if (h > 100 && h < rect.height * 0.8) previewPane.style.height = h + 'px';
+    };
+    
+    document.addEventListener('touchmove', (e) => { if(isResizing) handleMove(e.touches[0].clientY); }, {passive:false});
+    document.addEventListener('mousemove', (e) => { if(isResizing) handleMove(e.clientY); });
+    const endResize = () => { isResizing=false; resizer.classList.remove('active'); };
+    document.addEventListener('touchend', endResize); document.addEventListener('mouseup', endResize);
 
-    resizer.addEventListener('touchstart', (e) => {
-      isResizing = true;
-      resizer.classList.add('active');
-      e.preventDefault(); // Prevent scroll
-    }, { passive: false });
-
-    resizer.addEventListener('mousedown', () => { // Desktop support
-      isResizing = true;
-      resizer.classList.add('active');
-    });
-
-    // Touch Move
-    document.addEventListener('touchmove', (e) => {
-      if (!isResizing) return;
-      handleMove(e.touches[0].clientY);
-    }, { passive: false });
-
-    // Mouse Move
-    document.addEventListener('mousemove', (e) => {
-      if (!isResizing) return;
-      handleMove(e.clientY);
-    });
-
-    // End
-    const endResize = () => { isResizing = false; resizer.classList.remove('active'); };
-    document.addEventListener('touchend', endResize);
-    document.addEventListener('mouseup', endResize);
-
-    function handleMove(y) {
-      const containerRect = splitContainer.getBoundingClientRect();
-      // Calculate new height: Container Bottom - Touch Y
-      const newHeight = containerRect.bottom - y;
-      
-      // Constraints (Min 100px, Max 80% of container)
-      const maxH = containerRect.height * 0.8;
-      const minH = 100;
-      
-      if (newHeight > minH && newHeight < maxH) {
-        previewPane.style.height = newHeight + 'px';
-      }
-    }
-
-    // --- 2. EDITOR SETUP ---
-    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #333; }\n    h1 { color: #2563eb; }\n  </style>\n</head>\n<body>\n  <h1>Resize Me!</h1>\n  <p>Drag the bar above to resize.</p>\n</body>\n</html>`;
+    // --- 2. EDITOR ---
+    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #333; background:#fff; }\n    h1 { color: #2563eb; }\n  </style>\n</head>\n<body>\n  <h1>Immersive Black</h1>\n  <p>The bottom safe area is now onyx.</p>\n</body>\n</html>`;
     editor.value = localStorage.getItem('code_edit_final') || DEFAULT;
 
-    // Auto-Indent
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const cursor = editor.selectionStart;
         const lines = editor.value.substr(0, cursor).split('\n');
-        const currentLine = lines[lines.length - 1];
-        const indent = (currentLine.match(/^(\s*)/) || ['',''])[1];
+        const indent = (lines[lines.length-1].match(/^(\s*)/)||['',''])[1];
         document.execCommand('insertText', false, '\n' + indent);
         setTimeout(() => editor.scrollTop = editor.scrollHeight, 10);
       }
     });
 
-    // --- 3. PREVIEW & TOGGLE ---
+    // --- 3. PREVIEW ---
     const previewFrame = document.getElementById('previewFrame');
     const previewHeader = document.getElementById('previewHeader');
     const errorDisplay = document.getElementById('errorDisplay');
@@ -323,16 +300,14 @@
       const code = editor.value;
       const errScript = `<script>window.onerror=function(m){window.parent.postMessage({type:'error',msg:m},'*');}<\/script>`;
       previewHeader.classList.remove('error'); errorDisplay.textContent="";
-      
       let final = code.includes('<head>') ? code.replace('<head>', '<head>'+errScript) : errScript+code;
       if (!final.includes('<meta name="viewport"')) final = '<meta name="viewport" content="width=device-width,initial-scale=1">' + final;
       previewFrame.srcdoc = final;
     }
-
+    
     window.addEventListener('message', (e) => {
       if (e.data?.type === 'error') {
-        previewHeader.classList.add('error');
-        errorDisplay.textContent = e.data.msg;
+        previewHeader.classList.add('error'); errorDisplay.textContent = e.data.msg;
       }
     });
 
@@ -340,67 +315,47 @@
       localStorage.setItem('code_edit_final', editor.value);
       updateGutter();
       if (previewPane.classList.contains('visible')) {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(updatePreview, 600);
+        clearTimeout(debounceTimer); debounceTimer = setTimeout(updatePreview, 600);
       }
     }
-    
     editor.addEventListener('input', onInput);
     editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
 
     function togglePreview() {
       const isVisible = previewPane.classList.toggle('visible');
       toggleBtn.classList.toggle('active', isVisible);
-      
-      // Resizer Control
       resizer.style.display = isVisible ? 'flex' : 'none';
-      
       if (isVisible) updatePreview();
     }
 
-    // --- 4. COPY FUNCTION ---
+    // --- 4. COPY & UTILS ---
     function copyAll() {
       navigator.clipboard.writeText(editor.value).then(() => {
-        const btn = document.getElementById('copyBtn');
-        const ic = document.getElementById('iconCopy');
-        const ch = document.getElementById('iconCheck');
-        btn.classList.add('copied'); ic.style.display='none'; ch.style.display='block';
-        setTimeout(() => {
-          btn.classList.remove('copied'); ic.style.display='block'; ch.style.display='none';
-        }, 2000);
+        const btn=document.getElementById('copyBtn'), c=document.getElementById('iconCopy'), k=document.getElementById('iconCheck');
+        btn.classList.add('copied'); c.style.display='none'; k.style.display='block';
+        setTimeout(()=>{ btn.classList.remove('copied'); c.style.display='block'; k.style.display='none'; }, 2000);
       });
     }
 
-    // --- 5. UTILS ---
-    const colorBtn = document.getElementById('colorBtn');
-    const swatch = document.getElementById('swatch');
-    const picker = document.getElementById('nativePicker');
-    let colorRange = null;
-
-    editor.addEventListener('click', detectColor);
-    editor.addEventListener('keyup', detectColor);
-
-    function detectColor() {
-      const pos = editor.selectionStart;
-      const text = editor.value;
+    const colorBtn=document.getElementById('colorBtn'), swatch=document.getElementById('swatch'), picker=document.getElementById('nativePicker');
+    let colorRange=null;
+    
+    const detectColor = () => {
+      const pos = editor.selectionStart, text = editor.value;
       const regex = /#([0-9a-fA-F]{3,6})\b/g;
-      let match; let found = null;
-      const startScan = Math.max(0, pos - 20);
-      const endScan = Math.min(text.length, pos + 20);
-      const slice = text.substring(startScan, endScan);
+      let match, found=null;
+      const startScan=Math.max(0,pos-20), slice=text.substring(startScan,Math.min(text.length,pos+20));
       while ((match = regex.exec(slice)) !== null) {
-        if (pos >= (startScan + match.index) && pos <= (startScan + match.index + match[0].length)) {
-          found = { hex: match[0], start: startScan + match.index, end: startScan + match.index + match[0].length };
-          break;
+        if (pos >= (startScan+match.index) && pos <= (startScan+match.index+match[0].length)) {
+          found = {hex:match[0], start:startScan+match.index, end:startScan+match.index+match[0].length}; break;
         }
       }
-      if (found) {
-        colorBtn.style.display = 'flex'; swatch.style.background = found.hex; colorRange = found;
-        let v = found.hex; if(v.length===4) v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3]; picker.value = v;
-      } else {
-        colorBtn.style.display = 'none'; colorRange = null;
-      }
-    }
+      if(found) {
+        colorBtn.style.display='flex'; swatch.style.background=found.hex; colorRange=found;
+        let v=found.hex; if(v.length===4) v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3]; picker.value=v;
+      } else { colorBtn.style.display='none'; colorRange=null; }
+    };
+    editor.addEventListener('click', detectColor); editor.addEventListener('keyup', detectColor);
 
     picker.addEventListener('input', (e) => {
       if (!colorRange) return;
@@ -413,18 +368,14 @@
       onInput();
     });
 
-    function updateGutter() {
-      gutter.innerHTML = Array.from({length: editor.value.split('\n').length}, (_, i) => i + 1).join('<br>');
-    }
+    function updateGutter() { gutter.innerHTML = Array.from({length: editor.value.split('\n').length}, (_, i) => i + 1).join('<br>'); }
     function insert(t) { document.execCommand('insertText', false, t); onInput(); }
     function insertTab() { insert('  '); }
     function move(s) { const p = editor.selectionStart + s; editor.setSelectionRange(p, p); editor.focus(); detectColor(); }
     function clearAll() { if(confirm('Reset?')) { editor.value=""; onInput(); colorBtn.style.display='none'; editor.focus(); } }
     function launch() { const b=new Blob([editor.value],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
 
-    // Init
     updateGutter();
-    // iOS Viewport fix
     const resizeApp = () => { if(window.visualViewport) { app.style.height=window.visualViewport.height+'px'; window.scrollTo(0,0); } };
     window.visualViewport?.addEventListener('resize', resizeApp); window.addEventListener('resize', resizeApp); resizeApp();
   </script>
