@@ -2,368 +2,299 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#0d1117">
-  <title>Liquid Ultimate</title>
+  <title>Onyx Editor</title>
   <style>
+    /* --- SYSTEM TOKENS --- */
     :root {
-      --bg: #0d1117;
-      --glass: rgba(22, 27, 34, 0.85);
-      --border: rgba(255,255,255,0.1);
-      --accent: #58a6ff;
-      --text: #c9d1d9;
-      --font-code: "SF Mono", "Menlo", monospace;
+      --bg: #010409;        /* Ultra Dark for OLED */
+      --surface: #0d1117;   /* GitHub Dimmed */
+      --border: #30363d;
+      --accent: #2f81f7;    /* Native Blue */
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --font-code: "SF Mono", "Menlo", "Consolas", monospace;
+      --font-ui: -apple-system, BlinkMacSystemFont, sans-serif;
+      --safe-bottom: env(safe-area-inset-bottom);
     }
 
-    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
     body {
       margin: 0; background: var(--bg); color: var(--text);
-      font-family: -apple-system, sans-serif; height: 100dvh;
+      font-family: var(--font-ui); height: 100dvh;
       display: flex; flex-direction: column; overflow: hidden;
     }
 
-    /* --- UI COMPONENTS --- */
+    /* --- HEADER: Minimal & Functional --- */
     header {
-      height: 50px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;
-      background: var(--glass); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border); z-index: 100;
-    }
-    .brand { font-weight: 700; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
-
-    .icon-btn {
-      background: transparent; border: none; color: #fff; padding: 8px;
-      font-size: 16px; border-radius: 8px; cursor: pointer;
-    }
-    .icon-btn:active { background: rgba(255,255,255,0.1); }
-
-    .btn-run {
-      background: #238636; color: white; border: 1px solid rgba(255,255,255,0.1);
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold;
+      height: 48px; padding: 0 12px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-shrink: 0;
     }
 
-    /* --- SEARCH BAR (Slide Down) --- */
-    #searchBar {
-      position: absolute; top: 50px; left: 0; right: 0;
-      background: #161b22; border-bottom: 1px solid var(--border);
-      padding: 8px 12px; display: flex; gap: 8px; align-items: center;
-      transform: translateY(-100%); transition: transform 0.2s ease-out;
-      z-index: 90;
+    .brand {
+      font-weight: 700; font-size: 14px; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
     }
-    #searchBar.active { transform: translateY(0); }
+    .status-dot { width: 8px; height: 8px; background: #238636; border-radius: 50%; }
 
-    .search-input {
-      flex: 1; background: #0d1117; border: 1px solid var(--border);
-      color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 13px;
+    .actions { display: flex; gap: 8px; }
+    
+    .btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background 0.1s;
     }
-    .nav-btn {
-      background: #21262d; border: 1px solid var(--border); color: #c9d1d9;
-      padding: 6px 10px; border-radius: 4px; font-size: 12px;
+    .btn:active { background: #21262d; }
+    .btn-primary { background: var(--accent); color: #fff; border: none; }
+    .btn-danger { color: #f85149; border-color: rgba(248, 81, 73, 0.4); }
+
+    /* --- SEGMENTED TABS --- */
+    .tab-bar {
+      background: var(--bg); padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; gap: 0; flex-shrink: 0;
+    }
+    
+    .tab-group {
+      display: flex; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; padding: 2px;
     }
 
-    /* --- EDITOR --- */
-    .editor-container {
-      flex: 1; position: relative; display: flex; overflow: hidden;
+    .tab {
+      padding: 6px 16px; font-size: 12px; font-weight: 500;
+      color: var(--text-muted); background: transparent;
+      border: none; border-radius: 6px; transition: all 0.1s;
     }
-    .gutter {
-      width: 40px; background: #0d1117; color: #484f58;
-      font-family: var(--font-code); font-size: 13px; padding: 10px 4px;
-      text-align: right; border-right: 1px solid var(--border);
-      line-height: 1.5; overflow: hidden;
+    .tab.active { background: var(--border); color: var(--text); }
+
+    /* --- EDITOR AREA --- */
+    .editor-wrapper {
+      flex: 1; position: relative; display: flex;
+      background: var(--bg); overflow: hidden;
     }
+
+    .line-numbers {
+      width: 40px; padding: 12px 0; text-align: right;
+      font-family: var(--font-code); font-size: 13px; line-height: 1.5;
+      color: #484f58; background: var(--bg);
+      border-right: 1px solid var(--border);
+      user-select: none; padding-right: 8px;
+    }
+
     textarea {
-      flex: 1; height: 100%; border: none; background: transparent;
-      color: var(--text); padding: 10px; font-family: var(--font-code);
-      font-size: 13px; line-height: 1.5; resize: none; white-space: pre;
-      overflow: auto; tab-size: 2;
+      flex: 1; width: 100%; height: 100%; border: none;
+      background: transparent; color: var(--text);
+      padding: 12px; font-family: var(--font-code);
+      font-size: 13px; line-height: 1.5; resize: none;
+      white-space: pre; tab-size: 2;
     }
 
-    /* --- ZOOM INDICATOR --- */
-    #zoomToast {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.7); color: white; padding: 15px 25px;
-      border-radius: 30px; font-size: 20px; font-weight: bold;
-      backdrop-filter: blur(10px); pointer-events: none; opacity: 0;
-      transition: opacity 0.3s; z-index: 200;
+    /* --- PRO ACCESSORY BAR --- */
+    .accessory-bar {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 8px; padding-bottom: max(8px, var(--safe-bottom));
+      display: flex; gap: 8px; overflow-x: auto;
+      align-items: center; flex-shrink: 0;
     }
+    
+    /* Scrollbar hide */
+    .accessory-bar::-webkit-scrollbar { display: none; }
 
-    /* --- TOOLBAR --- */
-    .toolbar {
-      padding: 8px; background: var(--glass); backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border); display: flex; gap: 8px;
-      overflow-x: auto; align-items: center; padding-bottom: max(8px, env(safe-area-inset-bottom));
-    }
     .key {
-      min-width: 32px; height: 32px; border-radius: 6px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05);
-      color: #fff; font-family: var(--font-code); font-size: 14px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      flex: 0 0 auto; min-width: 36px; height: 36px;
+      background: #21262d; border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-code); font-size: 15px;
+      cursor: pointer;
     }
-    .key:active { background: var(--accent); }
+    .key:active { background: var(--accent); color: white; border-color: var(--accent); }
+    .key-wide { min-width: 48px; font-size: 12px; font-weight: bold; color: var(--text-muted); }
 
-    /* Color Picker */
-    #colorTrigger {
-      display: none; padding: 0 10px; gap: 6px; border: 1px solid var(--accent); color: var(--accent);
-    }
-    .swatch { width: 12px; height: 12px; border-radius: 2px; border: 1px solid #fff; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand"><div class="dot"></div> Liquid Ult</div>
-    <div style="display:flex; gap:8px;">
-      <button class="icon-btn" onclick="toggleSearch()">🔍</button>
-      <button class="icon-btn" onclick="reset()">✕</button>
-      <button class="btn-run" onclick="launch()">Run ▶</button>
+    <div class="brand"><div class="status-dot"></div> &nbsp; Onyx Pro</div>
+    <div class="actions">
+      <button class="btn btn-danger" onclick="resetAll()">Reset</button>
+      <button class="btn btn-primary" onclick="launch()">Launch 🚀</button>
     </div>
   </header>
 
-  <div id="searchBar">
-    <input type="text" id="searchInput" class="search-input" placeholder="Find..." onkeyup="if(event.key==='Enter') findNext()">
-    <button class="nav-btn" onclick="findPrev()">▲</button>
-    <button class="nav-btn" onclick="findNext()">▼</button>
-    <button class="nav-btn" onclick="toggleSearch()" style="color:#f85149">✕</button>
+  <div class="tab-bar">
+    <div class="tab-group" id="tabGroup">
+      </div>
   </div>
 
-  <div class="editor-container">
-    <div class="gutter" id="gutter"></div>
-    <textarea id="editor" spellcheck="false" autocomplete="off"></textarea>
-    <div id="zoomToast">13px</div>
+  <div class="editor-wrapper">
+    <div class="line-numbers" id="gutter">1</div>
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
   </div>
 
-  <div class="toolbar" id="toolbar">
-    <button id="colorTrigger" class="key" onclick="document.getElementById('nativePicker').click()">
-      <div id="swatch" class="swatch"></div> <span id="colorLabel">#fff</span>
-    </button>
+  <div class="accessory-bar" id="accessoryBar">
+    <button class="key key-wide" onclick="insertTab()">TAB</button>
+    <button class="key" onclick="moveCursor(-1)">←</button>
+    <button class="key" onclick="moveCursor(1)">→</button>
+    <div style="width:1px; height:24px; background:var(--border); margin:0 4px;"></div>
     </div>
 
-  <input type="color" id="nativePicker" style="visibility:hidden; position:absolute;">
-
   <script>
-    // --- APP STATE ---
+    // --- CORE CONFIG ---
     const defaultData = {
-      'index.html': '\n<div class="hero">\n  <h1>Pinch to Zoom</h1>\n  <p>Try searching for "hero"</p>\n</div>',
-      'style.css': '.hero {\n  text-align: center;\n  color: #58a6ff;\n  font-size: 2rem;\n}',
-      'script.js': 'console.log("Ready");'
+      'index.html': 
+`<div class="container">
+  <h1>Hello World</h1>
+  <p>Clean. Fast. Reliable.</p>
+</div>`,
+      'style.css': 
+`body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.container {
+  text-align: center;
+}`,
+      'script.js': `console.log("System Ready");`
     };
-    let files = JSON.parse(localStorage.getItem('liquid_ult')) || defaultData;
+
+    let files = JSON.parse(localStorage.getItem('onyx_files')) || JSON.parse(JSON.stringify(defaultData));
     let currentTab = 'index.html';
-    
-    // Editor State
-    let fontSize = 13;
-    let searchIndex = -1;
-    
+
+    // --- DOM ---
     const editor = document.getElementById('editor');
     const gutter = document.getElementById('gutter');
-    const zoomToast = document.getElementById('zoomToast');
+    const tabGroup = document.getElementById('tabGroup');
+    const accessoryBar = document.getElementById('accessoryBar');
 
+    // --- INIT ---
     function init() {
-      // 1. Initial Load
-      editor.value = files[currentTab];
+      renderTabs();
+      renderSymbols();
+      loadFile(currentTab);
+      
+      // Event Listeners
+      editor.addEventListener('input', handleInput);
+      editor.addEventListener('scroll', syncScroll);
+      editor.addEventListener('click', () => saveState()); // Save cursor pos implicitly
+    }
+
+    // --- EDITOR LOGIC ---
+    function loadFile(name) {
+      files[currentTab] = editor.value; // Save old
+      currentTab = name;
+      editor.value = files[name]; // Load new
+      
+      renderTabs();
       updateGutter();
-      renderKeys();
-
-      // 2. Event Listeners
-      editor.addEventListener('input', () => {
-        files[currentTab] = editor.value;
-        localStorage.setItem('liquid_ult', JSON.stringify(files));
-        updateGutter();
-      });
-      editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
-      editor.addEventListener('click', checkContext);
-      editor.addEventListener('keyup', checkContext);
-      
-      // Color Picker
-      document.getElementById('nativePicker').addEventListener('input', (e) => applyColor(e.target.value));
-
-      // 3. Pinch Zoom Logic
-      setupPinchZoom();
     }
 
-    // --- PINCH ZOOM IMPLEMENTATION ---
-    function setupPinchZoom() {
-      let initialDist = 0;
-      let startSize = 13;
-
-      editor.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-          e.preventDefault(); // Prevent page zoom
-          initialDist = Math.hypot(
-            e.touches[0].pageX - e.touches[1].pageX,
-            e.touches[0].pageY - e.touches[1].pageY
-          );
-          startSize = fontSize;
-          zoomToast.style.opacity = '1';
-        }
-      }, { passive: false });
-
-      editor.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2) {
-          e.preventDefault();
-          const dist = Math.hypot(
-            e.touches[0].pageX - e.touches[1].pageX,
-            e.touches[0].pageY - e.touches[1].pageY
-          );
-          
-          const ratio = dist / initialDist;
-          let newSize = startSize * ratio;
-          
-          // Clamp (10px - 32px)
-          newSize = Math.max(10, Math.min(32, newSize));
-          
-          setFontSize(newSize);
-        }
-      }, { passive: false });
-
-      editor.addEventListener('touchend', () => {
-        zoomToast.style.opacity = '0';
-      });
+    function handleInput() {
+      files[currentTab] = editor.value;
+      localStorage.setItem('onyx_files', JSON.stringify(files));
+      updateGutter();
     }
 
-    function setFontSize(size) {
-      fontSize = size;
-      const px = size.toFixed(1) + 'px';
-      editor.style.fontSize = px;
-      gutter.style.fontSize = px;
-      zoomToast.textContent = Math.round(size) + 'px';
-    }
-
-    // --- SEARCH FUNCTIONALITY ---
-    function toggleSearch() {
-      const bar = document.getElementById('searchBar');
-      bar.classList.toggle('active');
-      if (bar.classList.contains('active')) {
-        document.getElementById('searchInput').focus();
-      }
-    }
-
-    function findNext() {
-      const query = document.getElementById('searchInput').value;
-      if (!query) return;
-      
-      const text = editor.value;
-      // Start searching from current cursor position or last match
-      let startPos = editor.selectionEnd;
-      let idx = text.indexOf(query, startPos);
-      
-      if (idx === -1) {
-        // Wrap around
-        idx = text.indexOf(query, 0);
-      }
-      
-      if (idx !== -1) {
-        selectAndScroll(idx, idx + query.length);
-      } else {
-        alert('Not found');
-      }
-    }
-
-    function findPrev() {
-      const query = document.getElementById('searchInput').value;
-      if (!query) return;
-      
-      const text = editor.value;
-      let startPos = editor.selectionStart;
-      // Search backwards is harder with indexOf, simple approach: find all, pick one before
-      // Or use lastIndexOf
-      let idx = text.lastIndexOf(query, startPos - 1);
-      
-      if (idx === -1) {
-        idx = text.lastIndexOf(query); // Wrap to end
-      }
-      
-      if (idx !== -1) {
-        selectAndScroll(idx, idx + query.length);
-      }
-    }
-
-    function selectAndScroll(start, end) {
-      editor.focus();
-      editor.setSelectionRange(start, end);
-      
-      // Calculate scroll position (approximate)
-      const textBefore = editor.value.substring(0, start);
-      const lines = textBefore.split('\n').length;
-      const lineHeight = fontSize * 1.5;
-      
-      // Center the view
-      editor.scrollTop = (lines * lineHeight) - (editor.clientHeight / 2);
-    }
-
-    // --- UTILS ---
     function updateGutter() {
-      const lines = editor.value.split('\n').length;
-      gutter.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('<br>');
+      const lineCount = editor.value.split('\n').length;
+      gutter.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('<br>');
     }
 
-    function renderKeys() {
-      const keys = ['<','>','/','=','{','}','(',')',';','"',"'",'class','id'];
-      const bar = document.getElementById('toolbar');
-      keys.forEach(k => {
-        const b = document.createElement('button');
-        b.className = 'key';
-        b.textContent = k;
-        b.onclick = (e) => {
-          e.preventDefault();
-          const s = editor.selectionStart;
-          editor.value = editor.value.slice(0,s) + k + editor.value.slice(editor.selectionEnd);
-          editor.selectionStart = editor.selectionEnd = s + k.length;
-          files[currentTab] = editor.value;
-        };
-        bar.appendChild(b);
+    function syncScroll() {
+      gutter.scrollTop = editor.scrollTop;
+    }
+
+    // --- TABS UI ---
+    function renderTabs() {
+      tabGroup.innerHTML = '';
+      Object.keys(files).forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = `tab ${name === currentTab ? 'active' : ''}`;
+        btn.textContent = name;
+        btn.onclick = () => loadFile(name);
+        tabGroup.appendChild(btn);
       });
     }
 
-    // Color Logic (Smart Context)
-    let colorRange = null;
-    function checkContext() {
-      const pos = editor.selectionStart;
-      const match = /#([0-9a-f]{3,6})\b/gi.exec(editor.value.slice(pos-7, pos+7)); // Look around cursor
-      // Simplified regex check for demo
-      const fullText = editor.value;
-      const regex = /#([0-9a-fA-F]{3,6})\b/g;
-      let m;
-      let found = null;
-      while((m = regex.exec(fullText)) !== null) {
-        if(pos >= m.index && pos <= m.index + m[0].length) {
-          found = m; break;
-        }
-      }
-
-      const trig = document.getElementById('colorTrigger');
-      if(found) {
-        trig.style.display = 'flex';
-        document.getElementById('swatch').style.background = found[0];
-        document.getElementById('colorLabel').textContent = found[0];
-        colorRange = {start: found.index, end: found.index + found[0].length};
-      } else {
-        trig.style.display = 'none';
-      }
+    // --- KEYBOARD ACCESSORY ---
+    function renderSymbols() {
+      const symbols = ['<','>','/','=','{','}','(',')',';','"',"'",':','$','!'];
+      symbols.forEach(char => {
+        const btn = document.createElement('button');
+        btn.className = 'key';
+        btn.textContent = char;
+        btn.onclick = (e) => {
+          e.preventDefault();
+          insertText(char);
+        };
+        accessoryBar.appendChild(btn);
+      });
     }
 
-    function applyColor(hex) {
-      if(!colorRange) return;
-      editor.value = editor.value.slice(0, colorRange.start) + hex + editor.value.slice(colorRange.end);
-      colorRange.end = colorRange.start + hex.length;
+    function insertText(text) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + text.length;
       editor.focus();
-      checkContext();
+      handleInput();
     }
 
+    function insertTab() {
+      insertText('  '); // 2 spaces for mobile
+    }
+
+    function moveCursor(step) {
+      const pos = editor.selectionStart + step;
+      editor.setSelectionRange(pos, pos);
+      editor.focus();
+    }
+
+    // --- LAUNCHER ---
     function launch() {
-      const blob = new Blob([
-        `<!DOCTYPE html><html><head><style>${files['style.css']}</style></head>
-         <body>${files['index.html']}<script>${files['script.js']}<\/script></body></html>`
-      ], {type:'text/html'});
-      window.open(URL.createObjectURL(blob), '_blank');
+      files[currentTab] = editor.value; // Ensure saved
+      
+      let html = files['index.html'];
+      // Auto-inject viewport if missing (Crucial for mobile preview)
+      if (!html.includes('<meta name="viewport"')) {
+        html = `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">` + html;
+      }
+
+      const blobContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>${files['style.css']}</style>
+        </head>
+        <body>
+          ${html}
+          <script>${files['script.js']}<\/script>
+        </body>
+        </html>
+      `;
+      
+      const blob = new Blob([blobContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
     }
 
-    function reset() {
-      if(confirm('Reset?')) {
+    function resetAll() {
+      if(confirm('Factory Reset: Are you sure?')) {
         files = JSON.parse(JSON.stringify(defaultData));
-        localStorage.removeItem('liquid_ult');
-        location.reload();
+        localStorage.removeItem('onyx_files');
+        loadFile('index.html');
       }
     }
 
