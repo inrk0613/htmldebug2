@@ -11,37 +11,36 @@
 
   <link id="appIcon" rel="apple-touch-icon" href="">
   <link id="favIcon" rel="icon" href="">
+  <link id="manifestLink" rel="manifest" href="">
 
   <style>
     /* --- THEME SYSTEM --- */
     :root {
       --bg-root: #000000;
-      /* 画面全体を覆う黒のグラデーション */
-      --bg-mesh: radial-gradient(circle at 50% 0%, #111827 0%, #000000 85%);
-      
+      --bg-mesh: radial-gradient(circle at 50% 0%, #111827 0%, #000000 90%);
       --glass-panel: rgba(18, 18, 23, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      
+      --glass-border: rgba(255, 255, 255, 0.1);
       --accent: #3b82f6;
       --text-main: #f3f4f6;
-      --font-code: "SF Mono", "Menlo", "Consolas", monospace;
-      
+      --font-code: "SF Mono", "Menlo", monospace;
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
-    /* 【重要】ここが修正点です */
+    /* 【重要】htmlタグに背景を設定することで、最下部の黒帯を消す */
     html {
-      background-color: #000000; /* 最下層を黒にする */
       height: 100%;
+      background-color: var(--bg-root);
+      background-image: var(--bg-mesh);
+      background-attachment: fixed;
     }
 
     body {
-      margin: 0; background-color: var(--bg-root);
-      background-image: var(--bg-mesh);
-      background-attachment: fixed;
+      margin: 0; 
+      /* bodyは透明にしてhtmlの背景を透かす */
+      background: transparent;
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       position: fixed; width: 100%; height: 100%; overflow: hidden;
@@ -66,7 +65,6 @@
       background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    
     .brand-icon {
       width: 20px; height: 20px; border-radius: 6px;
       background: linear-gradient(135deg, var(--accent), #2563eb);
@@ -120,15 +118,13 @@
       caret-color: var(--accent); -webkit-overflow-scrolling: touch;
     }
 
-    /* Resizer */
+    /* --- RESIZER --- */
     #resizer {
       height: 24px; flex-shrink: 0;
-      background: var(--glass-panel);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid var(--glass-border);
-      border-bottom: 1px solid var(--glass-border);
+      background: var(--glass-panel); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border);
       display: none; justify-content: center; align-items: center;
-      cursor: row-resize; z-index: 40; touch-action: none;
+      z-index: 40; touch-action: none;
     }
     #resizer::after {
       content: ''; width: 36px; height: 4px;
@@ -137,7 +133,7 @@
     #resizer.active { background: rgba(59, 130, 246, 0.1); }
     #resizer.active::after { background: var(--accent); }
 
-    /* Preview Pane */
+    /* --- PREVIEW --- */
     .preview-pane {
       height: 40%; background: #fff; display: none; flex-direction: column;
       box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 20;
@@ -152,19 +148,14 @@
     }
     .preview-header.error { background: #fee2e2; color: #ef4444; }
     .error-msg { font-weight: normal; opacity: 0.9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
-
     iframe { width: 100%; height: 100%; border: none; background: #fff; }
 
-    /* --- TOOLBAR (Immersive) --- */
+    /* --- TOOLBAR --- */
     .toolbar {
-      /* 背景色を少し濃くして透過させる */
-      background: rgba(10, 10, 12, 0.9);
+      background: rgba(10, 10, 12, 0.85);
       backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
       border-top: 1px solid var(--glass-border);
-      padding: 10px;
-      /* ホームバーの下まで背景色を伸ばす */
-      padding-bottom: max(10px, var(--safe-bottom));
-      
+      padding: 10px; padding-bottom: max(10px, var(--safe-bottom));
       display: flex; gap: 8px; overflow-x: auto; align-items: center;
       flex-shrink: 0; z-index: 50;
     }
@@ -240,8 +231,9 @@
   </div>
 
   <script>
-    // --- 0. ICON GEN ---
+    // --- 0. ASSETS GEN ---
     (function(){
+      // Generate Icon
       const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');
       const g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,'#111827');g.addColorStop(1,'#000000');
       x.fillStyle=g;x.fillRect(0,0,512,512);x.shadowBlur=50;x.shadowColor='#3b82f6';
@@ -249,9 +241,22 @@
       const t=x.createLinearGradient(0,100,512,400);t.addColorStop(0,'#60a5fa');t.addColorStop(1,'#2563eb');
       x.fillStyle=t;x.fillText('</>',256,276);
       const u=c.toDataURL('image/png');document.getElementById('appIcon').href=u;document.getElementById('favIcon').href=u;
+
+      // Generate Manifest (Important for PWA background color)
+      const manifest = {
+        name: "CodeEdit",
+        short_name: "CodeEdit",
+        display: "standalone",
+        background_color: "#000000", /* これが起動時の黒帯を防ぐ */
+        theme_color: "#000000",
+        start_url: ".",
+        icons: [{ src: u, sizes: "512x512", type: "image/png" }]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+      document.getElementById('manifestLink').href = URL.createObjectURL(blob);
     })();
 
-    // --- 1. RESIZE & VIEWPORT ---
+    // --- 1. RESIZE LOGIC ---
     const app = document.getElementById('app');
     const editor = document.getElementById('editor');
     const gutter = document.getElementById('gutter');
@@ -260,31 +265,25 @@
     const splitContainer = document.getElementById('splitContainer');
     const toggleBtn = document.getElementById('toggleViewBtn');
 
-    let isResizing = false;
-    resizer.addEventListener('touchstart', (e) => { isResizing=true; resizer.classList.add('active'); e.preventDefault(); }, {passive:false});
-    resizer.addEventListener('mousedown', () => { isResizing=true; resizer.classList.add('active'); });
-    
-    const handleMove = (y) => {
+    let isResizing=false;
+    resizer.addEventListener('touchstart', (e)=>{ isResizing=true; resizer.classList.add('active'); e.preventDefault(); }, {passive:false});
+    document.addEventListener('touchmove', (e)=>{ if(isResizing) handleMove(e.touches[0].clientY); }, {passive:false});
+    document.addEventListener('touchend', ()=>{ isResizing=false; resizer.classList.remove('active'); });
+    function handleMove(y) {
       const rect = splitContainer.getBoundingClientRect();
       const h = rect.bottom - y;
-      if (h > 100 && h < rect.height * 0.8) previewPane.style.height = h + 'px';
-    };
-    
-    document.addEventListener('touchmove', (e) => { if(isResizing) handleMove(e.touches[0].clientY); }, {passive:false});
-    document.addEventListener('mousemove', (e) => { if(isResizing) handleMove(e.clientY); });
-    const endResize = () => { isResizing=false; resizer.classList.remove('active'); };
-    document.addEventListener('touchend', endResize); document.addEventListener('mouseup', endResize);
+      if(h > 100 && h < rect.height * 0.8) previewPane.style.height = h + 'px';
+    }
 
     // --- 2. EDITOR ---
-    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #333; background:#fff; }\n    h1 { color: #2563eb; }\n  </style>\n</head>\n<body>\n  <h1>Immersive Black</h1>\n  <p>The bottom safe area is now onyx.</p>\n</body>\n</html>`;
+    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #fff; background: #222; }\n    h1 { color: #3b82f6; }\n  </style>\n</head>\n<body>\n  <h1>Full Screen!</h1>\n  <p>No black bars at the bottom.</p>\n</body>\n</html>`;
     editor.value = localStorage.getItem('code_edit_final') || DEFAULT;
 
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const cursor = editor.selectionStart;
-        const lines = editor.value.substr(0, cursor).split('\n');
-        const indent = (lines[lines.length-1].match(/^(\s*)/)||['',''])[1];
+        const indent = (editor.value.substr(0, cursor).split('\n').pop().match(/^(\s*)/) || ['',''])[1];
         document.execCommand('insertText', false, '\n' + indent);
         setTimeout(() => editor.scrollTop = editor.scrollHeight, 10);
       }
@@ -304,19 +303,14 @@
       if (!final.includes('<meta name="viewport"')) final = '<meta name="viewport" content="width=device-width,initial-scale=1">' + final;
       previewFrame.srcdoc = final;
     }
-    
+
     window.addEventListener('message', (e) => {
-      if (e.data?.type === 'error') {
-        previewHeader.classList.add('error'); errorDisplay.textContent = e.data.msg;
-      }
+      if (e.data?.type === 'error') { previewHeader.classList.add('error'); errorDisplay.textContent = e.data.msg; }
     });
 
     function onInput() {
-      localStorage.setItem('code_edit_final', editor.value);
-      updateGutter();
-      if (previewPane.classList.contains('visible')) {
-        clearTimeout(debounceTimer); debounceTimer = setTimeout(updatePreview, 600);
-      }
+      localStorage.setItem('code_edit_final', editor.value); updateGutter();
+      if (previewPane.classList.contains('visible')) { clearTimeout(debounceTimer); debounceTimer = setTimeout(updatePreview, 600); }
     }
     editor.addEventListener('input', onInput);
     editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
@@ -331,41 +325,34 @@
     // --- 4. COPY & UTILS ---
     function copyAll() {
       navigator.clipboard.writeText(editor.value).then(() => {
-        const btn=document.getElementById('copyBtn'), c=document.getElementById('iconCopy'), k=document.getElementById('iconCheck');
-        btn.classList.add('copied'); c.style.display='none'; k.style.display='block';
-        setTimeout(()=>{ btn.classList.remove('copied'); c.style.display='block'; k.style.display='none'; }, 2000);
+        const btn=document.getElementById('copyBtn'), ic=document.getElementById('iconCopy'), ch=document.getElementById('iconCheck');
+        btn.classList.add('copied'); ic.style.display='none'; ch.style.display='block';
+        setTimeout(()=>{ btn.classList.remove('copied'); ic.style.display='block'; ch.style.display='none'; },2000);
       });
     }
 
-    const colorBtn=document.getElementById('colorBtn'), swatch=document.getElementById('swatch'), picker=document.getElementById('nativePicker');
-    let colorRange=null;
-    
-    const detectColor = () => {
+    const colorBtn = document.getElementById('colorBtn'), swatch = document.getElementById('swatch'), picker = document.getElementById('nativePicker');
+    let colorRange = null;
+
+    editor.addEventListener('click', detectColor); editor.addEventListener('keyup', detectColor);
+    function detectColor() {
       const pos = editor.selectionStart, text = editor.value;
       const regex = /#([0-9a-fA-F]{3,6})\b/g;
-      let match, found=null;
-      const startScan=Math.max(0,pos-20), slice=text.substring(startScan,Math.min(text.length,pos+20));
+      let match, found = null;
+      const startScan = Math.max(0, pos-20), slice = text.substring(startScan, Math.min(text.length, pos+20));
       while ((match = regex.exec(slice)) !== null) {
         if (pos >= (startScan+match.index) && pos <= (startScan+match.index+match[0].length)) {
-          found = {hex:match[0], start:startScan+match.index, end:startScan+match.index+match[0].length}; break;
+          found = { hex: match[0], start: startScan+match.index, end: startScan+match.index+match[0].length }; break;
         }
       }
-      if(found) {
-        colorBtn.style.display='flex'; swatch.style.background=found.hex; colorRange=found;
-        let v=found.hex; if(v.length===4) v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3]; picker.value=v;
-      } else { colorBtn.style.display='none'; colorRange=null; }
-    };
-    editor.addEventListener('click', detectColor); editor.addEventListener('keyup', detectColor);
-
-    picker.addEventListener('input', (e) => {
-      if (!colorRange) return;
-      const n = e.target.value;
-      editor.value = editor.value.substring(0, colorRange.start) + n + editor.value.substring(colorRange.end);
-      const end = colorRange.start + n.length;
-      editor.setSelectionRange(end, end);
-      colorRange = { hex: n, start: colorRange.start, end: end };
-      swatch.style.background = n;
-      onInput();
+      if (found) { colorBtn.style.display='flex'; swatch.style.background=found.hex; colorRange=found; picker.value=found.hex.length===4?`#${found.hex[1].repeat(2)}${found.hex[2].repeat(2)}${found.hex[3].repeat(2)}`:found.hex; }
+      else { colorBtn.style.display='none'; colorRange=null; }
+    }
+    picker.addEventListener('input', (e)=>{
+      if(!colorRange)return; const n=e.target.value;
+      editor.value=editor.value.substring(0,colorRange.start)+n+editor.value.substring(colorRange.end);
+      const end=colorRange.start+n.length; editor.setSelectionRange(end,end);
+      colorRange={hex:n,start:colorRange.start,end:end}; swatch.style.background=n; onInput();
     });
 
     function updateGutter() { gutter.innerHTML = Array.from({length: editor.value.split('\n').length}, (_, i) => i + 1).join('<br>'); }
@@ -375,9 +362,10 @@
     function clearAll() { if(confirm('Reset?')) { editor.value=""; onInput(); colorBtn.style.display='none'; editor.focus(); } }
     function launch() { const b=new Blob([editor.value],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
 
+    // Init & Viewport Fix
     updateGutter();
-    const resizeApp = () => { if(window.visualViewport) { app.style.height=window.visualViewport.height+'px'; window.scrollTo(0,0); } };
-    window.visualViewport?.addEventListener('resize', resizeApp); window.addEventListener('resize', resizeApp); resizeApp();
+    const resizeApp=()=>{if(window.visualViewport){app.style.height=window.visualViewport.height+'px';window.scrollTo(0,0);}};
+    window.visualViewport?.addEventListener('resize',resizeApp);window.addEventListener('resize',resizeApp);resizeApp();
   </script>
 </body>
 </html>
