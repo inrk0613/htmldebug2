@@ -5,504 +5,175 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0b0d12" />
-  <title>DevConsole Mobile</title>
-
-  <link id="manifestLink" rel="manifest" />
-
+  <meta name="theme-color" content="#0d1117" />
+  <title>DevConsole Liquid</title>
   <style>
     :root {
-      --bg: #0b0d12;
-      --panel: #161b26;
-      --panel-header: #1c2333;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: #2d3748;
-      --accent: #3b82f6;
-      --accent-hover: #60a5fa;
-      --danger: #ef4444;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --mono: "SF Mono", "Menlo", "Monaco", "Cascadia Code", monospace;
-      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --accent: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      --bg-dark: #0d1117;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    
     body {
-      margin: 0;
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      overscroll-behavior-y: none;
+      margin: 0; font-family: -apple-system, sans-serif;
+      background: var(--bg-dark); color: #fff;
+      overflow: hidden; height: 100vh;
     }
 
-    /* Header styling */
+    /* Background Animation */
+    .bg-blobs {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+      background: radial-gradient(circle at 10% 20%, #1a2a6c, #b21f1f 50%, #fdbb2d);
+      opacity: 0.3; filter: blur(80px);
+    }
+
     header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
-      background: rgba(11, 13, 18, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: calc(env(safe-area-inset-top) + 12px) 20px 12px;
+      backdrop-filter: blur(20px); background: var(--glass);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex; justify-content: space-between; align-items: center;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      background: linear-gradient(90deg, #fff, var(--muted));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    h1 { font-size: 18px; margin: 0; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .main-layout { display: flex; flex-direction: column; height: calc(100vh - 100px); }
+
+    /* Editor */
+    #editor {
+      flex: 1; width: 100%; background: transparent; border: none;
+      color: #9cdcfe; font-family: "SF Mono", monospace; font-size: 14px;
+      padding: 20px; outline: none; resize: none;
     }
 
-    /* Layout */
-    .container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-      padding: 16px;
-      padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
-    }
-
-    @media (min-width: 1024px) {
-      .container { grid-template-columns: 1fr 1fr; align-items: start; }
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-header {
-      padding: 12px 16px;
-      background: var(--panel-header);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* Inputs & Buttons */
-    textarea {
-      width: 100%;
-      min-height: 350px;
-      background: #0d1117;
-      color: #79c0ff;
-      border: none;
-      padding: 16px;
-      font-family: var(--mono);
-      font-size: 13px;
-      outline: none;
-      resize: vertical;
-      line-height: 1.6;
-    }
-
+    /* Quick Toolbar */
     .toolbar {
-      padding: 12px;
-      background: var(--panel-header);
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      border-top: 1px solid var(--border);
+      display: flex; overflow-x: auto; padding: 10px; gap: 8px;
+      background: var(--glass); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--glass-border);
     }
 
-    button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #2d3748;
-      color: white;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s;
-      cursor: pointer;
+    .tool-btn {
+      padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 8px;
+      border: 1px solid var(--glass-border); color: white; font-size: 12px;
     }
 
-    button:active { transform: scale(0.96); opacity: 0.8; }
-    
-    button.primary { background: var(--accent); border-color: var(--accent); }
-    button.primary:hover { background: var(--accent-hover); }
-    
-    button.ghost { background: transparent; }
-    button.danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
-
-    select, .input-text {
-      background: #0d1117;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      outline: none;
+    /* Actions Bar */
+    .actions {
+      padding: 16px; display: flex; gap: 10px;
+      background: rgba(0,0,0,0.5);
     }
 
-    /* Log List */
-    .log-container {
-      height: 500px;
-      overflow-y: auto;
-      background: #090c10;
+    .btn {
+      flex: 1; padding: 12px; border-radius: 12px; border: none;
+      font-weight: bold; color: white; cursor: pointer; transition: 0.2s;
     }
 
-    .log-item {
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 12px;
-      animation: fadeIn 0.2s ease-out;
+    .btn-run { background: var(--accent); }
+    .btn-clear { background: rgba(255,255,255,0.1); }
+
+    /* Fullscreen Preview Overlay */
+    #previewOverlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: white; z-index: 1000; transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    #previewOverlay.show { transform: translateY(0); }
 
-    .log-meta {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 4px;
-      font-size: 10px;
-      opacity: 0.7;
+    .close-preview {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.8); color: white; padding: 12px 24px;
+      border-radius: 30px; z-index: 1001; border: 1px solid rgba(255,255,255,0.2);
     }
-
-    .badge {
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--border);
-      text-transform: uppercase;
-    }
-
-    .badge.error { background: #451a1a; color: #ff8e8e; }
-    .badge.warn { background: #45351a; color: #ffdb8e; }
-    .badge.info { background: #1a2e45; color: #8ecbff; }
-
-    /* REPL footer */
-    .repl-box {
-      padding: 16px;
-      background: var(--panel-header);
-      border-top: 1px solid var(--border);
-    }
-
-    .repl-input-group {
-      display: flex;
-      gap: 8px;
-    }
-
-    .repl-input-group input { flex: 1; }
-
-    #evalOut {
-      margin-top: 10px;
-      padding: 12px;
-      background: #0d1117;
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: #a5d6ff;
-      min-height: 40px;
-      white-space: pre-wrap;
-    }
-
-    /* Toast */
-    #toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.95);
-      color: #000;
-      padding: 10px 20px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      display: none;
-      z-index: 1000;
-    }
-
-    iframe {
-      width: 100%; height: 300px; border: none; background: white;
-    }
-
-    .hidden { display: none; }
   </style>
 </head>
 <body>
-
+  <div class="bg-blobs"></div>
   <header>
-    <h1>DevConsole <span style="font-weight: 300; opacity: 0.6;">Mobile</span></h1>
-    <div style="display: flex; gap: 8px;">
-      <button class="ghost" id="copyLogs" title="Copy Logs">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-      </button>
-      <button class="danger ghost" id="clearLogs" title="Clear">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-      </button>
-    </div>
+    <h1>LiquidConsole</h1>
+    <div id="saveStatus" style="font-size: 10px; opacity: 0.5;">Saved</div>
   </header>
 
-  <div class="container">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Source Code</span>
-        <div style="display:flex; gap:6px;">
-          <select id="sampleSelect">
-            <option value="basic">Basic</option>
-            <option value="error">Error Trace</option>
-            <option value="fetch">API Fetch</option>
-          </select>
-          <button id="loadSample">Load</button>
-        </div>
+  <div class="main-layout">
+    <textarea id="editor" spellcheck="false" placeholder="Write HTML/JS here..."></textarea>
+    
+    <div class="toolbar" id="quickInput">
       </div>
-      <textarea id="editor" spellcheck="false" placeholder="Write HTML here..."></textarea>
-      <div class="toolbar">
-        <button id="runTab" class="primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Run in New Tab
-        </button>
-        <button id="runPreview">Preview</button>
-        <button id="stopPreview" class="danger hidden">Stop</button>
-      </div>
-      <div id="previewWrap" class="hidden">
-        <iframe id="previewFrame" sandbox="allow-scripts"></iframe>
-      </div>
-    </div>
 
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Console</span>
-        <div style="display:flex; gap:6px;">
-          <select id="sessionFilter"></select>
-          <input id="textFilter" type="text" class="input-text" placeholder="Filter..." />
-        </div>
-      </div>
-      <div id="logList" class="log-container"></div>
-      
-      <div class="repl-box">
-        <div class="repl-input-group">
-          <input id="evalInput" type="text" class="input-text" placeholder="Evaluate JS..." />
-          <button id="evalBtn" class="primary">Eval</button>
-        </div>
-        <div id="evalOut">Ready.</div>
-      </div>
+    <div class="actions">
+      <button class="btn btn-clear" onclick="clearEditor()">Clear</button>
+      <button class="btn btn-run" onclick="openPreview()">Run Preview</button>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <div id="previewOverlay">
+    <iframe id="previewFrame" style="width:100%; height:100%; border:none;"></iframe>
+    <button class="close-preview" onclick="closePreview()">Close Preview</button>
+  </div>
 
   <script>
-    // --- JavaScriptロジック (コア機能は継承しつつ整理) ---
-    (() => {
-      'use strict';
+    const editor = document.getElementById('editor');
+    const STORAGE_KEY = 'dev_console_code';
 
-      const CHANNEL_NAME = 'dev_console_v1';
-      const bc = ('BroadcastChannel' in window) ? new BroadcastChannel(CHANNEL_NAME) : null;
-      const LS_OUT = '__dbg_out__';
-      const LS_IN  = '__dbg_in__';
+    // LocalStorage: Load
+    window.onload = () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) editor.value = saved;
+      renderQuickTools();
+    };
 
-      // --- UI Elements ---
-      const editor = document.getElementById('editor');
-      const logList = document.getElementById('logList');
-      const toastEl = document.getElementById('toast');
-      const sessionFilter = document.getElementById('sessionFilter');
-      const evalInput = document.getElementById('evalInput');
-      const evalOut = document.getElementById('evalOut');
+    // LocalStorage: Auto-Save
+    editor.addEventListener('input', () => {
+      localStorage.setItem(STORAGE_KEY, editor.value);
+      showStatus();
+    });
 
-      // --- State ---
-      let sessionCounter = 0;
-      let activeRunnerSession = null;
-      const sessions = new Map();
-      const logs = [];
+    function showStatus() {
+      const st = document.getElementById('saveStatus');
+      st.textContent = 'Saving...';
+      setTimeout(() => st.textContent = 'Saved', 800);
+    }
 
-      function toast(msg) {
-        toastEl.textContent = msg;
-        toastEl.style.display = 'block';
-        setTimeout(() => toastEl.style.display = 'none', 2500);
+    function clearEditor() {
+      if(confirm('Clear all code?')) {
+        editor.value = '';
+        localStorage.removeItem(STORAGE_KEY);
       }
+    }
 
-      function addLog(entry) {
-        logs.push(entry);
-        if (logs.length > 500) logs.shift();
-        renderLogs();
-        logList.scrollTop = logList.scrollHeight;
-      }
+    // Quick Input Tools
+    const tools = ['<', '>', '/', '{', '}', '(', ')', '"', "'", ';', '=', '!'];
+    function renderQuickTools() {
+      const container = document.getElementById('quickInput');
+      tools.forEach(char => {
+        const btn = document.createElement('button');
+        btn.className = 'tool-btn';
+        btn.textContent = char;
+        btn.onclick = () => insertAtCursor(char);
+        container.appendChild(btn);
+      });
+    }
 
-      function renderLogs() {
-        const target = sessionFilter.value || '__all__';
-        const query = document.getElementById('textFilter').value.toLowerCase();
-        logList.innerHTML = '';
+    function insertAtCursor(text) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + text.length;
+      editor.focus();
+    }
 
-        logs.forEach(log => {
-          if (target !== '__all__' && log.session !== target) return;
-          const body = formatBody(log);
-          if (query && !body.toLowerCase().includes(query)) return;
+    // Preview Logic
+    function openPreview() {
+      const frame = document.getElementById('previewFrame');
+      const overlay = document.getElementById('previewOverlay');
+      frame.srcdoc = editor.value;
+      overlay.classList.add('show');
+    }
 
-          const div = document.createElement('div');
-          div.className = 'log-item';
-          
-          const levelClass = log.payload.level || log.event;
-          
-          div.innerHTML = `
-            <div class="log-meta">
-              <span class="badge ${levelClass}">${levelClass}</span>
-              <span>${new Date(log.t).toLocaleTimeString()}</span>
-              <span>${log.source}</span>
-            </div>
-            <div style="white-space: pre-wrap;">${escapeHtml(body)}</div>
-          `;
-          logList.appendChild(div);
-        });
-      }
-
-      function formatBody(entry) {
-        const p = entry.payload || {};
-        switch(entry.event) {
-          case 'console': return (p.args || []).join(' ');
-          case 'error': return `Error: ${p.message}\n${p.stack || ''}`;
-          case 'fetch': return `[Fetch] ${p.phase} ${p.url} ${p.status || ''} (${p.ms || 0}ms)`;
-          case 'evalResult': return `> ${p.result}`;
-          default: return JSON.stringify(p);
-        }
-      }
-
-      function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-      }
-
-      // --- Execution Logic ---
-      function getBridge(sessionId, transport) {
-        return `
-          (function(){
-            const SESSION = "${sessionId}";
-            const TRANSPORT = "${transport}";
-            const bc = ("BroadcastChannel" in window) ? new BroadcastChannel("${CHANNEL_NAME}") : null;
-
-            function send(event, payload) {
-              const msg = { __dbg: true, t: Date.now(), session: SESSION, source: TRANSPORT, event, payload };
-              if (TRANSPORT === 'preview') {
-                window.parent.postMessage(msg, '*');
-              } else if (bc) {
-                bc.postMessage(msg);
-              } else {
-                localStorage.setItem("${LS_OUT}", JSON.stringify({...msg, _n: Math.random()}));
-              }
-            }
-
-            // Console Hook
-            ['log','info','warn','error'].forEach(l => {
-              const native = console[l];
-              console[l] = (...args) => {
-                send('console', { level: l, args: args.map(a => String(a)) });
-                native.apply(console, args);
-              };
-            });
-
-            window.onerror = (m, u, l, c, e) => send('error', { message: m, stack: e?.stack });
-            send('ready', { href: location.href });
-
-            if (TRANSPORT === 'runner') {
-              window.onmessage = (e) => {
-                if (e.data.cmd === 'eval') {
-                  try {
-                    const res = eval(e.data.expr);
-                    send('evalResult', { result: String(res) });
-                  } catch(err) {
-                    send('evalResult', { result: "Error: " + err.message });
-                  }
-                }
-              };
-            }
-          })();
-        `;
-      }
-
-      function run(type) {
-        const code = editor.value;
-        sessionCounter++;
-        const sid = `${type}-${sessionCounter}`;
-        activeRunnerSession = sid;
-
-        if (!sessions.has(sid)) {
-          sessions.set(sid, `${type.toUpperCase()} #${sessionCounter}`);
-          const opt = document.createElement('option');
-          opt.value = sid; opt.textContent = sessions.get(sid);
-          sessionFilter.appendChild(opt);
-        }
-
-        const bridge = getBridge(sid, type);
-        const fullHtml = code.replace('<head>', `<head><script>${bridge}<\/script>`);
-
-        if (type === 'tab') {
-          const win = window.open('about:blank', '_blank');
-          win.document.open();
-          win.document.write(fullHtml);
-          win.document.close();
-          toast("Opened in new tab");
-        } else {
-          const frame = document.getElementById('previewFrame');
-          document.getElementById('previewWrap').classList.remove('hidden');
-          document.getElementById('stopPreview').classList.remove('hidden');
-          frame.srcdoc = fullHtml;
-        }
-      }
-
-      // --- Listeners ---
-      document.getElementById('runTab').onclick = () => run('tab');
-      document.getElementById('runPreview').onclick = () => run('preview');
-      document.getElementById('stopPreview').onclick = () => {
-        document.getElementById('previewFrame').srcdoc = '';
-        document.getElementById('previewWrap').classList.add('hidden');
-        document.getElementById('stopPreview').classList.add('hidden');
-      };
-      document.getElementById('clearLogs').onclick = () => { logs.length = 0; renderLogs(); };
-      
-      document.getElementById('evalBtn').onclick = () => {
-        const expr = evalInput.value;
-        if (!expr) return;
-        // シンプルな評価コマンド送信例 (Broadcast経由)
-        if (bc) bc.postMessage({ cmd: 'eval', expr, session: activeRunnerSession });
-        evalInput.value = '';
-      };
-
-      window.onmessage = (e) => { if (e.data.__dbg) addLog(e.data); };
-      if (bc) bc.onmessage = (e) => { if (e.data.__dbg) addLog(e.data); };
-
-      // Initialize session filter
-      const optAll = document.createElement('option');
-      optAll.value = '__all__'; optAll.textContent = 'All Sessions';
-      sessionFilter.appendChild(optAll);
-
-      // PWA Manifest
-      const manifest = {
-        name: "DevConsole Mobile",
-        short_name: "DevConsole",
-        display: "standalone",
-        start_url: ".",
-        theme_color: "#0b0d12",
-        background_color: "#0b0d12"
-      };
-      document.getElementById('manifestLink').href = "data:application/manifest+json," + JSON.stringify(manifest);
-
-    })();
+    function closePreview() {
+      document.getElementById('previewOverlay').classList.remove('show');
+    }
   </script>
 </body>
 </html>
