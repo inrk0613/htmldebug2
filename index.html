@@ -3,61 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-  
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#09090b">
   <title>CodeEdit</title>
 
   <link id="appIcon" rel="apple-touch-icon" href="">
   <link id="favIcon" rel="icon" href="">
-  <link id="manifestLink" rel="manifest" href="">
 
   <style>
     :root {
-      /* --- Color Palette --- */
       --bg-root: #09090b;
       --bg-editor: #0c0c0e;
       --bg-gutter: #111113;
-      
-      --bg-mesh: radial-gradient(circle at 50% -20%, #27272a 0%, #09090b 60%);
-      
-      /* UI Colors */
-      --glass-panel: rgba(18, 18, 20, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      
+      --glass-panel: rgba(18, 18, 20, 0.95);
+      --glass-border: rgba(255, 255, 255, 0.1);
       --accent-primary: #3b82f6;
       --text-main: #e4e4e7;
-      --text-muted: #71717a;
-      
-      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --font-code: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
-      
+      --font-code: "JetBrains Mono", "SF Mono", "Menlo", monospace;
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
-
       --rainbow-grad: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff, #ff0000);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
-    html {
-      height: 100%;
+    html, body {
+      height: 100%; margin: 0; padding: 0;
       background-color: var(--bg-root);
-      background-image: var(--bg-mesh);
-      background-attachment: fixed;
-      background-size: cover;
-    }
-
-    body {
-      margin: 0; 
-      background: transparent;
       color: var(--text-main);
-      font-family: var(--font-ui);
-      min-height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       overflow: hidden;
-      overscroll-behavior: none;
-      -webkit-font-smoothing: antialiased;
     }
 
     #app { 
@@ -68,76 +42,81 @@
     /* --- HEADER --- */
     header {
       padding-top: calc(var(--safe-top) + 8px);
-      padding-bottom: 12px; padding-left: 20px; padding-right: 20px;
+      padding-bottom: 10px; 
+      padding-left: 16px; padding-right: 16px;
       display: flex; justify-content: space-between; align-items: center;
       background: var(--glass-panel);
-      backdrop-filter: blur(25px) saturate(180%);
-      -webkit-backdrop-filter: blur(25px) saturate(180%);
-      z-index: 50; flex-shrink: 0;
-      position: relative;
+      z-index: 50; flex-shrink: 0; position: relative;
     }
     header::after {
       content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
       background: var(--rainbow-grad); opacity: 0.5;
     }
 
+    /* スマホ対応：ブランド名を狭い画面で隠す */
     .brand {
-      font-weight: 700; font-size: 18px; letter-spacing: -0.03em;
-      display: flex; align-items: center; gap: 12px; color: #fff;
+      display: flex; align-items: center; gap: 10px; 
+      font-weight: 700; font-size: 18px; color: #fff;
+      flex-shrink: 0; /* ロゴは縮めない */
     }
+    .brand-text { display: block; }
+    
+    @media (max-width: 380px) {
+      .brand-text { display: none; } /* 画面が狭いと文字を消す */
+    }
+
     .brand-icon {
       width: 24px; height: 24px; border-radius: 6px;
       background: linear-gradient(135deg, #2563eb, #1e40af);
-      box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
       display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
     }
     .brand-icon::after { content: '/'; color: white; font-size: 14px; font-weight: 800; }
 
-    .actions { display: flex; gap: 10px; align-items: center; }
+    .actions { 
+      display: flex; gap: 8px; align-items: center; 
+      flex-shrink: 1; /* ボタン群は必要なら詰める */
+      justify-content: flex-end;
+      width: 100%;
+    }
 
     .icon-btn {
-      width: 40px; height: 40px; border-radius: 10px;
+      width: 36px; height: 36px; border-radius: 8px; /* 少し小さくしてフィットさせる */
       display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.03); 
+      background: rgba(255,255,255,0.05); 
       border: 1px solid var(--glass-border);
-      color: var(--text-muted); 
-      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-      cursor: pointer;
+      color: #a1a1aa; cursor: pointer; flex-shrink: 0;
     }
-    .icon-btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
-    .icon-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.1); }
-    .icon-btn.active { 
-      background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.5); color: #60a5fa; 
-    }
-    .icon-btn.copied { color: #10b981; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); }
+    .icon-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.15); }
+    .icon-btn.active { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #60a5fa; }
+
+    /* ペーストボタン専用色 */
+    #pasteBtn { color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.05); }
+    #pasteBtn:active { background: rgba(251, 191, 36, 0.15); }
 
     .btn-launch {
-      padding: 0 18px; height: 40px; border-radius: 10px;
+      padding: 0 14px; height: 36px; border-radius: 8px;
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-top: 1px solid rgba(255,255,255,0.3);
-      color: white; font-weight: 600; font-size: 14px;
-      display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-weight: 600; font-size: 13px;
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
     }
-    .btn-launch:active { transform: scale(0.96); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); }
+    .btn-launch:active { transform: scale(0.96); }
 
-    /* --- SPLIT CONTAINER --- */
+    /* --- MAIN AREA --- */
     .split-container {
       flex: 1; display: flex; flex-direction: column;
       overflow: hidden; position: relative;
       background: var(--bg-editor);
     }
 
-    /* --- EDITOR --- */
     .editor-pane { flex: 1; display: flex; overflow: hidden; min-height: 0; }
     
     .gutter {
-      width: 48px; background: var(--bg-gutter);
+      width: 44px; background: var(--bg-gutter);
       border-right: 1px solid rgba(255,255,255,0.05);
       font-family: var(--font-code); font-size: 13px; line-height: 1.6;
-      color: #52525b; text-align: right; padding: 16px 10px 16px 0;
+      color: #52525b; text-align: right; padding: 16px 8px 16px 0;
       overflow: hidden; user-select: none;
     }
 
@@ -145,81 +124,61 @@
       flex: 1; height: 100%; border: none; background: transparent;
       color: #d4d4d8; padding: 16px; 
       font-family: var(--font-code); font-size: 13px; line-height: 1.6; 
-      resize: none; white-space: pre; caret-color: var(--accent-primary); 
-      -webkit-overflow-scrolling: touch;
+      resize: none; white-space: pre; caret-color: var(--accent-primary);
     }
-    textarea::-webkit-scrollbar { width: 6px; }
-    textarea::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
 
-    /* --- TOOLBAR (Moved Inside Split) --- */
+    /* --- TOOLBAR (Modified) --- */
+    /* エディタとプレビューの間に配置 */
     .toolbar {
-      background: #131315; /* 少し濃い背景で区切りを明確に */
-      border-top: 1px solid var(--glass-border);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 8px 12px;
-      /* プレビューが非表示の時（最下部にある時）だけセーフエリアを確保 */
-      padding-bottom: max(8px, env(safe-area-inset-bottom)); 
-      display: flex; gap: 8px; overflow-x: auto; align-items: center;
+      background: #18181b; /* 背景色を少し明るくして区切りを明確に */
+      border-top: 1px solid rgba(255,255,255,0.15); /* 上の線を強調 */
+      border-bottom: 1px solid rgba(0,0,0,0.5);
+      padding: 8px 10px;
+      /* 重要: プレビューが閉じている時は、ここが画面最下部になるのでセーフエリアが必要 */
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      
+      display: flex; gap: 6px; overflow-x: auto; align-items: center;
       flex-shrink: 0; z-index: 45;
+      height: 56px; /* 高さを固定して安定させる */
     }
-    /* プレビューが表示されている場合（最下部ではない場合）はpaddingを標準に戻すJS制御も可能だが、
-       CSSの :last-child 擬似クラスで簡易的に制御 */
-    .toolbar:not(:last-child) {
-      padding-bottom: 8px; 
-    }
+    /* プレビューが開いている時（toolbarが画面途中にある時）のスタイル調整はJSで行うか、このままでもOK */
+    
     .toolbar::-webkit-scrollbar { display: none; }
 
     .key {
-      position: relative; flex: 0 0 auto;
-      height: 40px; min-width: 40px; border-radius: 8px;
-      background: linear-gradient(to bottom, #27272a, #18181b);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-bottom-color: rgba(0,0,0,0.5);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      color: #e4e4e7; 
-      font-family: var(--font-code); font-size: 15px; font-weight: 500;
+      flex: 0 0 auto; height: 38px; min-width: 38px; border-radius: 6px;
+      background: #27272a; border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.3); /* 物理キー風 */
+      color: #e4e4e7; font-family: var(--font-code); font-size: 15px;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.1s;
     }
-    .key:active { transform: translateY(2px); box-shadow: none; background: #18181b; border-top-color: rgba(0,0,0,0.5); }
+    .key:active { transform: translateY(2px); box-shadow: none; background: #3f3f46; }
 
-    #colorBtn {
-      padding: 0 12px; gap: 8px; font-size: 12px; display: none;
-      background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #93c5fd;
-    }
-    #swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.6); }
-    #nativePicker { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
-
-    /* --- RESIZER --- */
-    #resizer {
-      height: 12px; flex-shrink: 0;
-      background: #09090b;
-      border-bottom: 1px solid var(--glass-border);
-      display: none; justify-content: center; align-items: center;
-      z-index: 40; touch-action: none; cursor: row-resize;
-    }
-    #resizer::after {
-      content: ''; width: 32px; height: 4px;
-      background: #3f3f46; border-radius: 2px;
-    }
+    #colorBtn { display: none; padding: 0 10px; font-size: 12px; gap: 6px; background: rgba(59,130,246,0.15); color: #93c5fd; border-color: rgba(59,130,246,0.4); }
+    #swatch { width: 10px; height: 10px; background: #fff; border-radius: 2px; }
+    #nativePicker { position: absolute; opacity: 0; width: 0; height: 0; }
 
     /* --- PREVIEW --- */
+    #resizer {
+      height: 16px; background: #131315; border-bottom: 1px solid var(--glass-border);
+      display: none; justify-content: center; align-items: center; flex-shrink: 0;
+    }
+    #resizer::after { content: ''; width: 40px; height: 4px; background: #3f3f46; border-radius: 2px; }
+
     .preview-pane {
       height: 40%; background: #fff; display: none; flex-direction: column;
-      box-shadow: 0 -20px 50px rgba(0,0,0,0.5); 
-      z-index: 20;
+      border-top: 1px solid var(--glass-border);
     }
     .preview-pane.visible { display: flex; }
-    
+
     .preview-header {
-      height: 32px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
-      display: flex; align-items: center; padding: 0 12px;
-      font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 0.05em;
-      justify-content: space-between; text-transform: uppercase;
+      height: 30px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; padding: 0 10px;
+      font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.5px;
+      justify-content: space-between;
     }
-    .preview-header.error { background: #fef2f2; color: #ef4444; border-bottom-color: #fecaca; }
-    .error-msg { font-weight: normal; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-    iframe { width: 100%; height: 100%; border: none; background: #fff; }
+    .preview-header.error { background: #fee2e2; color: #ef4444; }
+    iframe { width: 100%; height: 100%; border: none; background: white; }
 
   </style>
 </head>
@@ -227,27 +186,30 @@
 
   <div id="app">
     <header>
-      <div class="brand"><div class="brand-icon"></div>CodeEdit</div>
+      <div class="brand">
+        <div class="brand-icon"></div>
+        <span class="brand-text">CodeEdit</span>
+      </div>
       <div class="actions">
         <button id="pasteBtn" class="icon-btn" onclick="pasteFromClipboard()" title="Paste">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
         </button>
 
-        <button id="copyBtn" class="icon-btn" onclick="copyAll()" title="Copy">
+        <button id="copyBtn" class="icon-btn" onclick="copyAll()">
           <svg id="iconCopy" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           <svg id="iconCheck" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:none;"><path d="M20 6L9 17l-5-5"></path></svg>
         </button>
 
-        <button id="toggleViewBtn" class="icon-btn" onclick="togglePreview()" title="Preview">
+        <button id="toggleViewBtn" class="icon-btn" onclick="togglePreview()">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
         
-        <button class="icon-btn" style="color:#f87171; border-color:rgba(239,68,68,0.2);" onclick="clearAll()" title="Clear">
+        <button class="icon-btn" style="color:#f87171; border-color:rgba(239,68,68,0.2);" onclick="clearAll()">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
         
         <button class="btn-launch" onclick="launch()">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> 実行
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> <span class="brand-text" style="font-size:12px; margin-left:4px;">実行</span>
         </button>
       </div>
     </header>
@@ -255,21 +217,21 @@
     <div class="split-container" id="splitContainer">
       <div class="editor-pane">
         <div class="gutter" id="gutter">1</div>
-        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="コードを入力..."></textarea>
       </div>
 
-      <div class="toolbar">
-        <div id="colorBtn" class="key"><div id="swatch"></div> Color <input type="color" id="nativePicker"></div>
+      <div class="toolbar" id="toolbar">
+        <div id="colorBtn" class="key"><div id="swatch"></div> <input type="color" id="nativePicker"></div>
         <button class="key" onclick="move(-1)">←</button>
         <button class="key" onclick="move(1)">→</button>
-        <button class="key" style="width:54px; font-size: 13px; font-weight:700" onclick="insertTab()">TAB</button>
+        <button class="key" style="font-size:12px; font-weight:700" onclick="insertTab()">TAB</button>
         <button class="key" onclick="insert('=')">=</button>
         <button class="key" onclick="insert('<')">&lt;</button>
         <button class="key" onclick="insert('>')">&gt;</button>
         <button class="key" onclick="insert('/')">/</button>
         <button class="key" onclick="insert('{')">{</button>
         <button class="key" onclick="insert('}')">}</button>
-        <button class="key" onclick="insert('#')">#</button>
+        <button class="key" onclick="insert(';')">;</button>
       </div>
 
       <div id="resizer"></div>
@@ -284,145 +246,204 @@
   </div>
 
   <script>
-    // --- 0. ASSETS ---
+    // --- 0. ASSETS & INIT ---
     (function(){
+      // アイコン生成
       const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');
       const g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,'#111827');g.addColorStop(1,'#000000');
-      x.fillStyle=g;x.fillRect(0,0,512,512);x.shadowBlur=50;x.shadowColor='#3b82f6';
+      x.fillStyle=g;x.fillRect(0,0,512,512);
       x.font='bold 300px sans-serif';x.textAlign='center';x.textBaseline='middle';
-      const t=x.createLinearGradient(0,100,512,400);t.addColorStop(0,'#60a5fa');t.addColorStop(1,'#2563eb');
-      x.fillStyle=t;x.fillText('</>',256,276);
+      x.fillStyle='#3b82f6';x.fillText('</>',256,276);
       const u=c.toDataURL('image/png');document.getElementById('appIcon').href=u;document.getElementById('favIcon').href=u;
-      
-      const manifest = {
-        name: "CodeEdit", short_name: "CodeEdit", display: "standalone",
-        background_color: "#000000", theme_color: "#000000", start_url: ".",
-        icons: [{ src: u, sizes: "512x512", type: "image/png" }]
-      };
-      const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-      document.getElementById('manifestLink').href = URL.createObjectURL(blob);
     })();
 
-    // --- 1. RESIZE LOGIC ---
-    const splitContainer = document.getElementById('splitContainer');
-    const previewPane = document.getElementById('previewPane');
-    const resizer = document.getElementById('resizer');
-    let isResizing=false;
-
-    resizer.addEventListener('touchstart', (e)=>{ isResizing=true; resizer.classList.add('active'); e.preventDefault(); }, {passive:false});
-    document.addEventListener('touchmove', (e)=>{ 
-      if(isResizing) {
-        const rect = splitContainer.getBoundingClientRect();
-        // Calculate height from bottom
-        const h = rect.bottom - e.touches[0].clientY;
-        if(h > 50 && h < rect.height * 0.8) previewPane.style.height = h + 'px';
-      }
-    }, {passive:false});
-    document.addEventListener('touchend', ()=>{ isResizing=false; resizer.classList.remove('active'); });
-
-    // --- 2. EDITOR ---
+    // --- 1. CORE VARIABLES ---
     const editor = document.getElementById('editor');
     const gutter = document.getElementById('gutter');
-    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #fff; background: #222; }\n    h1 { color: #3b82f6; }\n  </style>\n</head>\n<body>\n  <h1>Fixed!</h1>\n  <p>No black bars anymore.</p>\n</body>\n</html>`;
+    const previewPane = document.getElementById('previewPane');
+    const resizer = document.getElementById('resizer');
+    const toolbar = document.getElementById('toolbar');
+    
+    // 初期コード
+    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #fff; background: #222; }\n    h1 { color: #3b82f6; }\n  </style>\n</head>\n<body>\n  <h1>Hello World</h1>\n  <p>CodeEdit Mobile</p>\n</body>\n</html>`;
     editor.value = localStorage.getItem('code_edit_final') || DEFAULT;
 
-    // Auto-Indent
+    // --- 2. PASTE FUNCTIONALITY (Robust) ---
+    async function pasteFromClipboard() {
+      // エディタにフォーカスを戻す
+      editor.focus();
+      try {
+        // 最近のブラウザ向け
+        const text = await navigator.clipboard.readText();
+        insert(text);
+      } catch (err) {
+        // 失敗した場合（権限なしなど）
+        // iOSでは、ユーザーが明示的に「ペースト」メニューを選ばないとダメな場合があるため
+        // execCommandを試す（非推奨だが一部で有効）
+        const success = document.execCommand('paste');
+        if (!success) {
+          alert("クリップボードからの読み取りがブロックされました。\nテキストエリアを長押しして手動でペーストしてください。");
+        }
+      }
+    }
+
+    // --- 3. EDITOR LOGIC ---
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const cursor = editor.selectionStart;
         const indent = (editor.value.substr(0, cursor).split('\n').pop().match(/^(\s*)/) || ['',''])[1];
         document.execCommand('insertText', false, '\n' + indent);
-        setTimeout(() => editor.scrollTop = editor.scrollHeight, 10);
+        // スマホキーボードで隠れないようにスクロール調整
+        setTimeout(() => {
+            editor.blur(); editor.focus(); // iOSのキャレット位置更新ハック
+        }, 10);
       }
     });
 
-    // --- 3. PREVIEW ---
-    const previewFrame = document.getElementById('previewFrame');
-    const previewHeader = document.getElementById('previewHeader');
-    const errorDisplay = document.getElementById('errorDisplay');
-    const toggleBtn = document.getElementById('toggleViewBtn');
+    function updateGutter() { 
+        const lineCount = editor.value.split('\n').length;
+        gutter.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('<br>'); 
+    }
+    
+    function onInput() {
+      localStorage.setItem('code_edit_final', editor.value); 
+      updateGutter();
+      if (previewPane.classList.contains('visible')) updatePreviewDebounced();
+    }
+    
+    editor.addEventListener('input', onInput);
+    editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
+    
+    // --- 4. PREVIEW LOGIC ---
     let debounceTimer;
+    function updatePreviewDebounced() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updatePreview, 600);
+    }
 
     function updatePreview() {
       const code = editor.value;
+      const previewFrame = document.getElementById('previewFrame');
       const errScript = `<script>window.onerror=function(m){window.parent.postMessage({type:'error',msg:m},'*');}<\/script>`;
-      previewHeader.classList.remove('error'); errorDisplay.textContent="";
+      document.getElementById('previewHeader').classList.remove('error'); 
+      document.getElementById('errorDisplay').textContent="";
+      
       let final = code.includes('<head>') ? code.replace('<head>', '<head>'+errScript) : errScript+code;
       if (!final.includes('<meta name="viewport"')) final = '<meta name="viewport" content="width=device-width,initial-scale=1">' + final;
       previewFrame.srcdoc = final;
     }
 
     window.addEventListener('message', (e) => {
-      if (e.data?.type === 'error') { previewHeader.classList.add('error'); errorDisplay.textContent = e.data.msg; }
+      if (e.data?.type === 'error') { 
+        document.getElementById('previewHeader').classList.add('error'); 
+        document.getElementById('errorDisplay').textContent = e.data.msg; 
+      }
     });
-
-    function onInput() {
-      localStorage.setItem('code_edit_final', editor.value); updateGutter();
-      if (previewPane.classList.contains('visible')) { clearTimeout(debounceTimer); debounceTimer = setTimeout(updatePreview, 600); }
-    }
-    editor.addEventListener('input', onInput);
-    editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
 
     function togglePreview() {
       const isVisible = previewPane.classList.toggle('visible');
-      toggleBtn.classList.toggle('active', isVisible);
-      // Toggle resizer visibility
-      resizer.style.display = isVisible ? 'flex' : 'none';
-      if (isVisible) updatePreview();
-    }
-
-    // --- 4. UTILS & ACTIONS ---
-    
-    // Paste Functionality
-    async function pasteFromClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        insert(text);
-      } catch (err) {
-        alert('貼り付けに失敗しました。ブラウザの権限設定を確認してください。\n' + err);
+      document.getElementById('toggleViewBtn').classList.toggle('active', isVisible);
+      
+      // プレビューON: ツールバーは画面中央（下部の余白ゼロ）
+      // プレビューOFF: ツールバーは画面最下部（セーフエリア余白あり）
+      if (isVisible) {
+          resizer.style.display = 'flex';
+          toolbar.style.paddingBottom = '8px'; // 戻す
+          updatePreview();
+      } else {
+          resizer.style.display = 'none';
+          // セーフエリア考慮を再適用（CSSで設定されているがJSで明示的にクラス切り替えも可）
+          toolbar.style.removeProperty('padding-bottom'); 
       }
     }
 
+    // --- 5. UTILS ---
+    function insert(t) { 
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        // document.execCommandは非推奨だが、Undo履歴を残すためにまだ有用
+        const success = document.execCommand('insertText', false, t);
+        if(!success) {
+            // フォールバック
+            editor.setRangeText(t, start, end, 'end');
+        }
+        onInput(); 
+        editor.focus();
+    }
+    function insertTab() { insert('  '); }
+    function move(s) { 
+        const p = editor.selectionStart + s; 
+        editor.setSelectionRange(p, p); 
+        editor.focus(); 
+        detectColor(); // 移動時に色チェック
+    }
+    
     function copyAll() {
       navigator.clipboard.writeText(editor.value).then(() => {
-        const btn=document.getElementById('copyBtn'), ic=document.getElementById('iconCopy'), ch=document.getElementById('iconCheck');
-        btn.classList.add('copied'); ic.style.display='none'; ch.style.display='block';
-        setTimeout(()=>{ btn.classList.remove('copied'); ic.style.display='block'; ch.style.display='none'; },2000);
+        const btn=document.getElementById('copyBtn');
+        btn.classList.add('copied');
+        setTimeout(()=> btn.classList.remove('copied'), 2000);
       });
     }
 
+    function clearAll() { if(confirm('全消去しますか？')) { editor.value=""; onInput(); } }
+    function launch() { const b=new Blob([editor.value],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
+
+    // Color Picker Logic
     const colorBtn = document.getElementById('colorBtn'), swatch = document.getElementById('swatch'), picker = document.getElementById('nativePicker');
     let colorRange = null;
 
-    editor.addEventListener('click', detectColor); editor.addEventListener('keyup', detectColor);
+    editor.addEventListener('click', detectColor); 
+    editor.addEventListener('keyup', detectColor);
+    
     function detectColor() {
       const pos = editor.selectionStart, text = editor.value;
       const regex = /#([0-9a-fA-F]{3,6})\b/g;
       let match, found = null;
+      // カーソル周辺を探査
       const startScan = Math.max(0, pos-20), slice = text.substring(startScan, Math.min(text.length, pos+20));
       while ((match = regex.exec(slice)) !== null) {
-        if (pos >= (startScan+match.index) && pos <= (startScan+match.index+match[0].length)) {
-          found = { hex: match[0], start: startScan+match.index, end: startScan+match.index+match[0].length }; break;
+        const absStart = startScan + match.index;
+        const absEnd = absStart + match[0].length;
+        if (pos >= absStart && pos <= absEnd) {
+          found = { hex: match[0], start: absStart, end: absEnd }; break;
         }
       }
-      if (found) { colorBtn.style.display='flex'; swatch.style.background=found.hex; colorRange=found; picker.value=found.hex.length===4?`#${found.hex[1].repeat(2)}${found.hex[2].repeat(2)}${found.hex[3].repeat(2)}`:found.hex; }
+      if (found) { 
+        colorBtn.style.display='flex'; swatch.style.background=found.hex; 
+        colorRange=found; 
+        // 6桁に正規化してpickerに渡す
+        let h = found.hex;
+        if(h.length===4) h = `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
+        picker.value=h; 
+      }
       else { colorBtn.style.display='none'; colorRange=null; }
     }
+    
     picker.addEventListener('input', (e)=>{
-      if(!colorRange)return; const n=e.target.value;
-      editor.value=editor.value.substring(0,colorRange.start)+n+editor.value.substring(colorRange.end);
-      const end=colorRange.start+n.length; editor.setSelectionRange(end,end);
-      colorRange={hex:n,start:colorRange.start,end:end}; swatch.style.background=n; onInput();
+      if(!colorRange) return; 
+      const n=e.target.value;
+      editor.setSelectionRange(colorRange.start, colorRange.end);
+      document.execCommand('insertText', false, n);
+      colorRange.hex = n; // 更新
+      colorRange.end = colorRange.start + n.length;
+      swatch.style.background=n;
     });
 
-    function updateGutter() { gutter.innerHTML = Array.from({length: editor.value.split('\n').length}, (_, i) => i + 1).join('<br>'); }
-    function insert(t) { document.execCommand('insertText', false, t); onInput(); }
-    function insertTab() { insert('  '); }
-    function move(s) { const p = editor.selectionStart + s; editor.setSelectionRange(p, p); editor.focus(); detectColor(); }
-    function clearAll() { if(confirm('Reset?')) { editor.value=""; onInput(); colorBtn.style.display='none'; editor.focus(); } }
-    function launch() { const b=new Blob([editor.value],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
+    // Resize Logic
+    let isResizing=false;
+    resizer.addEventListener('touchstart', (e)=>{ isResizing=true; e.preventDefault(); }, {passive:false});
+    document.addEventListener('touchmove', (e)=>{ 
+      if(isResizing) {
+        const rect = document.getElementById('app').getBoundingClientRect();
+        const h = rect.bottom - e.touches[0].clientY;
+        if(h > 50 && h < rect.height * 0.8) previewPane.style.height = h + 'px';
+      }
+    }, {passive:false});
+    document.addEventListener('touchend', ()=>{ isResizing=false; });
 
+    // Init
     updateGutter();
   </script>
 </body>
