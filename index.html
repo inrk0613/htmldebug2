@@ -2,332 +2,229 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Aura Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>Aura Studio Pro</title>
   <style>
-    /* --- DESIGN TOKENS --- */
     :root {
-      --bg-root: #050505;
-      --bg-surface: #0f1115;
-      --bg-panel: #161b22;
-      --glass: rgba(22, 27, 34, 0.75);
-      --border: rgba(255, 255, 255, 0.08);
-      --primary: #3b82f6;
-      --primary-glow: rgba(59, 130, 246, 0.3);
-      --text-main: #e2e8f0;
-      --text-muted: #64748b;
-      --font-code: "SF Mono", "Menlo", "Consolas", monospace;
-      --safe-top: env(safe-area-inset-top);
-      --safe-bottom: env(safe-area-inset-bottom);
+      --bg: #050505;
+      --panel: #111;
+      --border: #222;
+      --accent: #3b82f6;
+      --text: #e2e8f0;
+      --font-ui: -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: "SF Mono", "Menlo", monospace;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     
     body {
-      margin: 0; background-color: var(--bg-root); color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: var(--font-ui); height: 100dvh;
+      display: flex; flex-direction: column; overflow: hidden;
     }
 
-    /* --- LAYOUT --- */
-    .app-header {
-      padding: calc(var(--safe-top) + 12px) 16px 12px;
-      background: var(--glass); backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
+    /* Header */
+    header {
+      height: 50px; padding: 0 16px;
       display: flex; justify-content: space-between; align-items: center;
-      z-index: 50;
+      border-bottom: 1px solid var(--border); background: rgba(5,5,5,0.9);
+      backdrop-filter: blur(10px);
     }
+    
+    .logo { font-weight: 700; font-size: 14px; letter-spacing: -0.5px; color: #fff; }
+    
+    .actions { display: flex; gap: 8px; }
 
-    .logo {
-      font-size: 15px; font-weight: 700; letter-spacing: -0.5px;
-      display: flex; align-items: center; gap: 8px;
+    .btn {
+      background: #222; border: 1px solid var(--border); color: #ccc;
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: 0.2s;
     }
-    .logo-icon {
-      width: 18px; height: 18px; background: var(--primary);
-      border-radius: 6px; box-shadow: 0 0 12px var(--primary-glow);
-    }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn:active { transform: scale(0.96); opacity: 0.8; }
 
-    .run-btn {
-      background: var(--primary); color: white; border: none;
-      padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-      transition: transform 0.1s;
-    }
-    .run-btn:active { transform: scale(0.96); }
-
-    /* --- TABS --- */
-    .file-tabs {
-      display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto;
-      background: var(--bg-root); border-bottom: 1px solid var(--border);
+    /* Tabs */
+    .tabs {
+      display: flex; background: #000; overflow-x: auto;
+      border-bottom: 1px solid var(--border);
     }
     .tab {
-      padding: 6px 12px; font-size: 12px; border-radius: 8px;
-      color: var(--text-muted); background: transparent;
-      border: 1px solid transparent; transition: all 0.2s;
+      padding: 10px 20px; font-size: 12px; color: #666;
+      border-right: 1px solid #111; cursor: pointer; white-space: nowrap;
       font-family: var(--font-code);
     }
-    .tab.active {
-      background: var(--bg-panel); color: var(--text-main);
-      border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
+    .tab.active { color: #fff; background: var(--panel); border-bottom: 2px solid var(--accent); }
 
-    /* --- EDITOR --- */
-    .editor-container {
-      flex: 1; position: relative; overflow: hidden; background: var(--bg-surface);
-    }
+    /* Editor */
+    .editor-wrapper { flex: 1; position: relative; background: var(--panel); }
+    
     textarea {
-      width: 100%; height: 100%; border: none; resize: none;
-      background: transparent; color: #a5b3ce;
-      padding: 16px 16px 80px; /* Bottom padding for keyboard accessory */
-      font-family: var(--font-code); font-size: 14px; line-height: 1.6;
-      white-space: pre; word-wrap: normal; overflow-x: auto;
+      width: 100%; height: 100%; background: transparent; border: none;
+      color: #ccc; padding: 15px; font-family: var(--font-code); font-size: 13px;
+      line-height: 1.5; resize: none; white-space: pre;
     }
-    textarea::placeholder { color: #334155; }
 
-    /* --- KEYBOARD ACCESSORY --- */
-    .accessory-bar {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: var(--glass); backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      padding: 8px; display: flex; gap: 6px; overflow-x: auto;
-      z-index: 20; padding-bottom: max(8px, var(--safe-bottom));
+    /* Keyboard Toolbar */
+    .toolbar {
+      padding: 8px; background: #1a1a1a; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; overflow-x: auto;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
     }
     .key {
-      flex: 0 0 auto; min-width: 32px; height: 32px;
-      background: rgba(255,255,255,0.06); border-radius: 6px;
+      min-width: 36px; height: 36px; background: #333; border-radius: 4px;
       display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-code); font-size: 14px; color: var(--text-main);
-      border: 1px solid rgba(255,255,255,0.05);
+      color: #fff; font-family: var(--font-code); font-size: 14px;
+      box-shadow: 0 2px 0 #000;
     }
-    .key:active { background: rgba(255,255,255,0.15); }
+    .key:active { transform: translateY(2px); box-shadow: none; }
 
-    /* --- PREVIEW MODAL --- */
-    .preview-modal {
-      position: fixed; inset: 0; background: #fff; z-index: 100;
-      transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-      display: flex; flex-direction: column;
-    }
-    .preview-modal.visible { transform: translateY(0); }
-    
-    .preview-header {
-      padding: calc(var(--safe-top) + 10px) 16px 10px;
-      background: #f8f9fa; border-bottom: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between; align-items: center; color: #000;
-    }
-    .close-btn {
-      background: #e2e8f0; border: none; width: 30px; height: 30px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      color: #475569; font-weight: bold;
-    }
-    
-    iframe { flex: 1; border: none; width: 100%; background: #fff; }
-
-    /* --- TOAST --- */
-    #toast {
-      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-      background: #10b981; color: white; padding: 10px 20px;
-      border-radius: 30px; font-size: 13px; font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    #toast.show { transform: translateX(-50%) translateY(var(--safe-top)); }
   </style>
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="logo">
-      <div class="logo-icon"></div>
-      Aura Studio
+  <header>
+    <div class="logo">Aura Studio</div>
+    <div class="actions">
+      <button class="btn" onclick="resetCode()">Reset</button>
+      <button class="btn btn-primary" onclick="launchProduction()">🚀 Launch</button>
     </div>
-    <button class="run-btn" onclick="runApp()">Play</button>
   </header>
 
-  <div class="file-tabs" id="tabContainer">
-    </div>
-
-  <div class="editor-container">
-    <textarea id="codeEditor" spellcheck="false" autocapitalize="none" autocomplete="off"></textarea>
-    
-    <div class="accessory-bar" id="accessoryBar">
-      </div>
+  <div class="tabs" id="tabContainer"></div>
+  
+  <div class="editor-wrapper">
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none"></textarea>
   </div>
 
-  <div class="preview-modal" id="previewModal">
-    <div class="preview-header">
-      <span style="font-weight:600; font-size:14px;">Running Application</span>
-      <button class="close-btn" onclick="closePreview()">✕</button>
-    </div>
-    <iframe id="previewFrame"></iframe>
-  </div>
-
-  <div id="toast">Saved Successfully</div>
+  <div class="toolbar" id="toolbar"></div>
 
   <script>
-    // --- STATE MANAGEMENT ---
-    const appState = {
-      activeFile: 'index.html',
-      files: {
-        'index.html': 
-`<div class="card">
-  <h1>Hello World</h1>
-  <p>Edit styles and logic in the tabs above.</p>
-  <button id="btn">Click Me</button>
+    // --- Data Store ---
+    const defaultFiles = {
+      'index.html': `<div class="hero">
+  <h1>Launch Day</h1>
+  <p>This page is running in a clean environment.</p>
+  <button onclick="alert('Hello!')">Test Interaction</button>
 </div>`,
-        'style.css': 
-`body {
-  font-family: -apple-system, sans-serif;
-  display: flex; justify-content: center; 
-  align-items: center; height: 100vh;
-  background: #f1f5f9; margin: 0;
+      'style.css': `body {
+  margin: 0; font-family: -apple-system, sans-serif;
+  background: #000; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh;
 }
-.card {
-  background: white; padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-  text-align: center; width: 80%;
-}
-h1 { color: #0f172a; margin-top: 0; }
-button {
-  background: #3b82f6; color: white;
-  border: none; padding: 12px 24px;
-  border-radius: 12px; font-size: 16px;
-  margin-top: 1rem;
-}`,
-        'script.js': 
-`const btn = document.getElementById('btn');
-btn.addEventListener('click', () => {
-  btn.textContent = 'Awesome! ✨';
-  btn.style.background = '#10b981';
-  alert('Interaction works perfectly!');
-});`
-      }
+.hero { text-align: center; }
+h1 { font-size: 3rem; margin: 0 0 1rem; background: linear-gradient(to right, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+button { padding: 12px 24px; border-radius: 30px; border: none; background: #fff; color: #000; font-weight: bold; font-size: 1rem; cursor: pointer; }`,
+      'script.js': `console.log('Production Environment Loaded');`
     };
 
-    // --- DOM ELEMENTS ---
-    const editor = document.getElementById('codeEditor');
+    let files = JSON.parse(localStorage.getItem('aura_files')) || defaultFiles;
+    let currentTab = 'index.html';
+
+    // --- Core UI Logic ---
+    const editor = document.getElementById('editor');
     const tabContainer = document.getElementById('tabContainer');
-    const accessoryBar = document.getElementById('accessoryBar');
-    const previewModal = document.getElementById('previewModal');
-    const previewFrame = document.getElementById('previewFrame');
+    const toolbar = document.getElementById('toolbar');
 
-    // --- INITIALIZATION ---
     function init() {
-      // Load from LocalStorage if available
-      const saved = localStorage.getItem('aura_project');
-      if (saved) {
-        try {
-          appState.files = JSON.parse(saved);
-        } catch(e) { console.error('Save corrupted'); }
-      }
-
       renderTabs();
-      renderKeys();
-      loadFile(appState.activeFile);
+      renderToolbar();
+      loadFile(currentTab);
+      
+      editor.addEventListener('input', () => {
+        files[currentTab] = editor.value;
+        localStorage.setItem('aura_files', JSON.stringify(files));
+      });
     }
 
-    // --- CORE LOGIC ---
-    function loadFile(fileName) {
-      // Save current content to memory before switching
-      appState.files[appState.activeFile] = editor.value;
-      
-      appState.activeFile = fileName;
-      editor.value = appState.files[fileName];
-      
-      // Update Tab UI
-      document.querySelectorAll('.tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.file === fileName);
-      });
+    function loadFile(filename) {
+      files[currentTab] = editor.value; // Save current
+      currentTab = filename;
+      editor.value = files[filename];
+      renderTabs();
     }
 
     function renderTabs() {
       tabContainer.innerHTML = '';
-      Object.keys(appState.files).forEach(file => {
-        const btn = document.createElement('button');
-        btn.className = `tab ${file === appState.activeFile ? 'active' : ''}`;
-        btn.textContent = file;
-        btn.dataset.file = file;
-        btn.onclick = () => loadFile(file);
-        tabContainer.appendChild(btn);
+      Object.keys(files).forEach(name => {
+        const div = document.createElement('div');
+        div.className = `tab ${name === currentTab ? 'active' : ''}`;
+        div.textContent = name;
+        div.onclick = () => loadFile(name);
+        tabContainer.appendChild(div);
       });
     }
 
-    function renderKeys() {
-      const keys = ['<', '>', '/', '{', '}', '(', ')', ';', '=', '"', "'", '!', '$', '`'];
+    function renderToolbar() {
+      const keys = ['<','>','/','=','"',"'",'{','}','(',')',';','!','class','id'];
       keys.forEach(k => {
-        const el = document.createElement('div');
-        el.className = 'key';
-        el.textContent = k;
-        el.onclick = (e) => {
-          e.preventDefault();
-          insertText(k);
-        };
-        accessoryBar.appendChild(el);
+        const btn = document.createElement('div');
+        btn.className = 'key';
+        btn.textContent = k;
+        btn.onclick = () => insert(k);
+        toolbar.appendChild(btn);
       });
     }
 
-    function insertText(text) {
+    function insert(txt) {
       const start = editor.selectionStart;
       const end = editor.selectionEnd;
-      editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
-      editor.selectionStart = editor.selectionEnd = start + text.length;
+      editor.value = editor.value.substring(0, start) + txt + editor.value.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + txt.length;
       editor.focus();
-      triggerSave();
+      files[currentTab] = editor.value; // Trigger save
     }
 
-    // --- AUTO SAVE ---
-    editor.addEventListener('input', () => {
-      appState.files[appState.activeFile] = editor.value;
-      triggerSave();
-    });
+    // --- 🚀 Production Launch Logic ---
+    function launchProduction() {
+      // 1. 最新の状態を保存
+      files[currentTab] = editor.value;
 
-    let saveTimeout;
-    function triggerSave() {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        localStorage.setItem('aura_project', JSON.stringify(appState.files));
-      }, 500);
-    }
+      // 2. HTMLの構築 (純粋な結合)
+      const htmlContent = files['index.html'];
+      const cssContent = files['style.css'];
+      const jsContent = files['script.js'];
 
-    // --- RUN / PREVIEW ---
-    function runApp() {
-      // Ensure current buffer is saved to state
-      appState.files[appState.activeFile] = editor.value;
+      // 3. Viewportチェック (なければ足す)
+      let finalHtml = htmlContent;
+      if (!finalHtml.includes('<meta name="viewport"')) {
+        const viewportTag = '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+        if (finalHtml.includes('<head>')) {
+          finalHtml = finalHtml.replace('<head>', `<head>${viewportTag}`);
+        } else {
+          finalHtml = `${viewportTag}${finalHtml}`;
+        }
+      }
 
-      const html = appState.files['index.html'];
-      const css = appState.files['style.css'];
-      const js = appState.files['script.js'];
-
-      const combinedSource = `
+      // 4. CSS/JSの注入
+      const blobContent = `
         <!DOCTYPE html>
         <html>
         <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>${css}</style>
+          <style>${cssContent}</style>
         </head>
         <body>
-          ${html}
-          <script>
-            try {
-              ${js}
-            } catch(e) {
-              document.body.innerHTML += '<div style="color:red; background:#fee; padding:10px; border:1px solid red; margin-top:20px;">' + e + '</div>';
-            }
-          <\/script>
+          ${finalHtml}
+          <script>${jsContent}<\/script>
         </body>
         </html>
       `;
 
-      previewFrame.srcdoc = combinedSource;
-      previewModal.classList.add('visible');
+      // 5. Blob URLの生成とオープン
+      const blob = new Blob([blobContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      // 新規タブで開く (iOS Safari対応のため、ユーザーアクション直下で実行)
+      window.open(url, '_blank');
     }
 
-    function closePreview() {
-      previewModal.classList.remove('visible');
+    function resetCode() {
+      if(confirm('Reset all code?')) {
+        files = JSON.parse(JSON.stringify(defaultFiles));
+        localStorage.removeItem('aura_files');
+        loadFile('index.html');
+      }
     }
 
     init();
