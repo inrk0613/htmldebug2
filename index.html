@@ -5,174 +5,158 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0d1117" />
-  <title>DevConsole Liquid</title>
+  <title>Liquid IDE Mobile</title>
   <style>
     :root {
-      --glass: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --accent: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-      --bg-dark: #0d1117;
+      --accent: #3b82f6;
+      --glass: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.1);
     }
 
     body {
-      margin: 0; font-family: -apple-system, sans-serif;
-      background: var(--bg-dark); color: #fff;
-      overflow: hidden; height: 100vh;
+      margin: 0; background: #0b0e14; color: #fff;
+      font-family: -apple-system, sans-serif;
+      height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
     }
 
-    /* Background Animation */
-    .bg-blobs {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-      background: radial-gradient(circle at 10% 20%, #1a2a6c, #b21f1f 50%, #fdbb2d);
-      opacity: 0.3; filter: blur(80px);
+    /* 背景の環境光エフェクト */
+    .glow {
+      position: fixed; width: 300px; height: 300px;
+      background: var(--accent); filter: blur(120px);
+      opacity: 0.15; z-index: -1; top: -50px; right: -50px;
     }
 
+    /* 1. フレキシブル・レイアウト */
     header {
-      padding: calc(env(safe-area-inset-top) + 12px) 20px 12px;
-      backdrop-filter: blur(20px); background: var(--glass);
-      border-bottom: 1px solid var(--glass-border);
+      padding: calc(env(safe-area-inset-top) + 10px) 15px 10px;
+      background: var(--glass); backdrop-filter: blur(20px);
       display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
     }
 
-    h1 { font-size: 18px; margin: 0; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .main-container {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; /* スクロールを内側に閉じ込める */
+    }
 
-    .main-layout { display: flex; flex-direction: column; height: calc(100vh - 100px); }
-
-    /* Editor */
+    /* エディタ：画面の高さに応じて伸縮 */
     #editor {
-      flex: 1; width: 100%; background: transparent; border: none;
-      color: #9cdcfe; font-family: "SF Mono", monospace; font-size: 14px;
-      padding: 20px; outline: none; resize: none;
+      flex: 3; /* プレビューより広めに確保 */
+      width: 100%; background: transparent; border: none;
+      color: #79c0ff; font-family: "Menlo", "Cascadia Code", monospace;
+      font-size: 14px; padding: 15px; outline: none; resize: none;
     }
 
-    /* Quick Toolbar */
+    /* リアルタイムプレビューの小窓 (Flexible Resize) */
+    .preview-pane {
+      flex: 2; border-top: 1px solid var(--border);
+      background: #fff; position: relative;
+    }
+
+    #previewFrame { width: 100%; height: 100%; border: none; }
+
+    /* クイックツールバー：横スクロール対応 */
     .toolbar {
-      display: flex; overflow-x: auto; padding: 10px; gap: 8px;
-      background: var(--glass); backdrop-filter: blur(10px);
-      border-top: 1px solid var(--glass-border);
+      padding: 8px; display: flex; gap: 6px; overflow-x: auto;
+      background: #161b22; border-top: 1px solid var(--border);
+      -webkit-overflow-scrolling: touch;
     }
 
     .tool-btn {
-      padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 8px;
-      border: 1px solid var(--glass-border); color: white; font-size: 12px;
+      flex-shrink: 0; padding: 6px 12px; background: #21262d;
+      border: 1px solid var(--border); border-radius: 6px; color: #c9d1d9; font-size: 13px;
     }
 
-    /* Actions Bar */
-    .actions {
-      padding: 16px; display: flex; gap: 10px;
-      background: rgba(0,0,0,0.5);
-    }
-
-    .btn {
-      flex: 1; padding: 12px; border-radius: 12px; border: none;
-      font-weight: bold; color: white; cursor: pointer; transition: 0.2s;
-    }
-
-    .btn-run { background: var(--accent); }
-    .btn-clear { background: rgba(255,255,255,0.1); }
-
-    /* Fullscreen Preview Overlay */
-    #previewOverlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: white; z-index: 1000; transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #previewOverlay.show { transform: translateY(0); }
-
-    .close-preview {
-      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.8); color: white; padding: 12px 24px;
-      border-radius: 30px; z-index: 1001; border: 1px solid rgba(255,255,255,0.2);
+    .status { font-size: 11px; color: #8b949e; }
+    
+    /* フル画面ボタン */
+    .expand-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(0,0,0,0.5); border: none; color: #fff;
+      padding: 5px 10px; border-radius: 5px; font-size: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="bg-blobs"></div>
+  <div class="glow"></div>
+  
   <header>
-    <h1>LiquidConsole</h1>
-    <div id="saveStatus" style="font-size: 10px; opacity: 0.5;">Saved</div>
+    <div style="font-weight: bold; font-size: 14px;">LiquidConsole <span class="status" id="saveMsg">Live</span></div>
+    <button onclick="toggleViewMode()" style="background:none; border:none; color:var(--accent); font-size:12px;">Toggle Layout</button>
   </header>
 
-  <div class="main-layout">
-    <textarea id="editor" spellcheck="false" placeholder="Write HTML/JS here..."></textarea>
+  <div class="main-container">
+    <textarea id="editor" spellcheck="false" placeholder="Type HTML..."></textarea>
     
-    <div class="toolbar" id="quickInput">
-      </div>
+    <div class="toolbar" id="quickBar"></div>
 
-    <div class="actions">
-      <button class="btn btn-clear" onclick="clearEditor()">Clear</button>
-      <button class="btn btn-run" onclick="openPreview()">Run Preview</button>
+    <div class="preview-pane" id="previewPane">
+      <button class="expand-btn" onclick="fullPreview()">Full Screen</button>
+      <iframe id="previewFrame"></iframe>
     </div>
-  </div>
-
-  <div id="previewOverlay">
-    <iframe id="previewFrame" style="width:100%; height:100%; border:none;"></iframe>
-    <button class="close-preview" onclick="closePreview()">Close Preview</button>
   </div>
 
   <script>
     const editor = document.getElementById('editor');
-    const STORAGE_KEY = 'dev_console_code';
+    const preview = document.getElementById('previewFrame');
+    const saveMsg = document.getElementById('saveMsg');
+    let timer;
 
-    // LocalStorage: Load
-    window.onload = () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) editor.value = saved;
-      renderQuickTools();
-    };
-
-    // LocalStorage: Auto-Save
+    // 1. リアルタイム・プレビュー（デバウンス処理）
     editor.addEventListener('input', () => {
-      localStorage.setItem(STORAGE_KEY, editor.value);
-      showStatus();
+      saveMsg.textContent = 'Typing...';
+      clearTimeout(timer);
+      
+      // 300ms間入力が止まったら反映（負荷軽減）
+      timer = setTimeout(() => {
+        const code = editor.value;
+        preview.srcdoc = code;
+        localStorage.setItem('liquid_save', code);
+        saveMsg.textContent = 'Live Sync';
+      }, 300);
     });
 
-    function showStatus() {
-      const st = document.getElementById('saveStatus');
-      st.textContent = 'Saving...';
-      setTimeout(() => st.textContent = 'Saved', 800);
-    }
-
-    function clearEditor() {
-      if(confirm('Clear all code?')) {
-        editor.value = '';
-        localStorage.removeItem(STORAGE_KEY);
+    // 2. ローカルストレージからの復元
+    window.onload = () => {
+      const saved = localStorage.getItem('liquid_save');
+      if (saved) {
+        editor.value = saved;
+        preview.srcdoc = saved;
       }
+      renderTools();
+    };
+
+    // 3. UIフレキシブル調整（レイアウト切り替え）
+    let isVertical = true;
+    function toggleViewMode() {
+      const container = document.querySelector('.main-container');
+      isVertical = !isVertical;
+      container.style.flexDirection = isVertical ? 'column' : 'row';
+      editor.style.flex = '1';
+      document.getElementById('previewPane').style.flex = '1';
     }
 
-    // Quick Input Tools
-    const tools = ['<', '>', '/', '{', '}', '(', ')', '"', "'", ';', '=', '!'];
-    function renderQuickTools() {
-      const container = document.getElementById('quickInput');
-      tools.forEach(char => {
-        const btn = document.createElement('button');
-        btn.className = 'tool-btn';
-        btn.textContent = char;
-        btn.onclick = () => insertAtCursor(char);
-        container.appendChild(btn);
+    // クイック入力（スマホ最適化）
+    function renderTools() {
+      const keys = ['<', '>', '/', '"', '=', '{', '}', '(', ')', ';', '.', '!', '?', '+'];
+      const bar = document.getElementById('quickBar');
+      keys.forEach(k => {
+        const b = document.createElement('button');
+        b.className = 'tool-btn';
+        b.textContent = k;
+        b.onclick = () => {
+          const s = editor.selectionStart;
+          editor.value = editor.value.substring(0, s) + k + editor.value.substring(editor.selectionEnd);
+          editor.selectionStart = editor.selectionEnd = s + 1;
+          editor.dispatchEvent(new Event('input')); // 反映をトリガー
+          editor.focus();
+        };
+        bar.appendChild(b);
       });
     }
 
-    function insertAtCursor(text) {
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
-      editor.selectionStart = editor.selectionEnd = start + text.length;
-      editor.focus();
-    }
-
-    // Preview Logic
-    function openPreview() {
-      const frame = document.getElementById('previewFrame');
-      const overlay = document.getElementById('previewOverlay');
-      frame.srcdoc = editor.value;
-      overlay.classList.add('show');
-    }
-
-    function closePreview() {
-      document.getElementById('previewOverlay').classList.remove('show');
+    function fullPreview() {
+      preview.requestFullscreen ? preview.requestFullscreen() : preview.webkitRequestFullscreen();
     }
   </script>
 </body>
