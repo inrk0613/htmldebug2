@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Aether Studio</title>
 
-  <!-- iOS PWA Native Configuration -->
+  <!-- iOS Standalone Web App Meta Directives -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Aether">
@@ -24,32 +24,18 @@
             brand: {
               black: '#000000',
               canvas: '#060608',
-              surface: '#101014',
-              elevated: '#17171C',
+              surface: '#111116',
+              elevated: '#181820',
               border: 'rgba(255, 255, 255, 0.08)',
-              borderFocus: 'rgba(255, 255, 255, 0.22)',
-              primary: '#F2F2F4',
+              borderStrong: 'rgba(255, 255, 255, 0.20)',
+              primary: '#F3F3F6',
               secondary: '#8E8E93',
-              tertiary: '#52525A',
-              accent: '#FFFFFF'
+              tertiary: '#48484A'
             }
           },
           fontFamily: {
-            sans: [
-              '-apple-system',
-              'BlinkMacSystemFont',
-              '"SF Pro Display"',
-              '"SF Pro Text"',
-              'system-ui',
-              'sans-serif'
-            ],
-            mono: [
-              '"SF Mono"',
-              'ui-monospace',
-              'Menlo',
-              'Consolas',
-              'monospace'
-            ]
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'system-ui', 'sans-serif'],
+            mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'Consolas', 'monospace']
           }
         }
       }
@@ -62,8 +48,7 @@
       --sab: env(safe-area-inset-bottom, 24px);
       --sal: env(safe-area-inset-left, 0px);
       --sar: env(safe-area-inset-right, 0px);
-      --spring-snap: cubic-bezier(0.16, 1, 0.3, 1);
-      --smooth-blur: blur(40px) saturate(190%);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -74,48 +59,39 @@
 
     body {
       background-color: #000000;
-      color: #F2F2F4;
+      color: #F3F3F6;
       font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "tnum";
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       touch-action: pan-y;
     }
 
-    /* Precision Specular Borders (0.5px hairline on Retina displays) */
-    .hairline-border {
-      border: 0.5px solid rgba(255, 255, 255, 0.09);
-    }
-    .hairline-b {
-      border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
-    }
-    .hairline-t {
-      border-top: 0.5px solid rgba(255, 255, 255, 0.08);
-    }
+    /* Retina 0.5px Specular Micro Hairlines */
+    .hairline-border { border: 0.5px solid rgba(255, 255, 255, 0.09); }
+    .hairline-b { border-bottom: 0.5px solid rgba(255, 255, 255, 0.08); }
+    .hairline-t { border-top: 0.5px solid rgba(255, 255, 255, 0.08); }
 
-    /* Precision Micro Specular Glare */
-    .titanium-panel {
-      background: linear-gradient(180deg, rgba(28, 28, 34, 0.7) 0%, rgba(14, 14, 18, 0.85) 100%);
-      backdrop-filter: var(--smooth-blur);
-      -webkit-backdrop-filter: var(--smooth-blur);
-      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.14), 0 20px 40px -15px rgba(0, 0, 0, 0.9);
+    .titanium-glass {
+      background: rgba(18, 18, 24, 0.72);
+      backdrop-filter: blur(35px) saturate(180%);
+      -webkit-backdrop-filter: blur(35px) saturate(180%);
+      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.14), 0 20px 40px -15px rgba(0, 0, 0, 0.95);
     }
 
     .monolith-plate {
-      background: rgba(18, 18, 22, 0.6);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
+      background: rgba(14, 14, 18, 0.65);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.1);
     }
 
-    /* Apple Squircle Geometry (22.5% Curvature Ratio) */
     .squircle {
       border-radius: 22.5%;
-      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.22), 0 4px 16px -4px rgba(0, 0, 0, 0.6);
+      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.7);
     }
 
-    /* Tactile Press Kinematics */
     .press-responsive {
-      transition: transform 0.16s var(--spring-snap), opacity 0.16s ease;
+      transition: transform 0.15s var(--spring), opacity 0.15s ease;
       will-change: transform, opacity;
     }
     .press-responsive:active {
@@ -126,30 +102,14 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Island Animation Engine */
-    #islandCapsule {
-      transition: width 0.42s var(--spring-snap), height 0.42s var(--spring-snap), border-radius 0.35s ease, background-color 0.3s ease;
-      will-change: width, height;
-    }
-
-    #sandboxViewport {
-      transition: transform 0.38s var(--spring-snap), opacity 0.3s ease, border-radius 0.38s ease;
-      will-change: transform, opacity;
-    }
-
-    /* Code Editor Specific Tweaks */
-    #formCode {
-      tab-size: 2;
-      -moz-tab-size: 2;
-    }
     .editor-fullscreen {
       position: fixed !important;
       inset: 0 !important;
       z-index: 60 !important;
-      padding: calc(env(safe-area-inset-top, 20px) + 12px) 16px calc(env(safe-area-inset-bottom, 20px) + 12px) 16px !important;
+      padding: calc(var(--sat) + 10px) 16px calc(var(--sab) + 12px) 16px !important;
       background: #000000 !important;
-      max-width: 100% !important;
       height: 100% !important;
+      max-width: 100% !important;
       border-radius: 0 !important;
       display: flex !important;
       flex-direction: column !important;
@@ -159,496 +119,373 @@
       height: 100% !important;
       min-height: 0 !important;
     }
-
-    /* iOS 18 3D Multitask App Switcher */
-    .switcher-perspective {
-      perspective: 1200px;
-      perspective-origin: 50% 40%;
-    }
-    .switcher-card {
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, filter 0.25s ease;
-      will-change: transform, opacity;
-      touch-action: pan-x;
-    }
-    .switcher-card.swiping-up {
-      transition: none !important;
-    }
-    .switcher-card.killed {
-      transform: translateY(-120vh) scale(0.7) !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
   </style>
 </head>
 
 <body class="h-full w-full flex flex-col font-sans overflow-hidden select-none bg-black text-white relative">
 
   <!-- ================================================================= -->
-  <!-- 1. DYNAMIC ISLAND (Precision Hardware Controller)                  -->
+  <!-- STANDALONE RUNNER CONTAINER (Activated only when ?run=ID is set)    -->
   <!-- ================================================================= -->
-  <div class="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none pt-[calc(env(safe-area-inset-top,14px)+4px)] px-4">
-    <div id="islandCapsule"
-         class="pointer-events-auto bg-[#0a0a0d]/95 border border-white/[0.12] rounded-full overflow-hidden flex flex-col items-center justify-center cursor-pointer select-none backdrop-blur-2xl shadow-[0_12px_32px_rgba(0,0,0,0.85)]"
-         style="width: 156px; height: 34px;">
-      
-      <!-- Collapsed State -->
-      <div id="islandCollapsed" class="w-full h-full px-3 flex items-center justify-between transition-opacity duration-200">
-        <div class="flex items-center space-x-2 min-w-0">
-          <span id="islandIndicator" class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-          <span id="islandTitle" class="text-[11px] font-medium tracking-tight text-white/90 truncate max-w-[80px]">Aether</span>
-        </div>
-        <span id="islandStateBadge" class="text-[9px] font-mono uppercase tracking-wider text-brand-secondary">Idle</span>
-      </div>
-
-      <!-- Expanded State (Appears during PWA running or tap) -->
-      <div id="islandExpanded" class="hidden w-full h-full p-3.5 flex-col justify-between opacity-0 transition-opacity duration-200">
-        <div class="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
-          <div class="flex items-center space-x-2.5 min-w-0">
-            <div id="islandAppIcon" class="w-7 h-7 squircle bg-brand-surface border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white">
-              P
-            </div>
-            <div class="min-w-0">
-              <h4 id="islandExpandedTitle" class="text-xs font-semibold text-white tracking-tight truncate">Sandbox App</h4>
-              <p id="islandExpandedMeta" class="text-[9px] text-brand-secondary font-mono truncate">100% Native Container</p>
-            </div>
-          </div>
-          <button id="btnIslandDismiss" class="press-responsive w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:text-white">
-            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-4 gap-1.5 pt-2 text-center text-[10px]">
-          <button id="btnIslandReload" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span>再読込</span>
-          </button>
-          <button id="btnIslandSwitcher" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="4" width="6" height="16" rx="1.5"/></svg>
-            <span>タスク一覧</span>
-          </button>
-          <button id="btnIslandInspect" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-            <span>コード</span>
-          </button>
-          <button id="btnIslandExit" class="press-responsive py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/25 hover:bg-rose-500/25 flex flex-col items-center justify-center gap-1 text-rose-300 font-medium">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            <span>キル</span>
-          </button>
-        </div>
-      </div>
+  <div id="standaloneRunnerRoot" class="fixed inset-0 bg-black z-[999] hidden flex-col w-full h-full overflow-hidden select-auto">
+    <!-- Standalone Floating Top Pill (Subtle Return Action) -->
+    <div id="runnerPill" class="absolute top-[calc(env(safe-area-inset-top,16px)+8px)] right-4 z-50 transition-opacity duration-300 opacity-30 hover:opacity-100 flex items-center gap-1.5">
+      <button id="btnRunnerReload" class="press-responsive w-7 h-7 rounded-full monolith-plate hairline-border flex items-center justify-center text-white/80 shadow-lg">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+      <button id="btnRunnerBackStudio" class="press-responsive h-7 px-2.5 rounded-full monolith-plate hairline-border flex items-center gap-1 text-[11px] font-mono text-white/80 shadow-lg">
+        <span>Studio</span>
+      </button>
     </div>
+
+    <!-- 100% Pure Sandboxed Screen -->
+    <iframe id="standaloneIframe"
+            class="w-full h-full border-none bg-black select-auto flex-1"
+            sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-downloads allow-popups"
+            allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; vr; web-share">
+    </iframe>
   </div>
 
-  <header id="appHeader" class="relative z-20 pt-[calc(env(safe-area-inset-top,44px)+18px)] px-6 pb-3 flex flex-col gap-3 transition-opacity duration-300">
-    <div class="flex items-center justify-between">
-      <div class="space-y-0.5">
-        <span class="text-[10px] font-mono font-medium tracking-wider text-brand-secondary uppercase">
-          Autonomous PWA Orchestrator
-        </span>
-        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-          Aether
-          <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] text-brand-secondary">
-            v6.0 Minimal
+  <!-- ================================================================= -->
+  <!-- MAIN AETHER STUDIO UI                                             -->
+  <!-- ================================================================= -->
+  <div id="studioRoot" class="h-full w-full flex flex-col overflow-hidden relative">
+
+    <header class="relative z-20 pt-[calc(env(safe-area-inset-top,44px)+16px)] px-5 pb-3 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-[9px] font-mono tracking-widest text-brand-secondary uppercase">
+            Standalone Multi-Window Engine
           </span>
-        </h1>
-      </div>
-
-      <div class="flex items-center space-x-2">
-        <!-- View Toggle (Grid vs Clean List) -->
-        <button id="btnLayoutToggle" title="表示切替" class="press-responsive w-8 h-8 rounded-full monolith-plate hairline-border flex items-center justify-center text-brand-secondary hover:text-white">
-          <svg id="iconLayoutGrid" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-          <svg id="iconLayoutList" class="w-3.5 h-3.5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-        <!-- New Project Button -->
-        <button id="btnOpenStudio" class="press-responsive h-8 px-3 rounded-full bg-white text-black font-semibold text-[11px] flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m-8-8h16"/></svg>
-          <span>新規PWA</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Minimal Spotlight Search -->
-    <div class="relative mt-1">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-secondary">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-      </div>
-      <input id="searchInput" type="text" placeholder="プロジェクト名、コード、用途を検索..."
-             class="w-full h-8 pl-8 pr-8 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-brand-tertiary focus:border-white/30 focus:bg-white/[0.07] transition-all font-sans">
-      <button id="btnSearchClear" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-brand-secondary hover:text-white">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <!-- Discrete Segmented Segmenter -->
-    <div class="flex items-center p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px]">
-      <button data-tab="active" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-white bg-white/10 transition-all text-center">
-        現役プロジェクト (<span id="countActive">0</span>)
-      </button>
-      <button data-tab="vault" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all text-center">
-        保管庫 / Vault (<span id="countVault">0</span>)
-      </button>
-      <button data-tab="starred" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all text-center">
-        スター済み
-      </button>
-    </div>
-  </header>
-
-  <main class="flex-1 relative overflow-hidden z-10">
-
-    <!-- VIEW 1: PROJECTS HUB (Minimal Grid / Precision List) -->
-    <section id="viewProjects" class="absolute inset-0 overflow-y-auto px-6 pt-2 pb-32 no-scrollbar">
-      
-      <!-- Vault Info Notice (Shown only in Vault tab) -->
-      <div id="vaultNotice" class="hidden mb-4 p-3 rounded-2xl monolith-plate hairline-border flex items-center justify-between">
-        <div class="flex items-center space-x-2.5 min-w-0">
-          <div class="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center text-brand-secondary shrink-0">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-          </div>
-          <div class="min-w-0">
-            <p class="text-[11px] font-medium text-white/90">過去作タイムカプセル</p>
-            <p class="text-[10px] text-brand-secondary truncate">保管中のアプリもワンタップでその場で完全起動できます</p>
-          </div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            Aether
+            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] text-brand-secondary">
+              v6.2
+            </span>
+          </h1>
         </div>
-        <button id="btnRestoreAllVault" class="press-responsive text-[10px] text-white/80 hover:text-white px-2 py-1 rounded-lg bg-white/[0.06] border border-white/10 font-mono shrink-0">
-          一括復帰
+
+        <div class="flex items-center space-x-2">
+          <button id="btnLayoutToggle" title="表示切替" class="press-responsive w-8 h-8 rounded-full monolith-plate hairline-border flex items-center justify-center text-brand-secondary hover:text-white">
+            <svg id="iconLayoutGrid" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+            <svg id="iconLayoutList" class="w-3.5 h-3.5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <button id="btnOpenStudio" class="press-responsive h-8 px-3 rounded-full bg-white text-black font-semibold text-[11px] flex items-center gap-1 shadow-sm">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m-8-8h16"/></svg>
+            <span>新規PWA</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Spotlight Search -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-secondary">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <input id="searchInput" type="text" placeholder="プロジェクト名、コード、用途を検索..."
+               class="w-full h-8 pl-8 pr-8 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-brand-tertiary focus:border-white/30 focus:bg-white/[0.07] transition-all font-sans">
+        <button id="btnSearchClear" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-brand-secondary hover:text-white">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <!-- App Grid / List Container -->
-      <div id="projectsContainer" class="grid grid-cols-1 gap-2.5">
-        <!-- Rendered via JavaScript -->
+      <!-- Segmented Control (Active vs Vault vs Starred) -->
+      <div class="flex items-center p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px]">
+        <button data-tab="active" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-white bg-white/10 transition-all text-center">
+          現役 (<span id="countActive">0</span>)
+        </button>
+        <button data-tab="vault" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all text-center">
+          保管庫 Vault (<span id="countVault">0</span>)
+        </button>
+        <button data-tab="starred" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all text-center">
+          スター済み
+        </button>
       </div>
+    </header>
 
-      <!-- Empty State -->
-      <div id="emptyNotice" class="hidden py-24 flex flex-col items-center justify-center text-center">
-        <div class="w-12 h-12 rounded-2xl monolith-plate hairline-border flex items-center justify-center text-brand-tertiary mb-3">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 9h6m-6 3h6m-6 3h4"/></svg>
-        </div>
-        <p class="text-xs font-medium text-brand-secondary">該当するプロジェクトはありません</p>
-        <p class="text-[11px] text-brand-tertiary mt-1">「新規PWA」から作成またはアーカイブを解除してください</p>
-      </div>
-    </section>
+    <main class="flex-1 relative overflow-hidden z-10">
 
-    <!-- VIEW 2: 100% NATIVE FULLSCREEN SANDBOX RUNNER -->
-    <section id="sandboxViewport" class="fixed inset-0 bg-black z-40 hidden flex-col transform scale-95 opacity-0 pointer-events-none rounded-[40px] overflow-hidden shadow-2xl">
-      
-      <!-- Top Subtle Pull Trigger (Pulls down to open Island controller) -->
-      <div id="sandboxPullZone" class="absolute top-0 left-0 right-0 h-10 z-30 flex items-center justify-center pointer-events-auto cursor-pointer">
-        <div class="w-12 h-1 rounded-full bg-white/20 hover:bg-white/40 transition-colors"></div>
-      </div>
-
-      <!-- Full True Viewport Sandboxed iframe -->
-      <div class="flex-1 w-full h-full relative bg-black overflow-hidden">
-        <iframe id="sandboxFrame"
-                class="w-full h-full border-none bg-black select-auto"
-                sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-downloads allow-popups"
-                allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; vr; web-share">
-        </iframe>
-      </div>
-
-      <!-- Native iOS Home Indicator (Swipe/Tap to Exit with Live Rubberbanding) -->
-      <div id="sandboxHomeArea" class="absolute bottom-0 left-0 right-0 h-[calc(env(safe-area-inset-bottom,34px)+10px)] z-30 flex items-center justify-center pointer-events-auto cursor-pointer bg-gradient-to-t from-black/80 to-transparent">
-        <div id="homeIndicator" class="w-32 h-1 rounded-full bg-white/50 hover:bg-white transition-all press-responsive"></div>
-      </div>
-    </section>
-
-    <!-- VIEW 3: PWA CREATIVE STUDIO & CODE INSPECTOR -->
-    <section id="viewStudio" class="absolute inset-0 overflow-y-auto px-6 pt-3 pb-32 no-scrollbar hidden">
-      <div class="max-w-xl mx-auto flex flex-col gap-3.5">
+      <!-- VIEW 1: PROJECTS HUB -->
+      <section id="viewProjects" class="absolute inset-0 overflow-y-auto px-5 pt-1 pb-32 no-scrollbar">
         
-        <div class="flex items-center justify-between pb-2 hairline-b">
-          <div>
-            <h2 id="studioHeadline" class="text-sm font-bold text-white tracking-tight">PWA Architecture Studio</h2>
-            <p class="text-[10px] text-brand-secondary font-mono">Self-contained Standalone WebApp</p>
+        <!-- Vault Information Notice -->
+        <div id="vaultNotice" class="hidden mb-3 p-3 rounded-2xl monolith-plate hairline-border flex items-center justify-between">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center text-brand-secondary shrink-0">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-medium text-white/90">過去作タイムカプセル保管庫</p>
+              <p class="text-[10px] text-brand-secondary truncate">保管中の過去作もワンタップで別ウィンドウ即時起動できます</p>
+            </div>
           </div>
-          <button id="btnStudioClose" class="press-responsive text-xs text-brand-secondary hover:text-white px-2 py-1">
-            閉じる
+          <button id="btnRestoreAllVault" class="press-responsive text-[10px] text-white/80 hover:text-white px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/10 font-mono shrink-0">
+            一括復帰
           </button>
         </div>
 
-        <form id="studioForm" class="flex flex-col gap-3">
-          <input type="hidden" id="formProjectId" value="">
+        <!-- Project Grid / List -->
+        <div id="projectsContainer" class="grid grid-cols-1 gap-2">
+          <!-- Populated by JavaScript -->
+        </div>
 
-          <!-- Meta Section -->
-          <div class="titanium-panel hairline-border p-3.5 rounded-2xl space-y-3">
-            <div class="flex items-center gap-3">
-              <!-- Monogram Icon Preview -->
-              <div id="studioIconPlate" class="w-12 h-12 squircle bg-[#1c1c24] border border-white/10 flex items-center justify-center text-sm font-mono font-bold text-white shrink-0">
-                <span id="studioIconText">PW</span>
-              </div>
-              <div class="flex-1 space-y-1.5">
-                <div>
-                  <label class="text-[9px] font-mono uppercase text-brand-secondary block">識別シンボル (英数字 2文字 または記号)</label>
+        <!-- Empty State -->
+        <div id="emptyNotice" class="hidden py-24 flex flex-col items-center justify-center text-center">
+          <div class="w-12 h-12 rounded-2xl monolith-plate hairline-border flex items-center justify-center text-brand-tertiary mb-3">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 9h6m-6 3h6m-6 3h4"/></svg>
+          </div>
+          <p class="text-xs font-medium text-brand-secondary">該当するプロジェクトはありません</p>
+          <p class="text-[11px] text-brand-tertiary mt-1">「新規PWA」から作成またはアーカイブを解除してください</p>
+        </div>
+      </section>
+
+      <!-- VIEW 2: PWA CREATIVE STUDIO & HIGH-PRECISION EDITOR -->
+      <section id="viewStudio" class="absolute inset-0 overflow-y-auto px-5 pt-2 pb-32 no-scrollbar hidden">
+        <div class="max-w-xl mx-auto flex flex-col gap-3">
+          
+          <div class="flex items-center justify-between pb-1 hairline-b">
+            <div>
+              <h2 id="studioHeadline" class="text-sm font-bold text-white tracking-tight">新規PWAを設計・登録</h2>
+              <p class="text-[10px] text-brand-secondary font-mono">React 18 / HTML Standalone Engine</p>
+            </div>
+            <button id="btnStudioClose" class="press-responsive text-xs text-brand-secondary hover:text-white px-2 py-1">
+              閉じる
+            </button>
+          </div>
+
+          <form id="studioForm" class="flex flex-col gap-3">
+            <input type="hidden" id="formProjectId" value="">
+
+            <!-- Meta Information -->
+            <div class="titanium-glass hairline-border p-3.5 rounded-2xl space-y-2.5">
+              <div class="flex items-center gap-3">
+                <div id="studioIconPlate" class="w-11 h-11 squircle bg-black border border-white/15 flex items-center justify-center text-sm font-mono font-bold text-white shrink-0">
+                  <span id="studioIconText">PW</span>
+                </div>
+                <div class="flex-1 space-y-1">
+                  <label class="text-[9px] font-mono uppercase text-brand-secondary block">シンボル (英数字 2文字)</label>
                   <input id="formIcon" type="text" maxlength="3" value="PW"
                          class="w-full h-7 px-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-xs font-mono text-white focus:border-white/30">
                 </div>
               </div>
-            </div>
 
-            <div class="space-y-2">
-              <div>
-                <label class="text-[9px] font-mono uppercase text-brand-secondary block">プロジェクト名称 *</label>
-                <input id="formTitle" type="text" required placeholder="例: Vector Scope, Focus Timer"
-                       class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white focus:border-white/30">
-              </div>
-              <div>
-                <label class="text-[9px] font-mono uppercase text-brand-secondary block">用途メモ・詳細</label>
-                <input id="formDesc" type="text" placeholder="例: オフライン対応、Web Audio使用"
-                       class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white focus:border-white/30">
-              </div>
-            </div>
-          </div>
-
-          <!-- Code / URL Architecture Section -->
-          <div class="titanium-panel hairline-border p-3.5 rounded-2xl space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-[9px] font-mono uppercase text-brand-secondary">実行ターゲット</label>
-              
-              <!-- Quick Presets -->
-              <select id="selectPresets" class="bg-white/[0.06] text-white/80 text-[10px] rounded px-2 py-0.5 border border-white/10 font-mono">
-                <option value="" selected>⚡ プリセットから選ぶ...</option>
-                <option value="react_counter">⚛️ React: Minimal State App</option>
-                <option value="react_task">⚛️ React: Focus Kanban Matrix</option>
-                <option value="oscillo">⚡ HTML: Vector Scope Canvas</option>
-                <option value="metronome">⚡ HTML: Precision Chrono</option>
-                <option value="scratchpad">⚡ HTML: Clean Scratchpad</option>
-              </select>
-            </div>
-
-            <div class="grid grid-cols-3 gap-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-[10px] font-mono">
-              <button type="button" id="tabModeReact" class="py-1 rounded-lg font-medium text-white bg-white/10">
-                ⚛️ React (JSX)
-              </button>
-              <button type="button" id="tabModeCode" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
-                単一HTML
-              </button>
-              <button type="button" id="tabModeUrl" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
-                Web URL
-              </button>
-            </div>
-
-            <!-- Code Editor -->
-            <div id="boxEditorCode" class="space-y-2 transition-all duration-300">
-              <!-- Editor Header Bar -->
-              <div class="flex items-center justify-between text-[10px] font-mono text-brand-secondary pb-0.5">
-                <span id="editorLanguageLabel" class="truncate max-w-[200px] text-brand-tertiary">React 18 Component</span>
-                <div class="flex items-center space-x-2 shrink-0">
-                  <span id="codeStatsCounter" class="text-white/60">0 行 · 0 文字</span>
-                  <button type="button" id="btnToggleEditorExpand" title="エディタの全画面切替" class="press-responsive p-1 rounded-md bg-white/[0.06] border border-white/10 hover:bg-white/15 text-brand-secondary hover:text-white">
-                    <svg id="iconExpand" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>
-                    <svg id="iconCollapse" class="w-3 h-3 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9L4 4m0 0v5m0-5h5m6 5l5-5m0 0v5m0-5h-5m-6 6l-5 5m0 0v-5m0 5h5m6-5l5 5m0 0v-5m0 5h-5"/></svg>
-                  </button>
+              <div class="space-y-2">
+                <div>
+                  <label class="text-[9px] font-mono uppercase text-brand-secondary block">プロジェクト名称 *</label>
+                  <input id="formTitle" type="text" required placeholder="例: Vector Scope, Focus Timer"
+                         class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white focus:border-white/30">
+                </div>
+                <div>
+                  <label class="text-[9px] font-mono uppercase text-brand-secondary block">用途メモ・詳細</label>
+                  <input id="formDesc" type="text" placeholder="例: オフライン対応、Web Audio使用"
+                         class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white focus:border-white/30">
                 </div>
               </div>
+            </div>
 
-              <!-- Quick Action Toolbar (iPhone Optimized) -->
-              <div class="flex items-center justify-between p-1 bg-black/50 border border-white/[0.08] rounded-xl text-[11px] font-mono select-none">
-                <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
-                  <button type="button" id="btnEditorSelectAll" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.07] border border-white/[0.08] text-white hover:bg-white/[0.12] active:bg-white/20 whitespace-nowrap flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
-                    <span>全選択</span>
-                  </button>
-                  <button type="button" id="btnEditorPaste" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.07] border border-white/[0.08] text-white hover:bg-white/[0.12] active:bg-white/20 whitespace-nowrap flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
-                    <span>ペースト</span>
-                  </button>
-                  <button type="button" id="btnEditorCopy" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-brand-secondary hover:text-white whitespace-nowrap flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                    <span>コピー</span>
-                  </button>
-                  <button type="button" id="btnEditorIndent" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-brand-secondary hover:text-white whitespace-nowrap">
-                    Tab
-                  </button>
+            <!-- Code & Architecture -->
+            <div class="titanium-glass hairline-border p-3.5 rounded-2xl space-y-2.5">
+              <div class="flex items-center justify-between">
+                <label class="text-[9px] font-mono uppercase text-brand-secondary">実行ターゲット</label>
+                <select id="selectPresets" class="bg-white/[0.06] text-white/90 text-[10px] rounded px-2 py-0.5 border border-white/10 font-mono">
+                  <option value="" selected>⚡ プリセットから選ぶ...</option>
+                  <option value="react_counter">⚛️ React: Haptic Counter</option>
+                  <option value="react_task">⚛️ React: Focus Kanban Memo</option>
+                  <option value="oscillo">⚡ HTML: CRT Vector Scope</option>
+                  <option value="metronome">⚡ HTML: Focus Chrono</option>
+                  <option value="scratchpad">⚡ HTML: Clean Scratchpad</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-3 gap-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-[10px] font-mono">
+                <button type="button" id="tabModeReact" class="py-1 rounded-lg font-medium text-white bg-white/10">
+                  ⚛️ React (JSX)
+                </button>
+                <button type="button" id="tabModeCode" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
+                  単一HTML
+                </button>
+                <button type="button" id="tabModeUrl" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
+                  Web URL
+                </button>
+              </div>
+
+              <!-- Code Box -->
+              <div id="boxEditorCode" class="space-y-1.5 transition-all duration-300">
+                <!-- Editor Meta Bar -->
+                <div class="flex items-center justify-between text-[10px] font-mono text-brand-secondary pb-0.5">
+                  <span id="editorLanguageLabel" class="truncate max-w-[200px] text-brand-tertiary">React 18 Component</span>
+                  <div class="flex items-center space-x-2 shrink-0">
+                    <span id="codeStatsCounter" class="text-white/60">0 行 · 0 文字</span>
+                    <button type="button" id="btnToggleEditorExpand" title="全画面化" class="press-responsive p-1 rounded-md bg-white/[0.06] border border-white/10 hover:bg-white/15 text-brand-secondary hover:text-white">
+                      <svg id="iconExpand" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/></svg>
+                      <svg id="iconCollapse" class="w-3 h-3 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9L4 4m0 0v5m0-5h5m6 5l5-5m0 0v5m0-5h-5m-6 6l-5 5m0 0v-5m0 5h5m6-5l5 5m0 0v-5m0 5h-5"/></svg>
+                    </button>
+                  </div>
                 </div>
 
-                <div class="flex items-center space-x-1 pl-1">
-                  <button type="button" id="btnEditorClear" class="press-responsive px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-rose-400/80 hover:text-rose-300 hover:bg-rose-500/10 whitespace-nowrap flex items-center gap-1">
+                <!-- High Precision Action Bar (iPhone Optimized) -->
+                <div class="flex items-center justify-between p-1 bg-black/60 border border-white/[0.08] rounded-xl text-[11px] font-mono select-none">
+                  <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
+                    <button type="button" id="btnEditorSelectAll" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.08] border border-white/10 text-white hover:bg-white/15 active:bg-white/20 whitespace-nowrap flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+                      <span>全選択</span>
+                    </button>
+                    <button type="button" id="btnEditorPaste" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.08] border border-white/10 text-white hover:bg-white/15 active:bg-white/20 whitespace-nowrap flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                      <span>ペースト</span>
+                    </button>
+                    <button type="button" id="btnEditorCopy" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-brand-secondary hover:text-white whitespace-nowrap flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                      <span>コピー</span>
+                    </button>
+                    <button type="button" id="btnEditorIndent" class="press-responsive px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-brand-secondary hover:text-white whitespace-nowrap">
+                      Tab
+                    </button>
+                  </div>
+
+                  <button type="button" id="btnEditorClear" class="press-responsive px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:text-rose-300 whitespace-nowrap flex items-center gap-1">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     <span>消去</span>
                   </button>
                 </div>
-              </div>
 
-              <!-- Quick Symbol Strip for Mobile Coding -->
-              <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5 px-0.5 text-[11px] font-mono text-white/90">
-                <button type="button" onclick="insertSymbol('{', '}')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">{ }</button>
-                <button type="button" onclick="insertSymbol('(', ')')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">( )</button>
-                <button type="button" onclick="insertSymbol('<', '>')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">&lt; &gt;</button>
-                <button type="button" onclick="insertSymbol('[', ']')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">[ ]</button>
-                <button type="button" onclick="insertSymbol('=>')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">=&gt;</button>
-                <button type="button" onclick="insertSymbol('\'', '\'')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">' '</button>
-                <button type="button" onclick="insertSymbol('&quot;', '&quot;')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">&quot; &quot;</button>
-                <button type="button" onclick="insertSymbol('`', '`')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">` `</button>
-                <button type="button" onclick="insertSymbol(';')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">;</button>
-                <button type="button" onclick="insertSymbol('=')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">=</button>
-                <button type="button" onclick="insertSymbol('/')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">/</button>
-                <button type="button" onclick="insertSymbol(':')" class="press-responsive px-2 py-1 rounded bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.1] active:bg-white/20 shrink-0">:</button>
-              </div>
+                <!-- Quick Symbol Strip -->
+                <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5 px-0.5 text-[11px] font-mono text-white/90">
+                  <button type="button" onclick="insertSymbol('{', '}')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">{ }</button>
+                  <button type="button" onclick="insertSymbol('(', ')')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">( )</button>
+                  <button type="button" onclick="insertSymbol('<', '>')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">&lt; &gt;</button>
+                  <button type="button" onclick="insertSymbol('[', ']')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">[ ]</button>
+                  <button type="button" onclick="insertSymbol('=>')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">=&gt;</button>
+                  <button type="button" onclick="insertSymbol('\'', '\'')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">' '</button>
+                  <button type="button" onclick="insertSymbol('&quot;', '&quot;')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">&quot; &quot;</button>
+                  <button type="button" onclick="insertSymbol(';')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">;</button>
+                  <button type="button" onclick="insertSymbol('=')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">=</button>
+                  <button type="button" onclick="insertSymbol('/')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">/</button>
+                  <button type="button" onclick="insertSymbol(':')" class="press-responsive px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/20 shrink-0">:</button>
+                </div>
 
-              <!-- Code Input Textarea -->
-              <div class="relative w-full">
-                <textarea id="formCode" rows="13" spellcheck="false" autocapitalize="none" autocorrect="off" autocomplete="off"
+                <!-- Textarea -->
+                <textarea id="formCode" rows="12" spellcheck="false" autocapitalize="none" autocorrect="off" autocomplete="off"
                           placeholder="// コードを入力またはペースト..."
-                          class="w-full font-mono text-[12px] leading-relaxed bg-[#07070a] text-white/95 p-3 rounded-xl border border-white/[0.09] focus:border-white/35 focus:ring-1 focus:ring-white/20 transition-all resize-none block"></textarea>
+                          class="w-full font-mono text-[12px] leading-relaxed bg-[#06060a] text-white/95 p-3 rounded-xl border border-white/[0.09] focus:border-white/35 transition-all resize-none block"></textarea>
+              </div>
+
+              <!-- URL Box -->
+              <div id="boxEditorUrl" class="space-y-1 hidden">
+                <label class="text-[9px] font-mono uppercase text-brand-secondary">Web URL (HTTPS)</label>
+                <input id="formUrl" type="url" placeholder="https://app.example.com"
+                       class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs font-mono text-white focus:border-white/30">
               </div>
             </div>
 
-            <!-- URL Input -->
-            <div id="boxEditorUrl" class="space-y-1 hidden">
-              <label class="text-[9px] font-mono uppercase text-brand-secondary">Web URL (HTTPS)</label>
-              <input id="formUrl" type="url" placeholder="https://app.example.com"
-                     class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs font-mono text-white focus:border-white/30">
+            <!-- Vault Placement Option -->
+            <div class="monolith-plate hairline-border p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-xs font-medium text-white block">過去作としてアーカイブ保管</span>
+                <span class="text-[10px] text-brand-secondary">保管庫（Vault）に退避し、必要な時に呼び出せます</span>
+              </div>
+              <input id="formIsArchived" type="checkbox" class="w-4 h-4 rounded bg-white/10 border border-white/20 accent-white">
             </div>
-          </div>
 
-          <!-- Archive Direct Placement Flag -->
-          <div class="monolith-plate hairline-border p-3 rounded-xl flex items-center justify-between">
-            <div>
-              <span class="text-xs font-medium text-white block">過去作としてアーカイブ保管</span>
-              <span class="text-[10px] text-brand-secondary">保管庫（Vault）に退避し、必要な時に呼び出せます</span>
+            <!-- Action Controls -->
+            <div class="flex items-center space-x-2 pt-1">
+              <button type="submit" class="press-responsive flex-1 h-10 rounded-xl bg-white text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-md">
+                <span id="btnSubmitLabel">保存して登録</span>
+              </button>
+              <button type="button" id="btnTestRunDirect" title="別ウィンドウで起動テスト" class="press-responsive h-10 px-4 rounded-xl bg-white/10 border border-white/15 text-white text-xs font-medium flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>別窓起動テスト</span>
+              </button>
             </div>
-            <input id="formIsArchived" type="checkbox" class="w-4 h-4 rounded bg-white/10 border border-white/20 accent-white">
-          </div>
-
-          <!-- Action Controls -->
-          <div class="flex items-center space-x-2 pt-1">
-            <button type="submit" class="press-responsive flex-1 h-10 rounded-xl bg-white text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-md">
-              <span id="btnSubmitLabel">保存して登録</span>
-            </button>
-            <button type="button" id="btnTestRunSandbox" title="アプリ内プレビュー" class="press-responsive h-10 px-3 rounded-xl monolith-plate hairline-border text-white text-xs font-medium flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <span>内覧</span>
-            </button>
-            <button type="button" id="btnTestRunWindow" title="独立PWAとしてホーム追加・別アプリ化" class="press-responsive h-10 px-3 rounded-xl bg-white/10 border border-white/15 text-white text-xs font-medium flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-              <span>個別PWA化</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- VIEW 5: iOS 18 MULTITASK APP SWITCHER (Swipe Up to Task-Kill) -->
-    <section id="viewSwitcher" class="fixed inset-0 bg-black/90 backdrop-blur-2xl z-40 hidden flex-col select-none overflow-hidden">
-      <!-- Switcher Header -->
-      <div class="pt-[calc(env(safe-area-inset-top,20px)+16px)] px-6 pb-2 flex items-center justify-between">
-        <div>
-          <h2 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
-            マルチタスク一覧
-            <span id="switcherCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-brand-secondary">
-              0 RUNNING
-            </span>
-          </h2>
-          <p class="text-[11px] text-brand-secondary mt-0.5">カードを上にスワイプしてタスクキル（完全終了）できます</p>
+          </form>
         </div>
-        <button id="btnCloseSwitcher" class="press-responsive w-8 h-8 rounded-full monolith-plate hairline-border flex items-center justify-center text-brand-secondary hover:text-white">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </section>
+
+      <!-- VIEW 3: SYSTEM DATA & JSON VAULT -->
+      <section id="viewSettings" class="absolute inset-0 overflow-y-auto px-5 pt-2 pb-32 no-scrollbar hidden">
+        <div class="max-w-xl mx-auto flex flex-col gap-3">
+          
+          <div class="pb-1 hairline-b">
+            <h2 class="text-sm font-bold text-white tracking-tight">System & Data Vault</h2>
+            <p class="text-[10px] text-brand-secondary font-mono">Multi-Window Isolation & Storage</p>
+          </div>
+
+          <!-- Multi-Window Explanation Card -->
+          <div class="titanium-glass hairline-border p-4 rounded-2xl space-y-3">
+            <div class="flex items-center space-x-3">
+              <div class="w-9 h-9 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center text-white">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="4" width="6" height="16" rx="1.5"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xs font-semibold text-white">iOSマルチタスク（別ウィンドウ）動作仕様</h3>
+                <p class="text-[10px] text-brand-secondary">iPhoneのApp Switcherで独立カードとして並ぶ仕組み</p>
+              </div>
+            </div>
+
+            <div class="space-y-1.5 text-[11px] bg-black/60 p-3 rounded-xl border border-white/[0.06] font-mono text-brand-secondary leading-relaxed">
+              <p>1. 各アプリの「<strong>起動</strong>」を押すと、新しいウィンドウとして立ち上がります。</p>
+              <p>2. iPhoneのホームバーを上にスワイプすると、<strong>Aetherと開いたPWAが別のカードとして並びます</strong>。</p>
+              <p>3. カードを上にフリックすれば、OS標準の操作でいつでも<strong>タスクキル</strong>できます。</p>
+              <p>4. 開いた画面で「ホーム画面に追加」を行えば、個別の独立PWAとしてホームに常駐します。</p>
+            </div>
+          </div>
+
+          <!-- Backup & Restore -->
+          <div class="titanium-glass hairline-border p-4 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-white">全アーカイブの書き出し / 復元</span>
+              <span id="storageSizeLabel" class="text-[9px] font-mono text-brand-secondary">0 KB</span>
+            </div>
+            <p class="text-[11px] text-brand-secondary leading-relaxed">
+              現役アプリおよび過去の全保管コードを1つのJSONファイルとして書き出します。機種変更やバックアップも安全に行えます。
+            </p>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button id="btnExportJSON" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs font-medium text-white flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>アーカイブ出力</span>
+              </button>
+              <button id="btnImportJSON" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs font-medium text-white flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <span>JSON復元</span>
+              </button>
+              <input type="file" id="fileImportInput" accept=".json" class="hidden">
+            </div>
+
+            <button id="btnResetDefaults" class="press-responsive w-full h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white text-[11px]">
+              初期サンプル構成にリセット
+            </button>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- FLOATING BOTTOM DOCK -->
+    <nav id="appDock" class="fixed bottom-0 left-0 right-0 z-30 pb-[calc(env(safe-area-inset-bottom,20px)+8px)] pt-2 px-6 flex justify-center pointer-events-none">
+      <div class="pointer-events-auto monolith-plate hairline-border rounded-full px-6 py-2 flex items-center space-x-8 shadow-2xl">
+        <button data-nav="projects" class="dock-btn press-responsive flex flex-col items-center justify-center text-white">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span class="text-[8px] font-mono mt-0.5 font-medium">APPS</span>
+        </button>
+        <button data-nav="vault" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+          <span class="text-[8px] font-mono mt-0.5 font-medium">VAULT</span>
+        </button>
+        <button data-nav="studio" class="dock-btn press-responsive w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg -my-0.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m-8-8h16"/></svg>
+        </button>
+        <button data-nav="settings" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          <span class="text-[8px] font-mono mt-0.5 font-medium">DATA</span>
         </button>
       </div>
+    </nav>
+  </div>
 
-      <!-- 3D Card Stack Container -->
-      <div id="switcherCardsWrapper" class="flex-1 w-full flex items-center overflow-x-auto py-8 px-8 space-x-6 no-scrollbar switcher-perspective">
-        <!-- Rendered via JS -->
-      </div>
-
-      <!-- Switcher Bottom Action Bar -->
-      <div class="pb-[calc(env(safe-area-inset-bottom,20px)+14px)] px-6 flex items-center justify-between">
-        <button id="btnKillAllSessions" class="press-responsive text-xs text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-          <span>すべてタスクキル</span>
-        </button>
-        <span class="text-[10px] font-mono text-brand-tertiary">TAP CARD TO RESUME</span>
-      </div>
-    </section>
-
-    <!-- VIEW 4: SYSTEM SETTINGS & ARCHIVE EXPORT -->
-    <section id="viewSettings" class="absolute inset-0 overflow-y-auto px-6 pt-3 pb-32 no-scrollbar hidden">
-      <div class="max-w-xl mx-auto flex flex-col gap-3.5">
-        
-        <div class="pb-2 hairline-b">
-          <h2 class="text-sm font-bold text-white tracking-tight">System & Data Vault</h2>
-          <p class="text-[10px] text-brand-secondary font-mono">Standalone Deployment & Storage</p>
-        </div>
-
-        <!-- Fullscreen PWA Guide Card -->
-        <div class="titanium-panel hairline-border p-4 rounded-2xl space-y-3">
-          <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center text-white">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.96.04-2.14.65-2.79 1.4-.56.64-.99 1.7-1.01 2.76 1.07.08 2.18-.54 2.79-1.29z"/></svg>
-            </div>
-            <div>
-              <h3 class="text-xs font-semibold text-white">iPhoneネイティブ全画面での運用</h3>
-              <p class="text-[10px] text-brand-secondary">Safariのアドレスバーを完全に非表示にする方法</p>
-            </div>
-          </div>
-
-          <div class="space-y-1.5 text-[11px] bg-black/60 p-3 rounded-xl border border-white/[0.06] font-mono text-brand-secondary">
-            <p>1. Safari下部の「共有（四角に上矢印）」をタップ</p>
-            <p>2. メニューから「<strong>ホーム画面に追加</strong>」を選択</p>
-            <p>3. ホームから起動するとアドレスバーが消失し、100%全画面で動作します</p>
-          </div>
-        </div>
-
-        <!-- Archive JSON Backup / Restore -->
-        <div class="titanium-panel hairline-border p-4 rounded-2xl space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-white">プロジェクト全アーカイブの書き出し / 復元</span>
-            <span id="storageSizeLabel" class="text-[9px] font-mono text-brand-secondary">0 KB</span>
-          </div>
-          <p class="text-[11px] text-brand-secondary leading-relaxed">
-            現役アプリおよび過去の全アーカイブコードを1つのJSONファイルとしてエクスポートします。機種変更時やPCへのバックアップも安全に行えます。
-          </p>
-
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button id="btnExportJSON" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs font-medium text-white flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              <span>アーカイブ出力</span>
-            </button>
-            <button id="btnImportJSON" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs font-medium text-white flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-              <span>JSON復元</span>
-            </button>
-            <input type="file" id="fileImportInput" accept=".json" class="hidden">
-          </div>
-
-          <button id="btnResetDefaults" class="press-responsive w-full h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white text-[11px]">
-            サンプルプロジェクト構成に戻す
-          </button>
-        </div>
-
-      </div>
-    </section>
-  </main>
-
-  <!-- FLOATING MINIMAL DOCK (Precision Titanium Capsule) -->
-  <nav id="appDock" class="fixed bottom-0 left-0 right-0 z-20 pb-[calc(env(safe-area-inset-bottom,20px)+8px)] pt-2 px-6 flex justify-center pointer-events-none transition-opacity duration-300">
-    <div class="pointer-events-auto monolith-plate hairline-border rounded-full px-5 py-2 flex items-center space-x-7 shadow-2xl">
-      <button data-nav="projects" class="dock-btn press-responsive flex flex-col items-center justify-center text-white">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-        <span class="text-[8px] font-mono mt-0.5 font-medium">APPS</span>
-      </button>
-      <button id="dockBtnSwitcher" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white relative">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="4" width="6" height="16" rx="1.5"/></svg>
-        <span class="text-[8px] font-mono mt-0.5 font-medium">SWITCH</span>
-        <span id="dockRunningBadge" class="hidden absolute top-0 right-1 w-1.5 h-1.5 rounded-full bg-white"></span>
-      </button>
-      <button data-nav="vault" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white relative">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-        <span class="text-[8px] font-mono mt-0.5 font-medium">VAULT</span>
-      </button>
-      <button data-nav="studio" class="dock-btn press-responsive w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg -my-0.5">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m-8-8h16"/></svg>
-      </button>
-      <button data-nav="settings" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        <span class="text-[8px] font-mono mt-0.5 font-medium">DATA</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- MODAL: High Precision Paste Modal (Clipboard Fallback) -->
-  <div id="pasteModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl hidden items-center justify-center p-5">
-    <div class="titanium-panel hairline-border w-full max-w-sm rounded-2xl p-5 flex flex-col shadow-2xl">
+  <!-- MODAL: Paste Clipboard Fallback -->
+  <div id="pasteModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-5">
+    <div class="titanium-glass hairline-border w-full max-w-sm rounded-2xl p-5 flex flex-col shadow-2xl">
       <div class="flex items-center justify-between pb-2 hairline-b">
         <h3 class="text-xs font-bold text-white tracking-tight">クリップボードから貼り付け</h3>
         <button id="btnPasteModalClose" class="press-responsive w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-brand-secondary hover:text-white">
@@ -656,7 +493,7 @@
         </button>
       </div>
       <p class="text-[11px] text-brand-secondary py-2 leading-relaxed">
-        iOSのセキュリティ制限により直接取得できない場合は、下の枠を長押しして「ペースト」し、確定を押してください。
+        iOSのセキュリティ制限により直接取得できない場合は、下のテキスト枠をタップ長押しして「ペースト」し、確定を押してください。
       </p>
       <textarea id="pasteModalInput" rows="5" placeholder="ここにコードを貼り付け..."
                 class="w-full font-mono text-xs p-3 rounded-xl bg-black border border-white/15 text-white outline-none focus:border-white/40 resize-none"></textarea>
@@ -671,51 +508,9 @@
     </div>
   </div>
 
-  <!-- MODAL: Standalone PWA Home Installation Guide -->
-  <div id="standaloneGuideModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-2xl hidden items-center justify-center p-5">
-    <div class="titanium-panel hairline-border w-full max-w-md rounded-2xl p-5 flex flex-col shadow-2xl">
-      <div class="flex items-center justify-between pb-2 hairline-b">
-        <div class="flex items-center space-x-2">
-          <div id="guideModalIcon" class="w-7 h-7 squircle bg-black border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white">PW</div>
-          <div>
-            <h3 id="guideModalTitle" class="text-xs font-bold text-white tracking-tight">独立PWAとしてホーム追加</h3>
-            <p class="text-[9px] text-brand-secondary font-mono">True OS App Switcher Integration</p>
-          </div>
-        </div>
-        <button id="btnGuideModalClose" class="press-responsive w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-brand-secondary hover:text-white">
-          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="py-3 space-y-3 text-xs text-white/90 leading-relaxed">
-        <p class="text-[11px] text-brand-secondary">
-          iPhoneのOS自体の<strong>アプリ一覧（マルチタスク画面）で個別にタスクキル</strong>するには、このアプリを単体でホーム画面に追加します：
-        </p>
-        <div class="space-y-1.5 text-[11px] bg-black/70 p-3 rounded-xl border border-white/[0.08] font-mono text-brand-secondary">
-          <p>1. 下の「<strong>独立ウィンドウを開く</strong>」をタップ</p>
-          <p>2. 開いたSafari画面下部の「<strong>共有</strong>」をタップ</p>
-          <p>3. 「<strong>ホーム画面に追加</strong>」を選択</p>
-        </div>
-        <p class="text-[10px] text-brand-tertiary">
-          ※ ホームから起動すれば、他のiOSアプリと全く同じように、下からスワイプしてアプリ一覧に並び、上へフリックしていつでもタスクキルできます。
-        </p>
-      </div>
-
-      <div class="pt-2 flex items-center space-x-2">
-        <button id="btnGuideModalCancel" class="press-responsive flex-1 h-9 rounded-xl monolith-plate hairline-border text-xs text-brand-secondary">
-          閉じる
-        </button>
-        <button id="btnGuideModalOpenTab" class="press-responsive flex-1 h-9 rounded-xl bg-white text-black font-semibold text-xs flex items-center justify-center gap-1">
-          <span>独立ウィンドウを開く</span>
-          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL: Minimal Code Inspector -->
   <div id="inspectorModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl hidden items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="titanium-panel hairline-border w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl p-5 flex flex-col max-h-[85vh] shadow-2xl">
+    <div class="titanium-glass hairline-border w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl p-5 flex flex-col max-h-[85vh] shadow-2xl">
       <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3 sm:hidden"></div>
       
       <div class="flex items-center justify-between pb-3 hairline-b">
@@ -737,15 +532,15 @@
           コードをコピー
         </button>
         <button id="btnInspectLaunch" class="press-responsive h-9 rounded-xl bg-white text-black text-xs font-bold flex items-center justify-center">
-          即座に実行
+          別窓で起動
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: Micro Confirmation Dialog -->
+  <!-- MODAL: Confirmation Dialog -->
   <div id="dialogModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-5">
-    <div class="titanium-panel hairline-border w-full max-w-xs rounded-2xl p-4 text-center shadow-2xl">
+    <div class="titanium-glass hairline-border w-full max-w-xs rounded-2xl p-4 text-center shadow-2xl">
       <h3 id="dialogTitle" class="text-xs font-bold text-white">確認</h3>
       <p id="dialogMessage" class="text-[11px] text-brand-secondary mt-1 leading-relaxed"></p>
       
@@ -761,23 +556,23 @@
   </div>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full monolith-plate hairline-border text-white text-[11px] font-medium shadow-2xl opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-1.5">
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full monolith-plate hairline-border text-white text-[11px] font-medium shadow-2xl opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-1.5">
     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
-    <span id="toastMsg">Notification</span>
+    <span id="toastMsg">通知</span>
   </div>
 
+  <!-- ================================================================= -->
+  <!-- JAVASCRIPT ENGINE & STANDALONE ROUTER                             -->
+  <!-- ================================================================= -->
   <script>
-    /* ================================================================= */
-    /* 1. STATE & MINIMAL REPOSITORY                                     */
-    /* ================================================================= */
-    const STORAGE_KEY = 'aether_minimal_pwa_v6';
+    const STORAGE_KEY = 'aether_minimal_pwa_v6_data';
 
     const DEFAULT_SEED_PROJECTS = [
       {
         id: 'pwa_react_minimal_haptic',
         title: 'React Haptic Counter',
         icon: 'RC',
-        desc: 'React 18 Hooks・状態管理・Web Audio触覚フィードバック統合アプリ',
+        desc: 'React 18 Hooks・ステート管理・触覚フィードバック統合アプリ',
         type: 'react',
         code: `function App() {
   const [count, setCount] = React.useState(0);
@@ -810,7 +605,7 @@
 
   return (
     <div className="h-full w-full bg-black text-white flex flex-col justify-between p-6 select-none font-sans">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3 pt-2">
         <span className="text-[10px] font-mono tracking-widest text-neutral-400">REACT 18 ISOLATED APP</span>
         <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-white/10 text-neutral-300">STANDALONE</span>
       </div>
@@ -851,8 +646,8 @@
       },
       {
         id: 'pwa_react_focus_matrix',
-        title: 'React Micro Tasks',
-        icon: 'MT',
+        title: 'React Focus Tasks',
+        icon: 'FT',
         desc: 'Reactステートによる即時ローカル永続化タスクメモ',
         type: 'react',
         code: `function App() {
@@ -880,7 +675,7 @@
   };
 
   return (
-    <div className="h-full w-full bg-[#050508] text-white flex flex-col justify-between p-6 select-none font-sans">
+    <div className="h-full w-full bg-[#060609] text-white flex flex-col justify-between p-6 select-none font-sans">
       <div className="space-y-4 max-w-md mx-auto w-full flex-1 flex flex-col">
         <div className="flex items-center justify-between border-b border-white/10 pb-3 pt-2">
           <h1 className="text-sm font-semibold tracking-tight">Today Focus Matrix</h1>
@@ -965,7 +760,7 @@
       },
       {
         id: 'pwa_vault_sample_2025',
-        title: '【アーカイブ】オシロ旧プロトタイプ',
+        title: '【保管庫】オシロ旧プロトタイプ',
         icon: 'AR',
         desc: '初期検証用の旧コード。保管庫からいつでも呼び出して即時実行可能',
         type: 'code',
@@ -991,53 +786,18 @@
     let projects = [];
     let currentFilter = 'active'; // 'active' | 'vault' | 'starred'
     let currentLayout = 'list';   // 'list' | 'grid'
-    let currentActiveApp = null;
-    let isIslandExpanded = false;
+    let currentEditorMode = 'react';
 
-    // Active parallel running sessions in Aether
-    let runningSessions = []; // Array of project items currently loaded
-
-    function loadStorage() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          projects = JSON.parse(raw);
-        } else {
-          projects = [...DEFAULT_SEED_PROJECTS];
-          saveStorage();
-        }
-      } catch (e) {
-        projects = [...DEFAULT_SEED_PROJECTS];
-      }
-      refreshStats();
-    }
-
-    function saveStorage() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-      refreshStats();
-    }
-
-    function refreshStats() {
-      const activeCount = projects.filter(p => !p.isArchived).length;
-      const vaultCount = projects.filter(p => p.isArchived).length;
-      document.getElementById('countActive').innerText = activeCount;
-      document.getElementById('countVault').innerText = vaultCount;
-
-      try {
-        const bytes = new Blob([localStorage.getItem(STORAGE_KEY) || '']).size;
-        document.getElementById('storageSizeLabel').innerText = `${(bytes / 1024).toFixed(1)} KB`;
-      } catch(e) {}
-    }
-
-    /* Minimal Web Audio Taptic Engine */
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Minimal Web Audio Haptic Synth
+    let audioCtx = null;
     function haptic() {
       try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(640, now);
         osc.frequency.exponentialRampToValueAtTime(160, now + 0.02);
         gain.gain.setValueAtTime(0.03, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
@@ -1048,146 +808,10 @@
       } catch (e) {}
     }
 
-    /* ================================================================= */
-    /* 2. PROJECT REPOSITORY RENDERING                                   */
-    /* ================================================================= */
-    function renderProjects() {
-      const container = document.getElementById('projectsContainer');
-      const emptyNotice = document.getElementById('emptyNotice');
-      const vaultNotice = document.getElementById('vaultNotice');
-      const query = document.getElementById('searchInput').value.trim().toLowerCase();
-
-      container.innerHTML = '';
-
-      if (currentFilter === 'vault') {
-        vaultNotice.classList.remove('hidden');
-      } else {
-        vaultNotice.classList.add('hidden');
-      }
-
-      const filtered = projects.filter(p => {
-        if (currentFilter === 'active' && p.isArchived) return false;
-        if (currentFilter === 'vault' && !p.isArchived) return false;
-        if (currentFilter === 'starred' && !p.isStarred) return false;
-
-        if (query) {
-          const mTitle = p.title.toLowerCase().includes(query);
-          const mDesc = (p.desc || '').toLowerCase().includes(query);
-          const mCode = (p.code || '').toLowerCase().includes(query);
-          if (!mTitle && !mDesc && !mCode) return false;
-        }
-        return true;
-      });
-
-      if (filtered.length === 0) {
-        emptyNotice.classList.remove('hidden');
-      } else {
-        emptyNotice.classList.add('hidden');
-      }
-
-      if (currentLayout === 'grid') {
-        container.className = 'grid grid-cols-2 gap-2.5';
-      } else {
-        container.className = 'grid grid-cols-1 gap-1.5';
-      }
-
-      filtered.forEach(p => {
-        const el = document.createElement('div');
-        const badgeType = p.type === 'react' ? 'REACT' : (p.type === 'url' ? 'URL' : 'HTML');
-        
-        if (currentLayout === 'grid') {
-          // Compact Grid Card
-          el.className = `titanium-panel hairline-border p-3.5 rounded-2xl flex flex-col justify-between press-responsive cursor-pointer transition-all ${
-            p.isArchived ? 'border-brand-secondary/20 bg-white/[0.02]' : ''
-          }`;
-          el.innerHTML = `
-            <div>
-              <div class="flex items-start justify-between">
-                <div class="w-10 h-10 squircle bg-black border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white shadow-sm">
-                  ${escapeHtml(p.icon || 'PW')}
-                </div>
-                <div class="flex items-center space-x-1">
-                  <span class="text-[8px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-brand-secondary border border-white/[0.06]">${badgeType}</span>
-                  <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
-                    <svg class="w-3.5 h-3.5 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                  </button>
-                </div>
-              </div>
-              <h3 class="text-xs font-semibold text-white tracking-tight mt-2.5 truncate">${escapeHtml(p.title)}</h3>
-              <p class="text-[10px] text-brand-secondary truncate mt-0.5">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
-            </div>
-            
-            <div class="flex items-center justify-between pt-3 mt-2 hairline-t text-[10px]">
-              <span class="font-mono text-brand-tertiary">${p.isArchived ? '保管中' : `${p.runCount || 0}回`}</span>
-              <div class="flex items-center space-x-1.5">
-                <button onclick="openStandaloneInstallGuide('${p.id}', event)" title="OSホーム画面へ独立アプリ追加（OSタスクキル対応）" class="p-1 text-white hover:opacity-80">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                </button>
-                <button onclick="openEditor('${p.id}', event)" class="p-1 text-brand-secondary hover:text-white">
-                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                </button>
-                <button onclick="toggleArchive('${p.id}', event)" class="p-1 text-brand-secondary hover:text-white">
-                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                </button>
-              </div>
-            </div>
-          `;
-        } else {
-          // Precision Minimal List Row
-          el.className = `monolith-plate hairline-border p-2.5 px-3 rounded-xl flex items-center justify-between press-responsive cursor-pointer transition-all ${
-            p.isArchived ? 'border-white/[0.05] opacity-80' : ''
-          }`;
-          el.innerHTML = `
-            <div class="flex items-center space-x-3 min-w-0 flex-1">
-              <div class="w-8 h-8 squircle bg-black border border-white/10 flex items-center justify-center text-[11px] font-mono font-bold text-white shrink-0">
-                ${escapeHtml(p.icon || 'PW')}
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center space-x-1.5">
-                  <h3 class="text-xs font-medium text-white tracking-tight truncate">${escapeHtml(p.title)}</h3>
-                  <span class="text-[8px] font-mono text-brand-tertiary px-1 py-0.2 rounded bg-white/[0.04] border border-white/[0.06]">${badgeType}</span>
-                  ${p.isArchived ? '<span class="text-[8px] font-mono text-amber-400/80 px-1 py-0.2 rounded bg-amber-400/10">VAULT</span>' : ''}
-                </div>
-                <p class="text-[10px] text-brand-secondary truncate">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
-              </div>
-            </div>
-
-            <div class="flex items-center space-x-2 shrink-0">
-              <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
-                <svg class="w-3 h-3 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-              </button>
-              <button onclick="openEditor('${p.id}', event)" title="編集" class="p-1 text-brand-secondary hover:text-white">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-              </button>
-              <button onclick="openStandaloneInstallGuide('${p.id}', event)" title="OSホーム画面へ独立アプリ追加" class="p-1 text-brand-secondary hover:text-white">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-              </button>
-              <button onclick="launchProject('${p.id}', event)" title="アプリ起動" class="h-6 px-2.5 rounded-full bg-white text-black font-semibold text-[10px] flex items-center justify-center gap-1 shadow-sm active:opacity-80">
-                <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                <span>起動</span>
-              </button>
-            </div>
-          `;
-        }
-
-        el.onclick = (e) => {
-          if (e.target.closest('button')) return;
-          launchProject(p.id, e);
-        };
-
-        container.appendChild(el);
-      });
-    }
-
-    /* ================================================================= */
-    /* 3. EXECUTABLE BUILDER & STANDALONE WINDOW LAUNCHER                */
-    /* ================================================================= */
     function buildStandaloneHtml(project) {
       const title = escapeHtml(project.title || 'PWA App');
       const iconText = escapeHtml(project.icon || 'PW');
-
-      // Generate Inline SVG PWA Icon (Data URI)
-      const iconSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect width="192" height="192" rx="42" fill="%23000000"/><text x="96" y="112" font-family="-apple-system,system-ui,sans-serif" font-size="64" font-weight="700" fill="%23ffffff" text-anchor="middle">${encodeURIComponent(iconText)}</text></svg>`;
+      const iconSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect width="192" height="192" rx="42" fill="%23000000"/><text x="96" y="114" font-family="-apple-system,system-ui,sans-serif" font-size="64" font-weight="700" fill="%23ffffff" text-anchor="middle">${encodeURIComponent(iconText)}</text></svg>`;
 
       if (project.type === 'react') {
         return `<!DOCTYPE html>
@@ -1197,7 +821,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>${title}</title>
   
-  <!-- Standalone iOS Web App Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="${title}">
@@ -1205,7 +828,6 @@
   <link rel="apple-touch-icon" href="${iconSvg}">
   <link rel="icon" type="image/svg+xml" href="${iconSvg}">
 
-  <!-- React 18, Babel Standalone & Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"><\/script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>
@@ -1214,11 +836,8 @@
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: #000000;
-      color: #ffffff;
+      margin: 0; padding: 0; height: 100%;
+      background-color: #000000; color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
       padding-top: env(safe-area-inset-top, 0px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1251,14 +870,14 @@
 </html>`;
       }
 
-      // Single HTML mode
       return project.code || '<h1 style="color:#fff;padding:24px;font-family:sans-serif;">Empty PWA</h1>';
     }
 
-    /* Open PWA as an Independent Window (Separate App) */
+    /* Open Project in a New Dedicated Window (Shows as Separate Card in iOS App Switcher) */
     function launchProjectInNewWindow(projectId, event) {
       if (event) event.stopPropagation();
       haptic();
+      
       const app = projects.find(p => p.id === projectId);
       if (!app) return;
 
@@ -1267,403 +886,223 @@
 
       if (app.type === 'url') {
         window.open(app.url, '_blank');
-        showToast(`「${app.title}」を別ウィンドウで起動`);
+        showToast(`「${app.title}」を起動中`);
         return;
       }
 
-      const fullHtml = buildStandaloneHtml(app);
-      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(blob);
+      // Construct standalone runner URL using ?run=ID query
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('run', app.id);
+      const runnerUrl = currentUrl.toString();
 
-      const win = window.open(blobUrl, '_blank');
+      // Launch separate window (Becomes independent task card on iOS)
+      const win = window.open(runnerUrl, '_blank');
       if (win) {
-        showToast(`「${app.title}」を独立別ウィンドウで起動`);
+        showToast(`「${app.title}」を別ウィンドウで起動`);
       } else {
-        // Fallback to internal sandbox if popup blocked
-        launchProject(projectId);
+        // Fallback if popup blocked by Safari
+        window.location.href = runnerUrl;
       }
     }
 
-    /* Internal Sandbox Runner (For preview or in-app emulation) */
-    function launchProject(projectId) {
-      haptic();
-      const app = projects.find(p => p.id === projectId);
-      if (!app) return;
+    /* Standalone Runner Initializer (Runs if ?run=ID is found in URL) */
+    function checkAndRunStandaloneMode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const runId = urlParams.get('run');
+      if (!runId) return false;
 
-      currentActiveApp = app;
-      app.runCount = (app.runCount || 0) + 1;
-      saveStorage();
+      loadStorage();
+      const app = projects.find(p => p.id === runId);
+      if (!app) return false;
 
-      if (!runningSessions.some(s => s.id === app.id)) {
-        runningSessions.unshift(app);
-      }
-      updateRunningBadge();
+      // Update Document Metadata for iOS Standalone Title
+      document.title = app.title || 'Aether PWA';
 
-      const viewport = document.getElementById('sandboxViewport');
-      const frame = document.getElementById('sandboxFrame');
-      const header = document.getElementById('appHeader');
-      const dock = document.getElementById('appDock');
+      const studioRoot = document.getElementById('studioRoot');
+      const runnerRoot = document.getElementById('standaloneRunnerRoot');
+      const iframe = document.getElementById('standaloneIframe');
 
-      syncIsland(app);
+      studioRoot.classList.add('hidden');
+      runnerRoot.classList.remove('hidden');
+      runnerRoot.classList.add('flex');
 
       if (app.type === 'url') {
-        frame.removeAttribute('srcdoc');
-        frame.src = app.url;
+        iframe.src = app.url;
       } else {
-        frame.removeAttribute('src');
-        frame.srcdoc = buildStandaloneHtml(app);
+        iframe.srcdoc = buildStandaloneHtml(app);
       }
 
-      header.classList.add('opacity-0', 'pointer-events-none');
-      dock.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('btnRunnerReload').onclick = () => {
+        haptic();
+        if (app.type === 'url') iframe.src = app.url;
+        else iframe.srcdoc = buildStandaloneHtml(app);
+        showToast('再読み込み完了');
+      };
 
-      viewport.classList.remove('hidden', 'pointer-events-none');
-      requestAnimationFrame(() => {
-        viewport.classList.remove('scale-95', 'opacity-0');
-        viewport.classList.add('scale-100', 'opacity-100');
+      document.getElementById('btnRunnerBackStudio').onclick = () => {
+        haptic();
+        const studioUrl = new URL(window.location.href);
+        studioUrl.searchParams.delete('run');
+        window.location.href = studioUrl.toString();
+      };
+
+      return true;
+    }
+
+    function loadStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          projects = JSON.parse(raw);
+        } else {
+          projects = [...DEFAULT_SEED_PROJECTS];
+          saveStorage();
+        }
+      } catch (e) {
+        projects = [...DEFAULT_SEED_PROJECTS];
+      }
+      refreshStats();
+    }
+
+    function saveStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      refreshStats();
+    }
+
+    function refreshStats() {
+      const activeCount = projects.filter(p => !p.isArchived).length;
+      const vaultCount = projects.filter(p => p.isArchived).length;
+      const elActive = document.getElementById('countActive');
+      const elVault = document.getElementById('countVault');
+      if (elActive) elActive.innerText = activeCount;
+      if (elVault) elVault.innerText = vaultCount;
+
+      try {
+        const bytes = new Blob([localStorage.getItem(STORAGE_KEY) || '']).size;
+        const elSize = document.getElementById('storageSizeLabel');
+        if (elSize) elSize.innerText = `${(bytes / 1024).toFixed(1)} KB`;
+      } catch(e) {}
+    }
+
+    function renderProjects() {
+      const container = document.getElementById('projectsContainer');
+      const emptyNotice = document.getElementById('emptyNotice');
+      const vaultNotice = document.getElementById('vaultNotice');
+      const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (currentFilter === 'vault') {
+        vaultNotice.classList.remove('hidden');
+      } else {
+        vaultNotice.classList.add('hidden');
+      }
+
+      const filtered = projects.filter(p => {
+        if (currentFilter === 'active' && p.isArchived) return false;
+        if (currentFilter === 'vault' && !p.isArchived) return false;
+        if (currentFilter === 'starred' && !p.isStarred) return false;
+
+        if (query) {
+          const mTitle = p.title.toLowerCase().includes(query);
+          const mDesc = (p.desc || '').toLowerCase().includes(query);
+          const mCode = (p.code || '').toLowerCase().includes(query);
+          if (!mTitle && !mDesc && !mCode) return false;
+        }
+        return true;
       });
 
-      showToast(`「${app.title}」を起動中`);
-    }
-
-    function exitSandbox() {
-      haptic();
-      const viewport = document.getElementById('sandboxViewport');
-      const frame = document.getElementById('sandboxFrame');
-      const header = document.getElementById('appHeader');
-      const dock = document.getElementById('appDock');
-
-      collapseIsland();
-
-      viewport.classList.remove('scale-100', 'opacity-100');
-      viewport.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
-
-      setTimeout(() => {
-        frame.removeAttribute('srcdoc');
-        frame.src = 'about:blank';
-        viewport.classList.add('hidden');
-      }, 300);
-
-      header.classList.remove('opacity-0', 'pointer-events-none');
-      dock.classList.remove('opacity-0', 'pointer-events-none');
-
-      resetIsland();
-      currentActiveApp = null;
-    }
-
-    function taskKillCurrentApp() {
-      haptic();
-      if (currentActiveApp) {
-        runningSessions = runningSessions.filter(s => s.id !== currentActiveApp.id);
-        updateRunningBadge();
-        showToast(`「${currentActiveApp.title}」をタスクキルしました`);
-      }
-      exitSandbox();
-    }
-
-    function updateRunningBadge() {
-      const badge = document.getElementById('dockRunningBadge');
-      if (runningSessions.length > 0) {
-        badge.classList.remove('hidden');
+      if (filtered.length === 0) {
+        emptyNotice.classList.remove('hidden');
       } else {
-        badge.classList.add('hidden');
+        emptyNotice.classList.add('hidden');
       }
-    }
 
-    /* iOS 18 MULTITASK APP SWITCHER (Swipe Up to Kill) */
-    function openAppSwitcher() {
-      haptic();
-      const switcher = document.getElementById('viewSwitcher');
-      const wrapper = document.getElementById('switcherCardsWrapper');
-      const countBadge = document.getElementById('switcherCountBadge');
-      
-      countBadge.innerText = `${runningSessions.length} RUNNING`;
-      wrapper.innerHTML = '';
+      container.className = currentLayout === 'grid' ? 'grid grid-cols-2 gap-2.5' : 'grid grid-cols-1 gap-1.5';
 
-      if (runningSessions.length === 0) {
-        wrapper.innerHTML = `
-          <div class="m-auto text-center py-20 text-brand-secondary text-xs">
-            実行中のタスクはありません<br>
-            <span class="text-[10px] text-brand-tertiary">アプリを起動するとここに並びます</span>
-          </div>
-        `;
-      } else {
-        runningSessions.forEach((app, index) => {
-          const card = document.createElement('div');
-          card.className = 'switcher-card relative shrink-0 w-[240px] h-[390px] rounded-3xl titanium-panel hairline-border overflow-hidden flex flex-col justify-between p-4 cursor-pointer shadow-2xl';
-          card.dataset.sessionId = app.id;
-
-          card.innerHTML = `
-            <!-- Top App Bar -->
-            <div class="flex items-center justify-between border-b border-white/[0.08] pb-2.5 pointer-events-none">
-              <div class="flex items-center space-x-2 min-w-0">
-                <div class="w-6 h-6 squircle bg-black border border-white/10 flex items-center justify-center text-[10px] font-mono font-bold text-white">
-                  ${escapeHtml(app.icon || 'PW')}
+      filtered.forEach(p => {
+        const el = document.createElement('div');
+        const badgeType = p.type === 'react' ? 'REACT' : (p.type === 'url' ? 'URL' : 'HTML');
+        
+        if (currentLayout === 'grid') {
+          el.className = `titanium-glass hairline-border p-3.5 rounded-2xl flex flex-col justify-between press-responsive cursor-pointer transition-all ${
+            p.isArchived ? 'opacity-70 bg-white/[0.02]' : ''
+          }`;
+          el.innerHTML = `
+            <div>
+              <div class="flex items-start justify-between">
+                <div class="w-10 h-10 squircle bg-black border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white shadow-sm">
+                  ${escapeHtml(p.icon || 'PW')}
                 </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-semibold text-white tracking-tight truncate">${escapeHtml(app.title)}</h4>
-                  <span class="text-[8px] font-mono text-brand-secondary">${app.type.toUpperCase()}</span>
+                <div class="flex items-center space-x-1">
+                  <span class="text-[8px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-brand-secondary border border-white/[0.06]">${badgeType}</span>
+                  <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
+                    <svg class="w-3.5 h-3.5 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  </button>
                 </div>
               </div>
-              <span class="text-[9px] font-mono text-brand-tertiary">#${index + 1}</span>
+              <h3 class="text-xs font-semibold text-white tracking-tight mt-2.5 truncate">${escapeHtml(p.title)}</h3>
+              <p class="text-[10px] text-brand-secondary truncate mt-0.5">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
             </div>
-
-            <!-- App Thumbnail Visual -->
-            <div class="my-auto flex-1 flex flex-col items-center justify-center p-3 text-center pointer-events-none">
-              <div class="w-14 h-14 squircle bg-white/[0.04] border border-white/10 flex items-center justify-center text-xl font-bold text-white mb-2">
-                ${escapeHtml(app.icon || 'PW')}
-              </div>
-              <p class="text-[11px] text-brand-secondary truncate max-w-[180px]">${escapeHtml(app.desc || '実行中タスク')}</p>
-              <div class="mt-3 px-2 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[9px] font-mono text-brand-secondary">
-                ↑ 上スワイプでタスクキル
-              </div>
-            </div>
-
-            <!-- Bottom Kill Button (Manual or Swipe) -->
-            <div class="pt-2 hairline-t flex items-center justify-between">
-              <button onclick="killSession('${app.id}', event)" class="press-responsive text-[10px] text-rose-400 hover:text-rose-300 font-medium py-1 px-2 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center gap-1">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                <span>タスクキル</span>
+            
+            <div class="flex items-center justify-between pt-3 mt-2 hairline-t text-[10px]">
+              <button onclick="launchProjectInNewWindow('${p.id}', event)" class="h-6 px-2.5 rounded-full bg-white text-black font-semibold text-[10px] flex items-center gap-1 shadow-sm">
+                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>起動</span>
               </button>
-              <button onclick="resumeSession('${app.id}', event)" class="press-responsive text-[10px] text-white font-medium py-1 px-3 rounded-lg bg-white/10 border border-white/15">
-                開く
+              <div class="flex items-center space-x-1.5">
+                <button onclick="openEditor('${p.id}', event)" title="編集" class="p-1 text-brand-secondary hover:text-white">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button onclick="toggleArchive('${p.id}', event)" title="保管庫へ移動" class="p-1 text-brand-secondary hover:text-white">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          el.className = `monolith-plate hairline-border p-2.5 px-3 rounded-xl flex items-center justify-between press-responsive cursor-pointer transition-all ${
+            p.isArchived ? 'opacity-70 bg-white/[0.02]' : ''
+          }`;
+          el.innerHTML = `
+            <div class="flex items-center space-x-3 min-w-0 flex-1">
+              <div class="w-8 h-8 squircle bg-black border border-white/10 flex items-center justify-center text-[11px] font-mono font-bold text-white shrink-0">
+                ${escapeHtml(p.icon || 'PW')}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center space-x-1.5">
+                  <h3 class="text-xs font-medium text-white tracking-tight truncate">${escapeHtml(p.title)}</h3>
+                  <span class="text-[8px] font-mono text-brand-tertiary px-1 py-0.2 rounded bg-white/[0.04] border border-white/[0.06]">${badgeType}</span>
+                  ${p.isArchived ? '<span class="text-[8px] font-mono text-amber-400/80 px-1 py-0.2 rounded bg-amber-400/10">VAULT</span>' : ''}
+                </div>
+                <p class="text-[10px] text-brand-secondary truncate">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2 shrink-0">
+              <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
+                <svg class="w-3 h-3 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              </button>
+              <button onclick="openEditor('${p.id}', event)" title="編集" class="p-1 text-brand-secondary hover:text-white">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              </button>
+              <button onclick="launchProjectInNewWindow('${p.id}', event)" title="別ウィンドウで起動（OSマルチタスク対応）" class="h-6 px-2.5 rounded-full bg-white text-black font-semibold text-[10px] flex items-center justify-center gap-1 shadow-sm active:opacity-80">
+                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>起動</span>
               </button>
             </div>
           `;
-
-          // Touch Drag to Kill Gesture on Cards
-          attachSwipeToKill(card, app.id);
-          wrapper.appendChild(card);
-        });
-      }
-
-      switcher.classList.remove('hidden');
-      switcher.classList.add('flex');
-    }
-
-    function closeAppSwitcher() {
-      haptic();
-      const switcher = document.getElementById('viewSwitcher');
-      switcher.classList.add('hidden');
-      switcher.classList.remove('flex');
-    }
-
-    function attachSwipeToKill(cardElement, appId) {
-      let startY = 0;
-      let currentY = 0;
-      let isDragging = false;
-
-      cardElement.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].clientY;
-        isDragging = true;
-        cardElement.classList.add('swiping-up');
-      }, { passive: true });
-
-      cardElement.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        currentY = e.touches[0].clientY;
-        const diffY = currentY - startY;
-        if (diffY < 0) {
-          // Dragging UPWARDS
-          cardElement.style.transform = `translateY(${diffY}px) scale(${Math.max(0.75, 1 + diffY / 800)})`;
-          cardElement.style.opacity = Math.max(0.2, 1 + diffY / 400);
         }
-      }, { passive: true });
 
-      cardElement.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        cardElement.classList.remove('swiping-up');
-        const diffY = e.changedTouches[0].clientY - startY;
+        el.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          launchProjectInNewWindow(p.id, e);
+        };
 
-        if (diffY < -90) {
-          // Trigger Task Kill
-          killSession(appId);
-        } else {
-          // Snap back
-          cardElement.style.transform = '';
-          cardElement.style.opacity = '';
-        }
+        container.appendChild(el);
       });
     }
-
-    function killSession(appId, event) {
-      if (event) event.stopPropagation();
-      haptic();
-      const card = document.querySelector(`.switcher-card[data-session-id="${appId}"]`);
-      if (card) {
-        card.classList.add('killed');
-      }
-
-      setTimeout(() => {
-        runningSessions = runningSessions.filter(s => s.id !== appId);
-        updateRunningBadge();
-        if (currentActiveApp && currentActiveApp.id === appId) {
-          exitSandbox();
-        }
-        openAppSwitcher(); // Re-render switcher list
-        showToast('タスクをキルしました');
-      }, 260);
-    }
-
-    function resumeSession(appId, event) {
-      if (event) event.stopPropagation();
-      closeAppSwitcher();
-      launchProject(appId);
-    }
-
-    document.getElementById('btnCloseSwitcher').onclick = closeAppSwitcher;
-    document.getElementById('dockBtnSwitcher').onclick = openAppSwitcher;
-    document.getElementById('btnIslandSwitcher').onclick = () => {
-      collapseIsland();
-      openAppSwitcher();
-    };
-    document.getElementById('btnIslandExit').onclick = () => {
-      collapseIsland();
-      taskKillCurrentApp();
-    };
-    document.getElementById('btnKillAllSessions').onclick = () => {
-      haptic();
-      runningSessions = [];
-      updateRunningBadge();
-      if (currentActiveApp) exitSandbox();
-      openAppSwitcher();
-      showToast('すべてのタスクをキルしました');
-    };
-
-    let selectedGuideProject = null;
-
-    function openStandaloneInstallGuide(projectId, event) {
-      if (event) event.stopPropagation();
-      haptic();
-      const app = projects.find(p => p.id === projectId);
-      if (!app) return;
-
-      selectedGuideProject = app;
-      document.getElementById('guideModalTitle').innerText = `「${app.title}」を独立アプリ化`;
-      document.getElementById('guideModalIcon').innerText = app.icon || 'PW';
-
-      document.getElementById('standaloneGuideModal').classList.remove('hidden');
-      document.getElementById('standaloneGuideModal').classList.add('flex');
-    }
-
-    document.getElementById('btnGuideModalClose').onclick = closeStandaloneInstallGuide;
-    document.getElementById('btnGuideModalCancel').onclick = closeStandaloneInstallGuide;
-
-    function closeStandaloneInstallGuide() {
-      document.getElementById('standaloneGuideModal').classList.add('hidden');
-      document.getElementById('standaloneGuideModal').classList.remove('flex');
-      selectedGuideProject = null;
-    }
-
-    document.getElementById('btnGuideModalOpenTab').onclick = () => {
-      if (!selectedGuideProject) return;
-      haptic();
-      const fullHtml = buildStandaloneHtml(selectedGuideProject);
-      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
-      closeStandaloneInstallGuide();
-      showToast('独立ウィンドウを開きました。共有からホーム画面に追加してください');
-    };
-    document.getElementById('btnTestRunWindow').onclick = () => {
-      const tempItem = {
-        id: 'preview_temp',
-        title: document.getElementById('formTitle').value || '別窓プレビュー',
-        icon: document.getElementById('formIcon').value || 'PW',
-        type: currentEditorMode,
-        code: document.getElementById('formCode').value,
-        url: document.getElementById('formUrl').value,
-        isArchived: false
-      };
-      openStandaloneInstallGuide('preview_temp');
-    };
-
-    // Open Paste Dialog (Fallback for iOS Safari Clipboard restrictions)
-    function openPastePromptModal() {
-      const modal = document.getElementById('pasteModal');
-      const input = document.getElementById('pasteModalInput');
-      input.value = '';
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      setTimeout(() => input.focus(), 50);
-    }
-
-    function closePasteModal() {
-      const modal = document.getElementById('pasteModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    document.getElementById('btnPasteModalClose').onclick = closePasteModal;
-    document.getElementById('btnPasteModalCancel').onclick = closePasteModal;
-    document.getElementById('btnPasteModalConfirm').onclick = () => {
-      haptic();
-      const text = document.getElementById('pasteModalInput').value;
-      if (text) {
-        insertTextAtCursor(text);
-        updateCodeCount();
-        showToast('コードを貼り付けました');
-      }
-      closePasteModal();
-    };
-
-    document.getElementById('btnIslandDismiss').onclick = (e) => {
-      e.stopPropagation();
-      collapseIsland();
-    };
-    document.getElementById('btnIslandReload').onclick = reloadSandbox;
-    document.getElementById('btnIslandExit').onclick = exitSandbox;
-    document.getElementById('btnIslandNewWindow').onclick = () => {
-      if (currentActiveApp) {
-        collapseIsland();
-        launchProjectInNewWindow(currentActiveApp.id);
-      }
-    };
-    document.getElementById('btnIslandInspect').onclick = () => {
-      collapseIsland();
-      if (currentActiveApp) openInspector(currentActiveApp.id);
-    };
-
-    /* Physical Home Indicator Gesture */
-    const homeArea = document.getElementById('sandboxHomeArea');
-    let touchY = 0;
-    let isDragging = false;
-
-    homeArea.addEventListener('touchstart', (e) => {
-      touchY = e.touches[0].clientY;
-      isDragging = true;
-    }, { passive: true });
-
-    homeArea.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      const curY = e.touches[0].clientY;
-      const diff = touchY - curY;
-      if (diff > 0) {
-        const scale = Math.max(0.88, 1 - (diff / 500));
-        const vp = document.getElementById('sandboxViewport');
-        vp.style.transform = `translateY(-${diff * 0.3}px) scale(${scale})`;
-      }
-    }, { passive: true });
-
-    homeArea.addEventListener('touchend', (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      const diff = touchY - e.changedTouches[0].clientY;
-      const vp = document.getElementById('sandboxViewport');
-      vp.style.transform = '';
-      if (diff > 50) {
-        exitSandbox();
-      }
-    });
-
-    homeArea.onclick = exitSandbox;
-    document.getElementById('sandboxPullZone').onclick = expandIsland;
-
-    /* ================================================================= */
-    /* 4. CREATIVE STUDIO & PRESET HANDLER                               */
-    /* ================================================================= */
-    let currentEditorMode = 'react'; // 'react' | 'code' | 'url'
 
     const PRESETS = {
       react_counter: DEFAULT_SEED_PROJECTS[0].code,
@@ -1713,115 +1152,14 @@
 </html>`
     };
 
-    function resetStudio() {
-      document.getElementById('formProjectId').value = '';
-      document.getElementById('formTitle').value = '';
-      document.getElementById('formIcon').value = 'RC';
-      document.getElementById('studioIconText').innerText = 'RC';
-      document.getElementById('formDesc').value = '';
-      document.getElementById('formCode').value = PRESETS.react_counter;
-      document.getElementById('formUrl').value = '';
-      document.getElementById('formIsArchived').checked = (currentFilter === 'vault');
-      document.getElementById('btnSubmitLabel').innerText = '保存して登録';
-      document.getElementById('studioHeadline').innerText = '新規PWAを設計・登録';
-      setEditorMode('react');
-      updateCodeCount();
-    }
-
-    function openEditor(projectId, event) {
-      if (event) event.stopPropagation();
-      haptic();
-      const app = projects.find(p => p.id === projectId);
-      if (!app) return;
-
-      switchView('studio');
-      document.getElementById('studioHeadline').innerText = 'プロジェクトを再編集';
-      document.getElementById('btnSubmitLabel').innerText = '更新内容を保存';
-      document.getElementById('formProjectId').value = app.id;
-      document.getElementById('formTitle').value = app.title;
-      document.getElementById('formIcon').value = app.icon || 'PW';
-      document.getElementById('studioIconText').innerText = app.icon || 'PW';
-      document.getElementById('formDesc').value = app.desc || '';
-      document.getElementById('formCode').value = app.code || '';
-      document.getElementById('formUrl').value = app.url || '';
-      document.getElementById('formIsArchived').checked = !!app.isArchived;
-
-      setEditorMode(app.type || 'code');
-      updateCodeCount();
-    }
-
-    function setEditorMode(mode) {
-      currentEditorMode = mode;
-      const tabReact = document.getElementById('tabModeReact');
-      const tabCode = document.getElementById('tabModeCode');
-      const tabUrl = document.getElementById('tabModeUrl');
-      const boxCode = document.getElementById('boxEditorCode');
-      const boxUrl = document.getElementById('boxEditorUrl');
-      const label = document.getElementById('editorLanguageLabel');
-
-      [tabReact, tabCode, tabUrl].forEach(t => {
-        t.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all';
-      });
-
-      if (mode === 'react') {
-        tabReact.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
-        boxCode.classList.remove('hidden');
-        boxUrl.classList.add('hidden');
-        label.innerText = 'Standalone React 18 Component (Babel JSX + Tailwind)';
-      } else if (mode === 'code') {
-        tabCode.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
-        boxCode.classList.remove('hidden');
-        boxUrl.classList.add('hidden');
-        label.innerText = 'Embedded Single HTML / CSS / JS';
-      } else {
-        tabUrl.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
-        boxUrl.classList.remove('hidden');
-        boxCode.classList.add('hidden');
-      }
-    }
+    const codeArea = document.getElementById('formCode');
 
     function updateCodeCount() {
-      const code = document.getElementById('formCode').value;
+      const code = codeArea.value || '';
       const lines = code ? code.split('\n').length : 0;
       const chars = code.length;
       document.getElementById('codeStatsCounter').innerText = `${lines} 行 · ${chars} 文字`;
     }
-
-    /* ================================================================= */
-    /* EDITOR ASSIST ENGINE (Select All, Paste, Copy, Indent, Symbols)   */
-    /* ================================================================= */
-    const codeArea = document.getElementById('formCode');
-
-    // 1. 全選択
-    document.getElementById('btnEditorSelectAll').onclick = () => {
-      haptic();
-      codeArea.focus();
-      codeArea.select();
-      codeArea.setSelectionRange(0, codeArea.value.length);
-      showToast('コードを全選択');
-    };
-
-    // 2. ペースト (Clipboard API ＋ フォールバック)
-    document.getElementById('btnEditorPaste').onclick = async () => {
-      haptic();
-      codeArea.focus();
-      try {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          const text = await navigator.clipboard.readText();
-          if (text) {
-            insertTextAtCursor(text);
-            updateCodeCount();
-            showToast('クリップボードから貼り付け');
-            return;
-          }
-        }
-      } catch (err) {
-        // Fallback: prompt modal for manual paste if restricted by iOS/iFrame
-      }
-
-      // フォールバック: iOS等でクリップボードAPIへのアクセスが遮断された場合
-      openPastePromptModal();
-    };
 
     function insertTextAtCursor(insertStr) {
       const start = codeArea.selectionStart;
@@ -1843,12 +1181,10 @@
       const val = codeArea.value;
 
       if (!close) {
-        // 単一記号の挿入
         insertTextAtCursor(open);
         return;
       }
 
-      // ペア記号（例: { } や ( ) など）の囲み処理
       if (start !== end) {
         const selected = val.substring(start, end);
         codeArea.value = val.substring(0, start) + open + selected + close + val.substring(end);
@@ -1862,6 +1198,63 @@
       updateCodeCount();
     }
 
+    // 1. 全選択
+    document.getElementById('btnEditorSelectAll').onclick = () => {
+      haptic();
+      codeArea.focus();
+      codeArea.select();
+      codeArea.setSelectionRange(0, codeArea.value.length);
+      showToast('コードを全選択');
+    };
+
+    // 2. ペースト (Clipboard API ＋ フォールバック)
+    document.getElementById('btnEditorPaste').onclick = async () => {
+      haptic();
+      codeArea.focus();
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            insertTextAtCursor(text);
+            updateCodeCount();
+            showToast('貼り付け完了');
+            return;
+          }
+        }
+      } catch (err) {}
+
+      // Fallback modal for iOS Safari sandbox
+      openPasteModal();
+    };
+
+    function openPasteModal() {
+      const modal = document.getElementById('pasteModal');
+      const input = document.getElementById('pasteModalInput');
+      input.value = '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => input.focus(), 100);
+    }
+
+    function closePasteModal() {
+      const modal = document.getElementById('pasteModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('btnPasteModalClose').onclick = closePasteModal;
+    document.getElementById('btnPasteModalCancel').onclick = closePasteModal;
+    document.getElementById('btnPasteModalConfirm').onclick = () => {
+      haptic();
+      const text = document.getElementById('pasteModalInput').value;
+      if (text) {
+        insertTextAtCursor(text);
+        updateCodeCount();
+        showToast('コードを貼り付けました');
+      }
+      closePasteModal();
+    };
+
     // 3. コピー
     document.getElementById('btnEditorCopy').onclick = () => {
       haptic();
@@ -1874,14 +1267,13 @@
       showToast('コードをコピーしました');
     };
 
-    // 4. Tabインデント（2スペース挿入）
+    // 4. Tabインデント
     document.getElementById('btnEditorIndent').onclick = () => {
       haptic();
       codeArea.focus();
       insertTextAtCursor('  ');
     };
 
-    // キーボードのTabキー押下時のハンドリング
     codeArea.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -1904,7 +1296,7 @@
       });
     };
 
-    // 6. エディタ全画面拡大トグル
+    // 6. 全画面化切替
     let isEditorExpanded = false;
     document.getElementById('btnToggleEditorExpand').onclick = () => {
       haptic();
@@ -1922,40 +1314,97 @@
         box.classList.remove('editor-fullscreen');
         iconExpand.classList.remove('hidden');
         iconCollapse.classList.add('hidden');
-        codeArea.setAttribute('rows', '13');
+        codeArea.setAttribute('rows', '12');
       }
     };
 
-    function openPastePromptModal() {
-      openDialog({
-        title: 'クリップボードのペースト',
-        message: 'ブラウザ設定により直接アクセスが制限されています。下のテキスト枠に貼り付けて実行してください。',
-        onConfirm: () => {
-          const manualVal = prompt('ここにコードを貼り付けてください:');
-          if (manualVal !== null && manualVal.length > 0) {
-            insertTextAtCursor(manualVal);
-            showToast('コードを貼り付けました');
-          }
-        }
-      });
-    }
-
-    document.getElementById('formCode').addEventListener('input', updateCodeCount);
+    codeArea.addEventListener('input', updateCodeCount);
     document.getElementById('formIcon').addEventListener('input', (e) => {
       document.getElementById('studioIconText').innerText = e.target.value.toUpperCase() || 'PW';
     });
+
+    function setEditorMode(mode) {
+      currentEditorMode = mode;
+      const tabReact = document.getElementById('tabModeReact');
+      const tabCode = document.getElementById('tabModeCode');
+      const tabUrl = document.getElementById('tabModeUrl');
+      const boxCode = document.getElementById('boxEditorCode');
+      const boxUrl = document.getElementById('boxEditorUrl');
+      const label = document.getElementById('editorLanguageLabel');
+
+      [tabReact, tabCode, tabUrl].forEach(t => {
+        t.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all';
+      });
+
+      if (mode === 'react') {
+        tabReact.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
+        boxCode.classList.remove('hidden');
+        boxUrl.classList.add('hidden');
+        label.innerText = 'React 18 Component (Babel JSX + Tailwind)';
+      } else if (mode === 'code') {
+        tabCode.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
+        boxCode.classList.remove('hidden');
+        boxUrl.classList.add('hidden');
+        label.innerText = 'Single Embedded HTML / CSS / JS';
+      } else {
+        tabUrl.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
+        boxUrl.classList.remove('hidden');
+        boxCode.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('tabModeReact').onclick = () => setEditorMode('react');
+    document.getElementById('tabModeCode').onclick = () => setEditorMode('code');
+    document.getElementById('tabModeUrl').onclick = () => setEditorMode('url');
 
     document.getElementById('selectPresets').onchange = (e) => {
       const key = e.target.value;
       if (key && PRESETS[key]) {
         haptic();
-        document.getElementById('formCode').value = PRESETS[key];
+        codeArea.value = PRESETS[key];
         setEditorMode(key.startsWith('react') ? 'react' : 'code');
         updateCodeCount();
         showToast('プリセットコードを挿入');
       }
       e.target.value = '';
     };
+
+    function resetStudio() {
+      document.getElementById('formProjectId').value = '';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formIcon').value = 'RC';
+      document.getElementById('studioIconText').innerText = 'RC';
+      document.getElementById('formDesc').value = '';
+      codeArea.value = PRESETS.react_counter;
+      document.getElementById('formUrl').value = '';
+      document.getElementById('formIsArchived').checked = (currentFilter === 'vault');
+      document.getElementById('btnSubmitLabel').innerText = '保存して登録';
+      document.getElementById('studioHeadline').innerText = '新規PWAを設計・登録';
+      setEditorMode('react');
+      updateCodeCount();
+    }
+
+    function openEditor(projectId, event) {
+      if (event) event.stopPropagation();
+      haptic();
+      const app = projects.find(p => p.id === projectId);
+      if (!app) return;
+
+      switchView('studio');
+      document.getElementById('studioHeadline').innerText = 'プロジェクトを再編集';
+      document.getElementById('btnSubmitLabel').innerText = '更新内容を保存';
+      document.getElementById('formProjectId').value = app.id;
+      document.getElementById('formTitle').value = app.title;
+      document.getElementById('formIcon').value = app.icon || 'PW';
+      document.getElementById('studioIconText').innerText = app.icon || 'PW';
+      document.getElementById('formDesc').value = app.desc || '';
+      codeArea.value = app.code || '';
+      document.getElementById('formUrl').value = app.url || '';
+      document.getElementById('formIsArchived').checked = !!app.isArchived;
+
+      setEditorMode(app.type || 'code');
+      updateCodeCount();
+    }
 
     document.getElementById('studioForm').onsubmit = (e) => {
       e.preventDefault();
@@ -1965,7 +1414,7 @@
       const title = document.getElementById('formTitle').value.trim();
       const icon = (document.getElementById('formIcon').value.trim() || 'PW').toUpperCase();
       const desc = document.getElementById('formDesc').value.trim();
-      const code = document.getElementById('formCode').value;
+      const code = codeArea.value;
       const url = document.getElementById('formUrl').value.trim();
       const isArchived = document.getElementById('formIsArchived').checked;
 
@@ -1999,62 +1448,27 @@
       renderProjects();
     };
 
-    document.getElementById('btnTestRunSandbox').onclick = () => {
+    document.getElementById('btnTestRunDirect').onclick = () => {
+      haptic();
+      const tempId = 'temp_preview_' + Date.now();
       const tempItem = {
-        id: 'preview_temp',
+        id: tempId,
         title: document.getElementById('formTitle').value || 'プレビュー実行',
         icon: document.getElementById('formIcon').value || 'PW',
         type: currentEditorMode,
-        code: document.getElementById('formCode').value,
+        code: codeArea.value,
         url: document.getElementById('formUrl').value,
-        isArchived: false
+        isArchived: false,
+        runCount: 0,
+        createdAt: new Date().toISOString().split('T')[0]
       };
-      launchDirectPreview(tempItem);
+
+      projects.unshift(tempItem);
+      saveStorage();
+
+      launchProjectInNewWindow(tempId);
     };
 
-    document.getElementById('btnTestRunWindow').onclick = () => {
-      const tempItem = {
-        id: 'preview_temp',
-        title: document.getElementById('formTitle').value || '別窓プレビュー',
-        icon: document.getElementById('formIcon').value || 'PW',
-        type: currentEditorMode,
-        code: document.getElementById('formCode').value,
-        url: document.getElementById('formUrl').value,
-        isArchived: false
-      };
-      const fullHtml = buildStandaloneHtml(tempItem);
-      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
-      showToast('別ウィンドウでテスト起動');
-    };
-
-    function launchDirectPreview(item) {
-      haptic();
-      currentActiveApp = item;
-      const viewport = document.getElementById('sandboxViewport');
-      const frame = document.getElementById('sandboxFrame');
-      const header = document.getElementById('appHeader');
-      const dock = document.getElementById('appDock');
-
-      syncIsland(item);
-
-      if (item.type === 'url') frame.src = item.url;
-      else frame.srcdoc = buildStandaloneHtml(item);
-
-      header.classList.add('opacity-0', 'pointer-events-none');
-      dock.classList.add('opacity-0', 'pointer-events-none');
-
-      viewport.classList.remove('hidden', 'pointer-events-none');
-      requestAnimationFrame(() => {
-        viewport.classList.remove('scale-95', 'opacity-0');
-        viewport.classList.add('scale-100', 'opacity-100');
-      });
-    }
-
-    /* ================================================================= */
-    /* 5. ARCHIVE & STAR SUBSYSTEM                                       */
-    /* ================================================================= */
     function toggleStar(id, event) {
       if (event) event.stopPropagation();
       haptic();
@@ -2087,55 +1501,6 @@
       showToast('保管庫の全アプリを現役へ復帰');
     };
 
-    /* ================================================================= */
-    /* 6. CODE INSPECTOR & EXPORT                                        */
-    /* ================================================================= */
-    function openInspector(id, event) {
-      if (event) event.stopPropagation();
-      haptic();
-      const p = projects.find(item => item.id === id);
-      if (!p) return;
-
-      document.getElementById('inspectTitle').innerText = p.title;
-      document.getElementById('inspectMeta').innerText = p.type === 'react' ? 'React 18 (JSX / Hooks)' : (p.type === 'url' ? `External URL (${p.url})` : 'Single Embedded HTML');
-      const content = p.type === 'url' ? p.url : (p.code || '');
-      document.getElementById('inspectCodeArea').innerText = content;
-
-      document.getElementById('btnInspectCopy').onclick = () => {
-        copySafe(content);
-        showToast('クリップボードにコピー');
-      };
-
-      document.getElementById('btnInspectLaunch').onclick = () => {
-        closeInspector();
-        launchProjectInNewWindow(p.id);
-      };
-
-      document.getElementById('inspectorModal').classList.remove('hidden');
-      document.getElementById('inspectorModal').classList.add('flex');
-    }
-
-    function closeInspector() {
-      document.getElementById('inspectorModal').classList.add('hidden');
-      document.getElementById('inspectorModal').classList.remove('flex');
-    }
-
-    document.getElementById('btnInspectDismiss').onclick = closeInspector;
-
-    function copySafe(text) {
-      const el = document.createElement('textarea');
-      el.value = text;
-      el.style.position = 'fixed';
-      el.style.opacity = '0';
-      document.body.appendChild(el);
-      el.select();
-      try { document.execCommand('copy'); } catch(e) {}
-      document.body.removeChild(el);
-    }
-
-    /* ================================================================= */
-    /* 7. SYSTEM BACKUP, RESET & DIALOG                                  */
-    /* ================================================================= */
     document.getElementById('btnExportJSON').onclick = () => {
       haptic();
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
@@ -2227,14 +1592,22 @@
       }, 2000);
     }
 
+    function copySafe(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(el);
+    }
+
     function escapeHtml(str) {
       if (!str) return '';
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
-    /* ================================================================= */
-    /* 8. NAVIGATION & CORE LIFECYCLE                                    */
-    /* ================================================================= */
     function switchView(target) {
       haptic();
 
@@ -2291,11 +1664,6 @@
     document.getElementById('btnOpenStudio').onclick = () => switchView('studio');
     document.getElementById('btnStudioClose').onclick = () => switchView('projects');
 
-    document.getElementById('tabModeReact').onclick = () => setEditorMode('react');
-    document.getElementById('tabModeCode').onclick = () => setEditorMode('code');
-    document.getElementById('tabModeUrl').onclick = () => setEditorMode('url');
-
-    /* Layout Toggle (List vs Grid) */
     document.getElementById('btnLayoutToggle').onclick = () => {
       haptic();
       currentLayout = (currentLayout === 'list') ? 'grid' : 'list';
@@ -2304,7 +1672,6 @@
       renderProjects();
     };
 
-    /* Search Controller */
     const searchInput = document.getElementById('searchInput');
     const searchClear = document.getElementById('btnSearchClear');
     searchInput.oninput = () => {
@@ -2317,11 +1684,15 @@
       renderProjects();
     };
 
-    // Initialize application
-    window.onload = () => {
+    window.addEventListener('load', () => {
+      // 1. Check if launched as Standalone Runner via ?run=ID
+      const isStandalone = checkAndRunStandaloneMode();
+      if (isStandalone) return;
+
+      // 2. Normal Studio Hub Mode
       loadStorage();
       renderProjects();
-    };
+    });
   </script>
 </body>
 </html>
