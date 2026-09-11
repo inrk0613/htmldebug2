@@ -180,13 +180,13 @@
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span>再読込</span>
           </button>
+          <button id="btnIslandNewWindow" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            <span>別アプリ起動</span>
+          </button>
           <button id="btnIslandInspect" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
             <span>コード</span>
-          </button>
-          <button id="btnIslandToggleArchive" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-            <span>アーカイブ</span>
           </button>
           <button id="btnIslandExit" class="press-responsive py-1.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white/20 flex flex-col items-center justify-center gap-1 text-white font-medium">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -365,29 +365,34 @@
               <!-- Quick Presets -->
               <select id="selectPresets" class="bg-white/[0.06] text-white/80 text-[10px] rounded px-2 py-0.5 border border-white/10 font-mono">
                 <option value="" selected>⚡ プリセットから選ぶ...</option>
-                <option value="oscillo">Oscilloscope Canvas</option>
-                <option value="metronome">Precision Chrono</option>
-                <option value="scratchpad">Clean Scratchpad</option>
+                <option value="react_counter">⚛️ React: Minimal State App</option>
+                <option value="react_task">⚛️ React: Focus Kanban Matrix</option>
+                <option value="oscillo">⚡ HTML: Vector Scope Canvas</option>
+                <option value="metronome">⚡ HTML: Precision Chrono</option>
+                <option value="scratchpad">⚡ HTML: Clean Scratchpad</option>
               </select>
             </div>
 
-            <div class="grid grid-cols-2 gap-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-[11px]">
-              <button type="button" id="tabModeCode" class="py-1 rounded-lg font-medium text-white bg-white/10">
-                単一HTMLソース
+            <div class="grid grid-cols-3 gap-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-[10px] font-mono">
+              <button type="button" id="tabModeReact" class="py-1 rounded-lg font-medium text-white bg-white/10">
+                ⚛️ React (JSX)
+              </button>
+              <button type="button" id="tabModeCode" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
+                単一HTML
               </button>
               <button type="button" id="tabModeUrl" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
-                Web PWA URL
+                Web URL
               </button>
             </div>
 
             <!-- Code Editor -->
             <div id="boxEditorCode" class="space-y-1">
               <div class="flex items-center justify-between text-[9px] font-mono text-brand-tertiary">
-                <span>Embedded Single HTML / JS</span>
+                <span id="editorLanguageLabel">Standalone React 18 Component (Babel JSX + Tailwind)</span>
                 <span id="codeLengthCounter">0 chars</span>
               </div>
               <textarea id="formCode" rows="12" spellcheck="false"
-                        placeholder="<!DOCTYPE html><html><body><h1>Minimal PWA</h1></body></html>"
+                        placeholder="// React Component (App)..."
                         class="w-full font-mono text-[11px] leading-relaxed bg-[#0a0a0d] text-white/90 p-3 rounded-xl border border-white/[0.08] focus:border-white/30 resize-none"></textarea>
             </div>
 
@@ -413,8 +418,13 @@
             <button type="submit" class="press-responsive flex-1 h-10 rounded-xl bg-white text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-md">
               <span id="btnSubmitLabel">保存して登録</span>
             </button>
-            <button type="button" id="btnTestRunSandbox" class="press-responsive h-10 px-4 rounded-xl monolith-plate hairline-border text-white text-xs font-medium flex items-center gap-1.5">
-              <span>プレビュー</span>
+            <button type="button" id="btnTestRunSandbox" title="アプリ内プレビュー" class="press-responsive h-10 px-3 rounded-xl monolith-plate hairline-border text-white text-xs font-medium flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>内覧</span>
+            </button>
+            <button type="button" id="btnTestRunWindow" title="独立別ウィンドウで起動" class="press-responsive h-10 px-3 rounded-xl bg-white/10 border border-white/15 text-white text-xs font-medium flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              <span>別窓</span>
             </button>
           </div>
         </form>
@@ -562,6 +572,154 @@
 
     const DEFAULT_SEED_PROJECTS = [
       {
+        id: 'pwa_react_minimal_haptic',
+        title: 'React Haptic Counter',
+        icon: 'RC',
+        desc: 'React 18 Hooks・状態管理・Web Audio触覚フィードバック統合アプリ',
+        type: 'react',
+        code: `function App() {
+  const [count, setCount] = React.useState(0);
+  const [history, setHistory] = React.useState([]);
+
+  const playClick = (freq) => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.03);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.03);
+    } catch(e) {}
+  };
+
+  const update = (diff) => {
+    playClick(diff > 0 ? 580 : 320);
+    setCount(prev => {
+      const next = Math.max(0, prev + diff);
+      setHistory(h => [next, ...h.slice(0, 4)]);
+      return next;
+    });
+  };
+
+  return (
+    <div className="h-full w-full bg-black text-white flex flex-col justify-between p-6 select-none font-sans">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <span className="text-[10px] font-mono tracking-widest text-neutral-400">REACT 18 ISOLATED APP</span>
+        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-white/10 text-neutral-300">STANDALONE</span>
+      </div>
+
+      <div className="my-auto text-center space-y-3">
+        <div className="text-8xl font-light tracking-tighter font-mono">{count}</div>
+        <div className="text-[11px] font-mono text-neutral-500">
+          Recent: {history.length > 0 ? history.join(' → ') : 'None'}
+        </div>
+      </div>
+
+      <div className="space-y-3 max-w-sm mx-auto w-full pb-4">
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => update(-1)}
+            className="h-14 rounded-2xl bg-neutral-900 border border-white/10 text-xl font-light active:scale-95 transition-transform">
+            - 1
+          </button>
+          <button
+            onClick={() => update(1)}
+            className="h-14 rounded-2xl bg-white text-black text-xl font-medium active:scale-95 transition-transform shadow-lg">
+            + 1
+          </button>
+        </div>
+        <button
+          onClick={() => { playClick(220); setCount(0); setHistory([]); }}
+          className="w-full py-2.5 text-[11px] font-mono uppercase tracking-wider text-neutral-500 hover:text-white transition-colors">
+          Reset Counter
+        </button>
+      </div>
+    </div>
+  );
+}`,
+        isArchived: false,
+        isStarred: true,
+        runCount: 19,
+        createdAt: '2026-09-10'
+      },
+      {
+        id: 'pwa_react_focus_matrix',
+        title: 'React Micro Tasks',
+        icon: 'MT',
+        desc: 'Reactステートによる即時ローカル永続化タスクメモ',
+        type: 'react',
+        code: `function App() {
+  const [items, setItems] = React.useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('focus_items') || '["ディープワーク 90分", "アーキテクチャ検証"]');
+    } catch(e) { return []; }
+  });
+  const [text, setText] = React.useState('');
+
+  const save = (next) => {
+    setItems(next);
+    localStorage.setItem('focus_items', JSON.stringify(next));
+  };
+
+  const add = (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    save([...items, text.trim()]);
+    setText('');
+  };
+
+  const remove = (idx) => {
+    save(items.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <div className="h-full w-full bg-[#050508] text-white flex flex-col justify-between p-6 select-none font-sans">
+      <div className="space-y-4 max-w-md mx-auto w-full flex-1 flex flex-col">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3 pt-2">
+          <h1 className="text-sm font-semibold tracking-tight">Today Focus Matrix</h1>
+          <span className="text-[10px] font-mono text-neutral-500">{items.length} ACTIVE</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-2 py-2">
+          {items.map((it, idx) => (
+            <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+              <span className="text-xs text-neutral-200">{it}</span>
+              <button onClick={() => remove(idx)} className="text-neutral-500 hover:text-white p-1">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className="text-center py-16 text-neutral-600 text-xs font-mono">すべてのタスクを達成しました</div>
+          )}
+        </div>
+
+        <form onSubmit={add} className="flex gap-2 pt-2 border-t border-white/10">
+          <input
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="新規フォーカスタスク..."
+            className="flex-1 h-10 px-3 bg-white/[0.06] border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-white/30"
+          />
+          <button type="submit" className="h-10 px-4 rounded-xl bg-white text-black font-semibold text-xs active:opacity-80">
+            追加
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}`,
+        isArchived: false,
+        isStarred: true,
+        runCount: 8,
+        createdAt: '2026-09-08'
+      },
+      {
         id: 'pwa_vector_canvas',
         title: 'Vector Scope Simulator',
         icon: 'VC',
@@ -599,49 +757,9 @@
 </body>
 </html>`,
         isArchived: false,
-        isStarred: true,
+        isStarred: false,
         runCount: 14,
         createdAt: '2026-09-01'
-      },
-      {
-        id: 'pwa_chrono_timer',
-        title: 'Focus Chronometer',
-        icon: 'FC',
-        desc: '装飾を極限まで削いだミニマルポモドーロ計測器',
-        type: 'code',
-        code: `<!DOCTYPE html>
-<html lang="ja" class="h-full bg-black text-white">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"></head>
-<body class="h-full m-0 bg-black flex flex-col justify-between items-center p-8 select-none font-sans">
-  <div class="text-[10px] font-mono tracking-widest text-neutral-500 pt-6">INTERVAL • 25 MIN</div>
-  <div class="text-7xl font-mono font-light tracking-tighter" id="display">25:00</div>
-  <div class="flex items-center space-x-4 w-full max-w-xs pb-6">
-    <button onclick="toggle()" id="btn" class="flex-1 py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase active:opacity-80">START</button>
-    <button onclick="reset()" class="px-5 py-3.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono text-xs uppercase active:opacity-80">RESET</button>
-  </div>
-  <script>
-    let sec = 25 * 60; let timer = null;
-    function render() {
-      const m = Math.floor(sec/60).toString().padStart(2,'0');
-      const s = (sec%60).toString().padStart(2,'0');
-      document.getElementById('display').innerText = \`\${m}:\${s}\`;
-    }
-    function toggle() {
-      const b = document.getElementById('btn');
-      if (timer) { clearInterval(timer); timer = null; b.innerText = 'RESUME'; }
-      else {
-        timer = setInterval(() => { if (sec > 0) { sec--; render(); } else { clearInterval(timer); timer = null; } }, 1000);
-        b.innerText = 'PAUSE';
-      }
-    }
-    function reset() { if(timer) { clearInterval(timer); timer = null; } sec = 25 * 60; render(); document.getElementById('btn').innerText = 'START'; }
-  <\/script>
-</body>
-</html>`,
-        isArchived: false,
-        isStarred: false,
-        runCount: 22,
-        createdAt: '2026-08-20'
       },
       {
         id: 'pwa_vault_sample_2025',
@@ -770,6 +888,7 @@
 
       filtered.forEach(p => {
         const el = document.createElement('div');
+        const badgeType = p.type === 'react' ? 'REACT' : (p.type === 'url' ? 'URL' : 'HTML');
         
         if (currentLayout === 'grid') {
           // Compact Grid Card
@@ -782,17 +901,23 @@
                 <div class="w-10 h-10 squircle bg-black border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white shadow-sm">
                   ${escapeHtml(p.icon || 'PW')}
                 </div>
-                <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
-                  <svg class="w-3.5 h-3.5 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                </button>
+                <div class="flex items-center space-x-1">
+                  <span class="text-[8px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-brand-secondary border border-white/[0.06]">${badgeType}</span>
+                  <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
+                    <svg class="w-3.5 h-3.5 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  </button>
+                </div>
               </div>
               <h3 class="text-xs font-semibold text-white tracking-tight mt-2.5 truncate">${escapeHtml(p.title)}</h3>
               <p class="text-[10px] text-brand-secondary truncate mt-0.5">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
             </div>
             
             <div class="flex items-center justify-between pt-3 mt-2 hairline-t text-[10px]">
-              <span class="font-mono text-brand-tertiary">${p.isArchived ? '保管中' : `${p.runCount || 0}回実行`}</span>
-              <div class="flex items-center space-x-1">
+              <span class="font-mono text-brand-tertiary">${p.isArchived ? '保管中' : `${p.runCount || 0}回`}</span>
+              <div class="flex items-center space-x-1.5">
+                <button onclick="launchProjectInNewWindow('${p.id}', event)" title="別アプリとして独立起動" class="p-1 text-white hover:opacity-80">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </button>
                 <button onclick="openEditor('${p.id}', event)" class="p-1 text-brand-secondary hover:text-white">
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                 </button>
@@ -815,7 +940,8 @@
               <div class="min-w-0 flex-1">
                 <div class="flex items-center space-x-1.5">
                   <h3 class="text-xs font-medium text-white tracking-tight truncate">${escapeHtml(p.title)}</h3>
-                  ${p.isArchived ? '<span class="text-[8px] font-mono text-brand-tertiary px-1 py-0.2 rounded bg-white/[0.04]">VAULT</span>' : ''}
+                  <span class="text-[8px] font-mono text-brand-tertiary px-1 py-0.2 rounded bg-white/[0.04] border border-white/[0.06]">${badgeType}</span>
+                  ${p.isArchived ? '<span class="text-[8px] font-mono text-amber-400/80 px-1 py-0.2 rounded bg-amber-400/10">VAULT</span>' : ''}
                 </div>
                 <p class="text-[10px] text-brand-secondary truncate">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
               </div>
@@ -831,8 +957,9 @@
               <button onclick="toggleArchive('${p.id}', event)" title="${p.isArchived ? '現役に復帰' : '保管庫へ'}" class="p-1 text-brand-secondary hover:text-white">
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
               </button>
-              <button onclick="launchProject('${p.id}')" class="h-6 px-2.5 rounded-full bg-white text-black font-semibold text-[10px] flex items-center justify-center">
-                起動
+              <button onclick="launchProjectInNewWindow('${p.id}', event)" title="別アプリとして独立起動" class="h-6 px-2.5 rounded-full bg-white text-black font-semibold text-[10px] flex items-center justify-center gap-1 shadow-sm active:opacity-80">
+                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>別窓</span>
               </button>
             </div>
           `;
@@ -840,7 +967,7 @@
 
         el.onclick = (e) => {
           if (e.target.closest('button')) return;
-          launchProject(p.id);
+          launchProjectInNewWindow(p.id, e);
         };
 
         container.appendChild(el);
@@ -848,8 +975,111 @@
     }
 
     /* ================================================================= */
-    /* 3. NATIVE SANDBOX RUNNER & DYNAMIC ISLAND                         */
+    /* 3. EXECUTABLE BUILDER & STANDALONE WINDOW LAUNCHER                */
     /* ================================================================= */
+    function buildStandaloneHtml(project) {
+      const title = escapeHtml(project.title || 'PWA App');
+      const iconText = escapeHtml(project.icon || 'PW');
+
+      // Generate Inline SVG PWA Icon (Data URI)
+      const iconSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect width="192" height="192" rx="42" fill="%23000000"/><text x="96" y="112" font-family="-apple-system,system-ui,sans-serif" font-size="64" font-weight="700" fill="%23ffffff" text-anchor="middle">${encodeURIComponent(iconText)}</text></svg>`;
+
+      if (project.type === 'react') {
+        return `<!DOCTYPE html>
+<html lang="ja" class="h-full bg-black text-white antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>${title}</title>
+  
+  <!-- Standalone iOS Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="${title}">
+  <meta name="theme-color" content="#000000">
+  <link rel="apple-touch-icon" href="${iconSvg}">
+  <link rel="icon" type="image/svg+xml" href="${iconSvg}">
+
+  <!-- React 18, Babel Standalone & Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js"><\/script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+      overflow: hidden;
+    }
+    #root { height: 100%; width: 100%; }
+  </style>
+</head>
+<body class="h-full w-full bg-black overflow-hidden select-none">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    ${project.code}
+
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    if (typeof App !== 'undefined') {
+      root.render(<App />);
+    } else {
+      root.render(
+        <div style={{padding: '24px', fontFamily: 'monospace', color: '#ff6b6b'}}>
+          Error: App component was not found in your React code. Ensure 'function App() { ... }' is defined.
+        </div>
+      );
+    }
+  <\/script>
+</body>
+</html>`;
+      }
+
+      // Single HTML mode
+      return project.code || '<h1 style="color:#fff;padding:24px;font-family:sans-serif;">Empty PWA</h1>';
+    }
+
+    /* Open PWA as an Independent Window (Separate App) */
+    function launchProjectInNewWindow(projectId, event) {
+      if (event) event.stopPropagation();
+      haptic();
+      const app = projects.find(p => p.id === projectId);
+      if (!app) return;
+
+      app.runCount = (app.runCount || 0) + 1;
+      saveStorage();
+
+      if (app.type === 'url') {
+        window.open(app.url, '_blank');
+        showToast(`「${app.title}」を別ウィンドウで起動`);
+        return;
+      }
+
+      const fullHtml = buildStandaloneHtml(app);
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+
+      const win = window.open(blobUrl, '_blank');
+      if (win) {
+        showToast(`「${app.title}」を独立別ウィンドウで起動`);
+      } else {
+        // Fallback to internal sandbox if popup blocked
+        launchProject(projectId);
+      }
+    }
+
+    /* Internal Sandbox Runner (For preview or in-app emulation) */
     function launchProject(projectId) {
       haptic();
       const app = projects.find(p => p.id === projectId);
@@ -871,7 +1101,7 @@
         frame.src = app.url;
       } else {
         frame.removeAttribute('src');
-        frame.srcdoc = app.code || '<h1 style="color:#fff;font-family:sans-serif;padding:20px;">Empty PWA</h1>';
+        frame.srcdoc = buildStandaloneHtml(app);
       }
 
       header.classList.add('opacity-0', 'pointer-events-none');
@@ -883,7 +1113,7 @@
         viewport.classList.add('scale-100', 'opacity-100');
       });
 
-      showToast(`「${app.title}」を起動中`);
+      showToast(`「${app.title}」をプレビュー実行中`);
     }
 
     function exitSandbox() {
@@ -918,7 +1148,7 @@
       if (currentActiveApp.type === 'url') {
         frame.src = currentActiveApp.url;
       } else {
-        frame.srcdoc = currentActiveApp.code;
+        frame.srcdoc = buildStandaloneHtml(currentActiveApp);
       }
       collapseIsland();
       showToast('再読込完了');
@@ -931,12 +1161,12 @@
 
     function syncIsland(app) {
       document.getElementById('islandTitle').innerText = app.title;
-      document.getElementById('islandStateBadge').innerText = app.isArchived ? 'VAULT' : 'RUN';
+      document.getElementById('islandStateBadge').innerText = app.type === 'react' ? 'REACT' : (app.isArchived ? 'VAULT' : 'RUN');
       document.getElementById('islandIndicator').className = 'w-1.5 h-1.5 rounded-full bg-white';
 
       document.getElementById('islandExpandedTitle').innerText = app.title;
       document.getElementById('islandAppIcon').innerText = app.icon || 'PW';
-      document.getElementById('islandExpandedMeta').innerText = app.isArchived ? 'Archived Session' : '100% Native Container';
+      document.getElementById('islandExpandedMeta').innerText = app.type === 'react' ? 'React 18 Standalone' : (app.isArchived ? 'Archived Session' : '100% Native Container');
     }
 
     function resetIsland() {
@@ -986,15 +1216,15 @@
     };
     document.getElementById('btnIslandReload').onclick = reloadSandbox;
     document.getElementById('btnIslandExit').onclick = exitSandbox;
+    document.getElementById('btnIslandNewWindow').onclick = () => {
+      if (currentActiveApp) {
+        collapseIsland();
+        launchProjectInNewWindow(currentActiveApp.id);
+      }
+    };
     document.getElementById('btnIslandInspect').onclick = () => {
       collapseIsland();
       if (currentActiveApp) openInspector(currentActiveApp.id);
-    };
-    document.getElementById('btnIslandToggleArchive').onclick = () => {
-      if (currentActiveApp) {
-        toggleArchive(currentActiveApp.id);
-        collapseIsland();
-      }
     };
 
     /* Physical Home Indicator Gesture */
@@ -1035,11 +1265,41 @@
     /* ================================================================= */
     /* 4. CREATIVE STUDIO & PRESET HANDLER                               */
     /* ================================================================= */
-    let currentEditorMode = 'code';
+    let currentEditorMode = 'react'; // 'react' | 'code' | 'url'
 
     const PRESETS = {
-      oscillo: DEFAULT_SEED_PROJECTS[0].code,
-      metronome: DEFAULT_SEED_PROJECTS[1].code,
+      react_counter: DEFAULT_SEED_PROJECTS[0].code,
+      react_task: DEFAULT_SEED_PROJECTS[1].code,
+      oscillo: DEFAULT_SEED_PROJECTS[2].code,
+      metronome: `<!DOCTYPE html>
+<html lang="ja" class="h-full bg-black text-white">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"></head>
+<body class="h-full m-0 bg-black flex flex-col justify-between items-center p-8 select-none font-sans">
+  <div class="text-[10px] font-mono tracking-widest text-neutral-500 pt-6">INTERVAL • 25 MIN</div>
+  <div class="text-7xl font-mono font-light tracking-tighter" id="display">25:00</div>
+  <div class="flex items-center space-x-4 w-full max-w-xs pb-6">
+    <button onclick="toggle()" id="btn" class="flex-1 py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase active:opacity-80">START</button>
+    <button onclick="reset()" class="px-5 py-3.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono text-xs uppercase active:opacity-80">RESET</button>
+  </div>
+  <script>
+    let sec = 25 * 60; let timer = null;
+    function render() {
+      const m = Math.floor(sec/60).toString().padStart(2,'0');
+      const s = (sec%60).toString().padStart(2,'0');
+      document.getElementById('display').innerText = \`\${m}:\${s}\`;
+    }
+    function toggle() {
+      const b = document.getElementById('btn');
+      if (timer) { clearInterval(timer); timer = null; b.innerText = 'RESUME'; }
+      else {
+        timer = setInterval(() => { if (sec > 0) { sec--; render(); } else { clearInterval(timer); timer = null; } }, 1000);
+        b.innerText = 'PAUSE';
+      }
+    }
+    function reset() { if(timer) { clearInterval(timer); timer = null; } sec = 25 * 60; render(); document.getElementById('btn').innerText = 'START'; }
+  <\/script>
+</body>
+</html>`,
       scratchpad: `<!DOCTYPE html>
 <html lang="ja" class="h-full bg-black text-white font-sans">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -1058,15 +1318,15 @@
     function resetStudio() {
       document.getElementById('formProjectId').value = '';
       document.getElementById('formTitle').value = '';
-      document.getElementById('formIcon').value = 'PW';
-      document.getElementById('studioIconText').innerText = 'PW';
+      document.getElementById('formIcon').value = 'RC';
+      document.getElementById('studioIconText').innerText = 'RC';
       document.getElementById('formDesc').value = '';
-      document.getElementById('formCode').value = PRESETS.oscillo;
+      document.getElementById('formCode').value = PRESETS.react_counter;
       document.getElementById('formUrl').value = '';
       document.getElementById('formIsArchived').checked = (currentFilter === 'vault');
       document.getElementById('btnSubmitLabel').innerText = '保存して登録';
       document.getElementById('studioHeadline').innerText = '新規PWAを設計・登録';
-      setEditorMode('code');
+      setEditorMode('react');
       updateCodeCount();
     }
 
@@ -1088,25 +1348,35 @@
       document.getElementById('formUrl').value = app.url || '';
       document.getElementById('formIsArchived').checked = !!app.isArchived;
 
-      setEditorMode(app.type === 'url' ? 'url' : 'code');
+      setEditorMode(app.type || 'code');
       updateCodeCount();
     }
 
     function setEditorMode(mode) {
       currentEditorMode = mode;
+      const tabReact = document.getElementById('tabModeReact');
       const tabCode = document.getElementById('tabModeCode');
       const tabUrl = document.getElementById('tabModeUrl');
       const boxCode = document.getElementById('boxEditorCode');
       const boxUrl = document.getElementById('boxEditorUrl');
+      const label = document.getElementById('editorLanguageLabel');
 
-      if (mode === 'code') {
-        tabCode.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
-        tabUrl.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white';
+      [tabReact, tabCode, tabUrl].forEach(t => {
+        t.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all';
+      });
+
+      if (mode === 'react') {
+        tabReact.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
         boxCode.classList.remove('hidden');
         boxUrl.classList.add('hidden');
+        label.innerText = 'Standalone React 18 Component (Babel JSX + Tailwind)';
+      } else if (mode === 'code') {
+        tabCode.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
+        boxCode.classList.remove('hidden');
+        boxUrl.classList.add('hidden');
+        label.innerText = 'Embedded Single HTML / CSS / JS';
       } else {
         tabUrl.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
-        tabCode.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white';
         boxUrl.classList.remove('hidden');
         boxCode.classList.add('hidden');
       }
@@ -1127,7 +1397,7 @@
       if (key && PRESETS[key]) {
         haptic();
         document.getElementById('formCode').value = PRESETS[key];
-        setEditorMode('code');
+        setEditorMode(key.startsWith('react') ? 'react' : 'code');
         updateCodeCount();
         showToast('プリセットコードを挿入');
       }
@@ -1153,7 +1423,7 @@
         icon,
         desc,
         type: currentEditorMode,
-        code: currentEditorMode === 'code' ? code : '',
+        code: currentEditorMode === 'url' ? '' : code,
         url: currentEditorMode === 'url' ? url : '',
         isArchived,
         isStarred: idx >= 0 ? projects[idx].isStarred : false,
@@ -1189,6 +1459,23 @@
       launchDirectPreview(tempItem);
     };
 
+    document.getElementById('btnTestRunWindow').onclick = () => {
+      const tempItem = {
+        id: 'preview_temp',
+        title: document.getElementById('formTitle').value || '別窓プレビュー',
+        icon: document.getElementById('formIcon').value || 'PW',
+        type: currentEditorMode,
+        code: document.getElementById('formCode').value,
+        url: document.getElementById('formUrl').value,
+        isArchived: false
+      };
+      const fullHtml = buildStandaloneHtml(tempItem);
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      showToast('別ウィンドウでテスト起動');
+    };
+
     function launchDirectPreview(item) {
       haptic();
       currentActiveApp = item;
@@ -1200,7 +1487,7 @@
       syncIsland(item);
 
       if (item.type === 'url') frame.src = item.url;
-      else frame.srcdoc = item.code;
+      else frame.srcdoc = buildStandaloneHtml(item);
 
       header.classList.add('opacity-0', 'pointer-events-none');
       dock.classList.add('opacity-0', 'pointer-events-none');
@@ -1257,7 +1544,7 @@
       if (!p) return;
 
       document.getElementById('inspectTitle').innerText = p.title;
-      document.getElementById('inspectMeta').innerText = p.type === 'url' ? `External PWA (${p.url})` : 'Single Embedded HTML';
+      document.getElementById('inspectMeta').innerText = p.type === 'react' ? 'React 18 (JSX / Hooks)' : (p.type === 'url' ? `External URL (${p.url})` : 'Single Embedded HTML');
       const content = p.type === 'url' ? p.url : (p.code || '');
       document.getElementById('inspectCodeArea').innerText = content;
 
@@ -1268,7 +1555,7 @@
 
       document.getElementById('btnInspectLaunch').onclick = () => {
         closeInspector();
-        launchProject(p.id);
+        launchProjectInNewWindow(p.id);
       };
 
       document.getElementById('inspectorModal').classList.remove('hidden');
@@ -1451,6 +1738,7 @@
     document.getElementById('btnOpenStudio').onclick = () => switchView('studio');
     document.getElementById('btnStudioClose').onclick = () => switchView('projects');
 
+    document.getElementById('tabModeReact').onclick = () => setEditorMode('react');
     document.getElementById('tabModeCode').onclick = () => setEditorMode('code');
     document.getElementById('tabModeUrl').onclick = () => setEditorMode('url');
 
