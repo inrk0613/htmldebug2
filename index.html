@@ -1,464 +1,1486 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="h-full bg-black select-none overflow-hidden antialiased">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#09090b">
-  <title>CodeEdit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Aether Studio</title>
 
-  <link id="appIcon" rel="apple-touch-icon" href="">
-  <link id="favIcon" rel="icon" href="">
+  <!-- iOS PWA Native Configuration -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Aether">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Tailwind CSS Engine -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#000000',
+              canvas: '#060608',
+              surface: '#101014',
+              elevated: '#17171C',
+              border: 'rgba(255, 255, 255, 0.08)',
+              borderFocus: 'rgba(255, 255, 255, 0.22)',
+              primary: '#F2F2F4',
+              secondary: '#8E8E93',
+              tertiary: '#52525A',
+              accent: '#FFFFFF'
+            }
+          },
+          fontFamily: {
+            sans: [
+              '-apple-system',
+              'BlinkMacSystemFont',
+              '"SF Pro Display"',
+              '"SF Pro Text"',
+              'system-ui',
+              'sans-serif'
+            ],
+            mono: [
+              '"SF Mono"',
+              'ui-monospace',
+              'Menlo',
+              'Consolas',
+              'monospace'
+            ]
+          }
+        }
+      }
+    };
+  </script>
 
   <style>
     :root {
-      --bg-root: #09090b;
-      --bg-editor: #0c0c0e;
-      --bg-gutter: #111113;
-      --glass-panel: rgba(18, 18, 20, 0.95);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --accent-primary: #3b82f6;
-      --text-main: #e4e4e7;
-      --font-code: "JetBrains Mono", "SF Mono", "Menlo", monospace;
-      --safe-top: env(safe-area-inset-top);
-      --safe-bottom: env(safe-area-inset-bottom);
-      --rainbow-grad: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff, #ff0000);
+      --sat: env(safe-area-inset-top, 47px);
+      --sab: env(safe-area-inset-bottom, 24px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --spring-snap: cubic-bezier(0.16, 1, 0.3, 1);
+      --smooth-blur: blur(40px) saturate(190%);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
-    /* 【修正】html, bodyを固定し、スクロールは内部で行う */
-    html, body {
-      height: 100%; width: 100%;
-      margin: 0; padding: 0;
-      background-color: var(--bg-root);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow: hidden; /* 全体のスクロールを禁止 */
-      position: fixed; /* iOSでのバウンス防止 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      box-sizing: border-box;
     }
 
-    #app { 
-      display: flex; flex-direction: column; 
-      height: 100%; width: 100%; 
-      /* キーボード表示時のリサイズをスムーズに */
-      transition: height 0.1s;
+    body {
+      background-color: #000000;
+      color: #F2F2F4;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "tnum";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      touch-action: pan-y;
     }
 
-    /* --- HEADER --- */
-    header {
-      padding-top: calc(var(--safe-top) + 8px);
-      padding-bottom: 10px; 
-      padding-left: 16px; padding-right: 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--glass-panel);
-      z-index: 50; flex-shrink: 0; position: relative;
+    /* Precision Specular Borders (0.5px hairline on Retina displays) */
+    .hairline-border {
+      border: 0.5px solid rgba(255, 255, 255, 0.09);
     }
-    header::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-      background: var(--rainbow-grad); opacity: 0.5;
+    .hairline-b {
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    }
+    .hairline-t {
+      border-top: 0.5px solid rgba(255, 255, 255, 0.08);
     }
 
-    .brand {
-      display: flex; align-items: center; gap: 10px; 
-      font-weight: 700; font-size: 18px; color: #fff;
-      flex-shrink: 0;
-    }
-    .brand-text { display: block; }
-    
-    @media (max-width: 380px) {
-      .brand-text { display: none; } 
+    /* Precision Micro Specular Glare */
+    .titanium-panel {
+      background: linear-gradient(180deg, rgba(28, 28, 34, 0.7) 0%, rgba(14, 14, 18, 0.85) 100%);
+      backdrop-filter: var(--smooth-blur);
+      -webkit-backdrop-filter: var(--smooth-blur);
+      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.14), 0 20px 40px -15px rgba(0, 0, 0, 0.9);
     }
 
-    .brand-icon {
-      width: 24px; height: 24px; border-radius: 6px;
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
-    }
-    .brand-icon::after { content: '/'; color: white; font-size: 14px; font-weight: 800; }
-
-    .actions { 
-      display: flex; gap: 8px; align-items: center; 
-      flex-shrink: 1; justify-content: flex-end; width: 100%;
+    .monolith-plate {
+      background: rgba(18, 18, 22, 0.6);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.1);
     }
 
-    .icon-btn {
-      width: 36px; height: 36px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.05); 
-      border: 1px solid var(--glass-border);
-      color: #a1a1aa; cursor: pointer; flex-shrink: 0;
-    }
-    .icon-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.15); }
-    .icon-btn.active { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #60a5fa; }
-
-    #pasteBtn { color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.05); }
-    #pasteBtn:active { background: rgba(251, 191, 36, 0.15); }
-
-    .btn-launch {
-      padding: 0 14px; height: 36px; border-radius: 8px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: white; font-weight: 600; font-size: 13px;
-      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-    }
-    .btn-launch:active { transform: scale(0.96); }
-
-    /* --- MAIN AREA --- */
-    .split-container {
-      flex: 1; display: flex; flex-direction: column;
-      overflow: hidden; position: relative;
-      background: var(--bg-editor);
+    /* Apple Squircle Geometry (22.5% Curvature Ratio) */
+    .squircle {
+      border-radius: 22.5%;
+      box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.22), 0 4px 16px -4px rgba(0, 0, 0, 0.6);
     }
 
-    .editor-pane { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-    
-    .gutter {
-      width: 44px; background: var(--bg-gutter);
-      border-right: 1px solid rgba(255,255,255,0.05);
-      font-family: var(--font-code); font-size: 13px; line-height: 1.6;
-      color: #52525b; text-align: right; padding: 16px 8px 16px 0;
-      /* 【修正】下部に余白を追加して、最後の行が見えるようにする */
-      padding-bottom: 80px;
-      overflow: hidden; user-select: none;
+    /* Tactile Press Kinematics */
+    .press-responsive {
+      transition: transform 0.16s var(--spring-snap), opacity 0.16s ease;
+      will-change: transform, opacity;
+    }
+    .press-responsive:active {
+      transform: scale(0.96);
+      opacity: 0.8;
     }
 
-    textarea {
-      flex: 1; height: 100%; border: none; background: transparent;
-      color: #d4d4d8; padding: 16px; 
-      font-family: var(--font-code); font-size: 13px; line-height: 1.6; 
-      resize: none; white-space: pre; caret-color: var(--accent-primary);
-      /* 【修正】下部に大きな余白を追加。これでキーボードが出てもスクロール余地が生まれる */
-      padding-bottom: 80px; 
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Island Animation Engine */
+    #islandCapsule {
+      transition: width 0.42s var(--spring-snap), height 0.42s var(--spring-snap), border-radius 0.35s ease, background-color 0.3s ease;
+      will-change: width, height;
     }
 
-    /* --- TOOLBAR --- */
-    .toolbar {
-      background: #18181b; 
-      border-top: 1px solid rgba(255,255,255,0.15);
-      border-bottom: 1px solid rgba(0,0,0,0.5);
-      padding: 8px 10px;
-      /* JSで制御するため、CSSでのsafe-areaは最小限に */
-      padding-bottom: 8px;
-      
-      display: flex; gap: 6px; overflow-x: auto; align-items: center;
-      flex-shrink: 0; z-index: 45;
-      height: 56px; 
+    #sandboxViewport {
+      transition: transform 0.38s var(--spring-snap), opacity 0.3s ease, border-radius 0.38s ease;
+      will-change: transform, opacity;
     }
-    .toolbar::-webkit-scrollbar { display: none; }
-
-    .key {
-      flex: 0 0 auto; height: 38px; min-width: 38px; border-radius: 6px;
-      background: #27272a; border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
-      color: #e4e4e7; font-family: var(--font-code); font-size: 15px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .key:active { transform: translateY(2px); box-shadow: none; background: #3f3f46; }
-
-    #colorBtn { display: none; padding: 0 10px; font-size: 12px; gap: 6px; background: rgba(59,130,246,0.15); color: #93c5fd; border-color: rgba(59,130,246,0.4); }
-    #swatch { width: 10px; height: 10px; background: #fff; border-radius: 2px; }
-    #nativePicker { position: absolute; opacity: 0; width: 0; height: 0; }
-
-    /* --- PREVIEW --- */
-    #resizer {
-      height: 16px; background: #131315; border-bottom: 1px solid var(--glass-border);
-      display: none; justify-content: center; align-items: center; flex-shrink: 0;
-    }
-    #resizer::after { content: ''; width: 40px; height: 4px; background: #3f3f46; border-radius: 2px; }
-
-    .preview-pane {
-      height: 40%; background: #fff; display: none; flex-direction: column;
-      border-top: 1px solid var(--glass-border);
-    }
-    .preview-pane.visible { display: flex; }
-
-    .preview-header {
-      height: 30px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
-      display: flex; align-items: center; padding: 0 10px;
-      font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.5px;
-      justify-content: space-between;
-    }
-    .preview-header.error { background: #fee2e2; color: #ef4444; }
-    iframe { width: 100%; height: 100%; border: none; background: white; }
-
   </style>
 </head>
-<body>
 
-  <div id="app">
-    <header>
-      <div class="brand">
-        <div class="brand-icon"></div>
-        <span class="brand-text">CodeEdit</span>
-      </div>
-      <div class="actions">
-        <button id="pasteBtn" class="icon-btn" onclick="pasteFromClipboard()" title="Paste">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-        </button>
+<body class="h-full w-full flex flex-col font-sans overflow-hidden select-none bg-black text-white relative">
 
-        <button id="copyBtn" class="icon-btn" onclick="copyAll()">
-          <svg id="iconCopy" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          <svg id="iconCheck" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:none;"><path d="M20 6L9 17l-5-5"></path></svg>
-        </button>
-
-        <button id="toggleViewBtn" class="icon-btn" onclick="togglePreview()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-        
-        <button class="icon-btn" style="color:#f87171; border-color:rgba(239,68,68,0.2);" onclick="clearAll()">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
-        
-        <button class="btn-launch" onclick="launch()">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> <span class="brand-text" style="font-size:12px; margin-left:4px;">実行</span>
-        </button>
-      </div>
-    </header>
-
-    <div class="split-container" id="splitContainer">
-      <div class="editor-pane">
-        <div class="gutter" id="gutter">1</div>
-        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="コードを入力..."></textarea>
-      </div>
-
-      <div class="toolbar" id="toolbar">
-        <div id="colorBtn" class="key"><div id="swatch"></div> <input type="color" id="nativePicker"></div>
-        <button class="key" onclick="move(-1)">←</button>
-        <button class="key" onclick="move(1)">→</button>
-        <button class="key" style="font-size:12px; font-weight:700" onclick="insertTab()">TAB</button>
-        <button class="key" onclick="insert('=')">=</button>
-        <button class="key" onclick="insert('<')">&lt;</button>
-        <button class="key" onclick="insert('>')">&gt;</button>
-        <button class="key" onclick="insert('/')">/</button>
-        <button class="key" onclick="insert('{')">{</button>
-        <button class="key" onclick="insert('}')">}</button>
-        <button class="key" onclick="insert(';')">;</button>
-      </div>
-
-      <div id="resizer"></div>
-      <div class="preview-pane" id="previewPane">
-        <div class="preview-header" id="previewHeader">
-          <span>Live Preview</span>
-          <span id="errorDisplay" class="error-msg"></span>
+  <!-- ================================================================= -->
+  <!-- 1. DYNAMIC ISLAND (Precision Hardware Controller)                  -->
+  <!-- ================================================================= -->
+  <div class="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none pt-[calc(env(safe-area-inset-top,14px)+4px)] px-4">
+    <div id="islandCapsule"
+         class="pointer-events-auto bg-[#0a0a0d]/95 border border-white/[0.12] rounded-full overflow-hidden flex flex-col items-center justify-center cursor-pointer select-none backdrop-blur-2xl shadow-[0_12px_32px_rgba(0,0,0,0.85)]"
+         style="width: 156px; height: 34px;">
+      
+      <!-- Collapsed State -->
+      <div id="islandCollapsed" class="w-full h-full px-3 flex items-center justify-between transition-opacity duration-200">
+        <div class="flex items-center space-x-2 min-w-0">
+          <span id="islandIndicator" class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+          <span id="islandTitle" class="text-[11px] font-medium tracking-tight text-white/90 truncate max-w-[80px]">Aether</span>
         </div>
-        <iframe id="previewFrame"></iframe>
+        <span id="islandStateBadge" class="text-[9px] font-mono uppercase tracking-wider text-brand-secondary">Idle</span>
+      </div>
+
+      <!-- Expanded State (Appears during PWA running or tap) -->
+      <div id="islandExpanded" class="hidden w-full h-full p-3.5 flex-col justify-between opacity-0 transition-opacity duration-200">
+        <div class="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <div id="islandAppIcon" class="w-7 h-7 squircle bg-brand-surface border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white">
+              P
+            </div>
+            <div class="min-w-0">
+              <h4 id="islandExpandedTitle" class="text-xs font-semibold text-white tracking-tight truncate">Sandbox App</h4>
+              <p id="islandExpandedMeta" class="text-[9px] text-brand-secondary font-mono truncate">100% Native Container</p>
+            </div>
+          </div>
+          <button id="btnIslandDismiss" class="press-responsive w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-secondary hover:text-white">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-1.5 pt-2 text-center text-[10px]">
+          <button id="btnIslandReload" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>再読込</span>
+          </button>
+          <button id="btnIslandInspect" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <span>コード</span>
+          </button>
+          <button id="btnIslandToggleArchive" class="press-responsive py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] flex flex-col items-center justify-center gap-1 text-white/80">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+            <span>アーカイブ</span>
+          </button>
+          <button id="btnIslandExit" class="press-responsive py-1.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white/20 flex flex-col items-center justify-center gap-1 text-white font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <span>閉じる</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <script>
-    (function(){
-      const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');
-      const g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,'#111827');g.addColorStop(1,'#000000');
-      x.fillStyle=g;x.fillRect(0,0,512,512);
-      x.font='bold 300px sans-serif';x.textAlign='center';x.textBaseline='middle';
-      x.fillStyle='#3b82f6';x.fillText('</>',256,276);
-      const u=c.toDataURL('image/png');document.getElementById('appIcon').href=u;document.getElementById('favIcon').href=u;
-    })();
+  <header id="appHeader" class="relative z-20 pt-[calc(env(safe-area-inset-top,44px)+18px)] px-6 pb-3 flex flex-col gap-3 transition-opacity duration-300">
+    <div class="flex items-center justify-between">
+      <div class="space-y-0.5">
+        <span class="text-[10px] font-mono font-medium tracking-wider text-brand-secondary uppercase">
+          Autonomous PWA Orchestrator
+        </span>
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          Aether
+          <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] text-brand-secondary">
+            v6.0 Minimal
+          </span>
+        </h1>
+      </div>
 
-    const editor = document.getElementById('editor');
-    const gutter = document.getElementById('gutter');
-    const previewPane = document.getElementById('previewPane');
-    const resizer = document.getElementById('resizer');
-    const toolbar = document.getElementById('toolbar');
-    const app = document.getElementById('app');
+      <div class="flex items-center space-x-2">
+        <!-- View Toggle (Grid vs Clean List) -->
+        <button id="btnLayoutToggle" title="表示切替" class="press-responsive w-8 h-8 rounded-full monolith-plate hairline-border flex items-center justify-center text-brand-secondary hover:text-white">
+          <svg id="iconLayoutGrid" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <svg id="iconLayoutList" class="w-3.5 h-3.5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <!-- New Project Button -->
+        <button id="btnOpenStudio" class="press-responsive h-8 px-3 rounded-full bg-white text-black font-semibold text-[11px] flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m-8-8h16"/></svg>
+          <span>新規PWA</span>
+        </button>
+      </div>
+    </div>
 
-    const DEFAULT = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <style>\n    body { font-family: sans-serif; padding: 20px; color: #fff; background: #222; }\n    h1 { color: #3b82f6; }\n  </style>\n</head>\n<body>\n  <h1>Hello World</h1>\n  <p>CodeEdit Mobile</p>\n</body>\n</html>`;
-    editor.value = localStorage.getItem('code_edit_final') || DEFAULT;
+    <!-- Minimal Spotlight Search -->
+    <div class="relative mt-1">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-secondary">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </div>
+      <input id="searchInput" type="text" placeholder="プロジェクト名、コード、用途を検索..."
+             class="w-full h-8 pl-8 pr-8 bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs text-white placeholder-brand-tertiary focus:border-white/30 focus:bg-white/[0.07] transition-all font-sans">
+      <button id="btnSearchClear" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-brand-secondary hover:text-white">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
 
-    // --- 0. VISUAL VIEWPORT FIX (これが重要) ---
-    // キーボードが出た時に、ブラウザが教えてくれる「本当の高さ」に#appを強制一致させる
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', () => {
-        // 高さ合わせ
-        app.style.height = `${window.visualViewport.height}px`;
+    <!-- Discrete Segmented Segmenter -->
+    <div class="flex items-center p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px]">
+      <button data-tab="active" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-white bg-white/10 transition-all text-center">
+        現役プロジェクト (<span id="countActive">0</span>)
+      </button>
+      <button data-tab="vault" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all text-center">
+        保管庫 / Vault (<span id="countVault">0</span>)
+      </button>
+      <button data-tab="starred" class="segment-tab press-responsive flex-1 py-1 rounded-lg font-medium text-brand-secondary hover:text-white transition-all text-center">
+        スター済み
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 relative overflow-hidden z-10">
+
+    <!-- VIEW 1: PROJECTS HUB (Minimal Grid / Precision List) -->
+    <section id="viewProjects" class="absolute inset-0 overflow-y-auto px-6 pt-2 pb-32 no-scrollbar">
+      
+      <!-- Vault Info Notice (Shown only in Vault tab) -->
+      <div id="vaultNotice" class="hidden mb-4 p-3 rounded-2xl monolith-plate hairline-border flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center text-brand-secondary shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] font-medium text-white/90">過去作タイムカプセル</p>
+            <p class="text-[10px] text-brand-secondary truncate">保管中のアプリもワンタップでその場で完全起動できます</p>
+          </div>
+        </div>
+        <button id="btnRestoreAllVault" class="press-responsive text-[10px] text-white/80 hover:text-white px-2 py-1 rounded-lg bg-white/[0.06] border border-white/10 font-mono shrink-0">
+          一括復帰
+        </button>
+      </div>
+
+      <!-- App Grid / List Container -->
+      <div id="projectsContainer" class="grid grid-cols-1 gap-2.5">
+        <!-- Rendered via JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyNotice" class="hidden py-24 flex flex-col items-center justify-center text-center">
+        <div class="w-12 h-12 rounded-2xl monolith-plate hairline-border flex items-center justify-center text-brand-tertiary mb-3">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 9h6m-6 3h6m-6 3h4"/></svg>
+        </div>
+        <p class="text-xs font-medium text-brand-secondary">該当するプロジェクトはありません</p>
+        <p class="text-[11px] text-brand-tertiary mt-1">「新規PWA」から作成またはアーカイブを解除してください</p>
+      </div>
+    </section>
+
+    <!-- VIEW 2: 100% NATIVE FULLSCREEN SANDBOX RUNNER -->
+    <section id="sandboxViewport" class="fixed inset-0 bg-black z-40 hidden flex-col transform scale-95 opacity-0 pointer-events-none rounded-[40px] overflow-hidden shadow-2xl">
+      
+      <!-- Top Subtle Pull Trigger (Pulls down to open Island controller) -->
+      <div id="sandboxPullZone" class="absolute top-0 left-0 right-0 h-10 z-30 flex items-center justify-center pointer-events-auto cursor-pointer">
+        <div class="w-12 h-1 rounded-full bg-white/20 hover:bg-white/40 transition-colors"></div>
+      </div>
+
+      <!-- Full True Viewport Sandboxed iframe -->
+      <div class="flex-1 w-full h-full relative bg-black overflow-hidden">
+        <iframe id="sandboxFrame"
+                class="w-full h-full border-none bg-black select-auto"
+                sandbox="allow-scripts allow-modals allow-forms allow-same-origin allow-downloads allow-popups"
+                allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; vr; web-share">
+        </iframe>
+      </div>
+
+      <!-- Native iOS Home Indicator (Swipe/Tap to Exit with Live Rubberbanding) -->
+      <div id="sandboxHomeArea" class="absolute bottom-0 left-0 right-0 h-[calc(env(safe-area-inset-bottom,34px)+10px)] z-30 flex items-center justify-center pointer-events-auto cursor-pointer bg-gradient-to-t from-black/80 to-transparent">
+        <div id="homeIndicator" class="w-32 h-1 rounded-full bg-white/50 hover:bg-white transition-all press-responsive"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: PWA CREATIVE STUDIO & CODE INSPECTOR -->
+    <section id="viewStudio" class="absolute inset-0 overflow-y-auto px-6 pt-3 pb-32 no-scrollbar hidden">
+      <div class="max-w-xl mx-auto flex flex-col gap-3.5">
         
-        // キーボードが出た際に、カーソル位置が見えるようにスクロール
-        if (document.activeElement === editor) {
-          setTimeout(scrollToCursor, 100);
-        }
-      });
-    }
+        <div class="flex items-center justify-between pb-2 hairline-b">
+          <div>
+            <h2 id="studioHeadline" class="text-sm font-bold text-white tracking-tight">PWA Architecture Studio</h2>
+            <p class="text-[10px] text-brand-secondary font-mono">Self-contained Standalone WebApp</p>
+          </div>
+          <button id="btnStudioClose" class="press-responsive text-xs text-brand-secondary hover:text-white px-2 py-1">
+            閉じる
+          </button>
+        </div>
 
-    // カーソル位置までスクロールする関数
-    function scrollToCursor() {
-      const cursorPosition = editor.selectionStart;
-      const textBeforeCursor = editor.value.substring(0, cursorPosition);
-      const lines = textBeforeCursor.split('\n');
-      const lineCount = lines.length;
+        <form id="studioForm" class="flex flex-col gap-3">
+          <input type="hidden" id="formProjectId" value="">
+
+          <!-- Meta Section -->
+          <div class="titanium-panel hairline-border p-3.5 rounded-2xl space-y-3">
+            <div class="flex items-center gap-3">
+              <!-- Monogram Icon Preview -->
+              <div id="studioIconPlate" class="w-12 h-12 squircle bg-[#1c1c24] border border-white/10 flex items-center justify-center text-sm font-mono font-bold text-white shrink-0">
+                <span id="studioIconText">PW</span>
+              </div>
+              <div class="flex-1 space-y-1.5">
+                <div>
+                  <label class="text-[9px] font-mono uppercase text-brand-secondary block">識別シンボル (英数字 2文字 または記号)</label>
+                  <input id="formIcon" type="text" maxlength="3" value="PW"
+                         class="w-full h-7 px-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-xs font-mono text-white focus:border-white/30">
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div>
+                <label class="text-[9px] font-mono uppercase text-brand-secondary block">プロジェクト名称 *</label>
+                <input id="formTitle" type="text" required placeholder="例: Vector Scope, Focus Timer"
+                       class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white focus:border-white/30">
+              </div>
+              <div>
+                <label class="text-[9px] font-mono uppercase text-brand-secondary block">用途メモ・詳細</label>
+                <input id="formDesc" type="text" placeholder="例: オフライン対応、Web Audio使用"
+                       class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white focus:border-white/30">
+              </div>
+            </div>
+          </div>
+
+          <!-- Code / URL Architecture Section -->
+          <div class="titanium-panel hairline-border p-3.5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-[9px] font-mono uppercase text-brand-secondary">実行ターゲット</label>
+              
+              <!-- Quick Presets -->
+              <select id="selectPresets" class="bg-white/[0.06] text-white/80 text-[10px] rounded px-2 py-0.5 border border-white/10 font-mono">
+                <option value="" selected>⚡ プリセットから選ぶ...</option>
+                <option value="oscillo">Oscilloscope Canvas</option>
+                <option value="metronome">Precision Chrono</option>
+                <option value="scratchpad">Clean Scratchpad</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-[11px]">
+              <button type="button" id="tabModeCode" class="py-1 rounded-lg font-medium text-white bg-white/10">
+                単一HTMLソース
+              </button>
+              <button type="button" id="tabModeUrl" class="py-1 rounded-lg font-medium text-brand-secondary hover:text-white">
+                Web PWA URL
+              </button>
+            </div>
+
+            <!-- Code Editor -->
+            <div id="boxEditorCode" class="space-y-1">
+              <div class="flex items-center justify-between text-[9px] font-mono text-brand-tertiary">
+                <span>Embedded Single HTML / JS</span>
+                <span id="codeLengthCounter">0 chars</span>
+              </div>
+              <textarea id="formCode" rows="12" spellcheck="false"
+                        placeholder="<!DOCTYPE html><html><body><h1>Minimal PWA</h1></body></html>"
+                        class="w-full font-mono text-[11px] leading-relaxed bg-[#0a0a0d] text-white/90 p-3 rounded-xl border border-white/[0.08] focus:border-white/30 resize-none"></textarea>
+            </div>
+
+            <!-- URL Input -->
+            <div id="boxEditorUrl" class="space-y-1 hidden">
+              <label class="text-[9px] font-mono uppercase text-brand-secondary">Web URL (HTTPS)</label>
+              <input id="formUrl" type="url" placeholder="https://app.example.com"
+                     class="w-full h-8 px-3 bg-white/[0.04] border border-white/10 rounded-lg text-xs font-mono text-white focus:border-white/30">
+            </div>
+          </div>
+
+          <!-- Archive Direct Placement Flag -->
+          <div class="monolith-plate hairline-border p-3 rounded-xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-medium text-white block">過去作としてアーカイブ保管</span>
+              <span class="text-[10px] text-brand-secondary">保管庫（Vault）に退避し、必要な時に呼び出せます</span>
+            </div>
+            <input id="formIsArchived" type="checkbox" class="w-4 h-4 rounded bg-white/10 border border-white/20 accent-white">
+          </div>
+
+          <!-- Action Controls -->
+          <div class="flex items-center space-x-2 pt-1">
+            <button type="submit" class="press-responsive flex-1 h-10 rounded-xl bg-white text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-md">
+              <span id="btnSubmitLabel">保存して登録</span>
+            </button>
+            <button type="button" id="btnTestRunSandbox" class="press-responsive h-10 px-4 rounded-xl monolith-plate hairline-border text-white text-xs font-medium flex items-center gap-1.5">
+              <span>プレビュー</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 4: SYSTEM SETTINGS & ARCHIVE EXPORT -->
+    <section id="viewSettings" class="absolute inset-0 overflow-y-auto px-6 pt-3 pb-32 no-scrollbar hidden">
+      <div class="max-w-xl mx-auto flex flex-col gap-3.5">
+        
+        <div class="pb-2 hairline-b">
+          <h2 class="text-sm font-bold text-white tracking-tight">System & Data Vault</h2>
+          <p class="text-[10px] text-brand-secondary font-mono">Standalone Deployment & Storage</p>
+        </div>
+
+        <!-- Fullscreen PWA Guide Card -->
+        <div class="titanium-panel hairline-border p-4 rounded-2xl space-y-3">
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center text-white">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.96.04-2.14.65-2.79 1.4-.56.64-.99 1.7-1.01 2.76 1.07.08 2.18-.54 2.79-1.29z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-xs font-semibold text-white">iPhoneネイティブ全画面での運用</h3>
+              <p class="text-[10px] text-brand-secondary">Safariのアドレスバーを完全に非表示にする方法</p>
+            </div>
+          </div>
+
+          <div class="space-y-1.5 text-[11px] bg-black/60 p-3 rounded-xl border border-white/[0.06] font-mono text-brand-secondary">
+            <p>1. Safari下部の「共有（四角に上矢印）」をタップ</p>
+            <p>2. メニューから「<strong>ホーム画面に追加</strong>」を選択</p>
+            <p>3. ホームから起動するとアドレスバーが消失し、100%全画面で動作します</p>
+          </div>
+        </div>
+
+        <!-- Archive JSON Backup / Restore -->
+        <div class="titanium-panel hairline-border p-4 rounded-2xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-white">プロジェクト全アーカイブの書き出し / 復元</span>
+            <span id="storageSizeLabel" class="text-[9px] font-mono text-brand-secondary">0 KB</span>
+          </div>
+          <p class="text-[11px] text-brand-secondary leading-relaxed">
+            現役アプリおよび過去の全アーカイブコードを1つのJSONファイルとしてエクスポートします。機種変更時やPCへのバックアップも安全に行えます。
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button id="btnExportJSON" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs font-medium text-white flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>アーカイブ出力</span>
+            </button>
+            <button id="btnImportJSON" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs font-medium text-white flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span>JSON復元</span>
+            </button>
+            <input type="file" id="fileImportInput" accept=".json" class="hidden">
+          </div>
+
+          <button id="btnResetDefaults" class="press-responsive w-full h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white text-[11px]">
+            サンプルプロジェクト構成に戻す
+          </button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FLOATING MINIMAL DOCK (Precision Titanium Capsule) -->
+  <nav id="appDock" class="fixed bottom-0 left-0 right-0 z-20 pb-[calc(env(safe-area-inset-bottom,20px)+8px)] pt-2 px-6 flex justify-center pointer-events-none transition-opacity duration-300">
+    <div class="pointer-events-auto monolith-plate hairline-border rounded-full px-5 py-2 flex items-center space-x-7 shadow-2xl">
+      <button data-nav="projects" class="dock-btn press-responsive flex flex-col items-center justify-center text-white">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="text-[8px] font-mono mt-0.5 font-medium">APPS</span>
+      </button>
+      <button data-nav="vault" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white relative">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+        <span class="text-[8px] font-mono mt-0.5 font-medium">VAULT</span>
+      </button>
+      <button data-nav="studio" class="dock-btn press-responsive w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg -my-0.5">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m-8-8h16"/></svg>
+      </button>
+      <button data-nav="settings" class="dock-btn press-responsive flex flex-col items-center justify-center text-brand-secondary hover:text-white">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="text-[8px] font-mono mt-0.5 font-medium">DATA</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL: Minimal Code Inspector -->
+  <div id="inspectorModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="titanium-panel hairline-border w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl p-5 flex flex-col max-h-[85vh] shadow-2xl">
+      <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3 sm:hidden"></div>
       
-      // 行の高さ(概算 20px) * 行数 で位置を計算
-      // ※正確な座標取得はtextareaでは難しいので、行数ベースで概算スクロールさせる
-      const lineHeight = 21; // font-size 13px * line-height 1.6 ≒ 20.8px
-      const scrollY = (lineCount - 1) * lineHeight;
+      <div class="flex items-center justify-between pb-3 hairline-b">
+        <div>
+          <h3 id="inspectTitle" class="text-xs font-bold text-white tracking-tight">Code Inspector</h3>
+          <span id="inspectMeta" class="text-[9px] text-brand-secondary font-mono">Clean Architecture</span>
+        </div>
+        <button id="btnInspectDismiss" class="press-responsive w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-brand-secondary hover:text-white">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="py-3 overflow-y-auto no-scrollbar flex-1">
+        <pre id="inspectCodeArea" class="p-3 rounded-xl bg-black border border-white/[0.08] font-mono text-[10px] text-white/90 overflow-x-auto leading-relaxed"></pre>
+      </div>
+
+      <div class="pt-3 hairline-t grid grid-cols-2 gap-2">
+        <button id="btnInspectCopy" class="press-responsive h-9 rounded-xl monolith-plate hairline-border text-xs text-white font-medium flex items-center justify-center">
+          コードをコピー
+        </button>
+        <button id="btnInspectLaunch" class="press-responsive h-9 rounded-xl bg-white text-black text-xs font-bold flex items-center justify-center">
+          即座に実行
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Micro Confirmation Dialog -->
+  <div id="dialogModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-5">
+    <div class="titanium-panel hairline-border w-full max-w-xs rounded-2xl p-4 text-center shadow-2xl">
+      <h3 id="dialogTitle" class="text-xs font-bold text-white">確認</h3>
+      <p id="dialogMessage" class="text-[11px] text-brand-secondary mt-1 leading-relaxed"></p>
       
-      // 現在のスクロール位置と比較して、画面外ならスクロール
-      const visibleHeight = editor.clientHeight;
-      if (scrollY > editor.scrollTop + visibleHeight - 60) {
-          editor.scrollTop = scrollY - visibleHeight / 2;
+      <div class="flex items-center space-x-2 mt-4">
+        <button id="btnDialogCancel" class="press-responsive flex-1 h-8 rounded-xl monolith-plate hairline-border text-white/80 font-medium text-xs">
+          キャンセル
+        </button>
+        <button id="btnDialogConfirm" class="press-responsive flex-1 h-8 rounded-xl bg-white text-black font-bold text-xs">
+          実行
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 rounded-full monolith-plate hairline-border text-white text-[11px] font-medium shadow-2xl opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-1.5">
+    <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+    <span id="toastMsg">Notification</span>
+  </div>
+
+  <script>
+    /* ================================================================= */
+    /* 1. STATE & MINIMAL REPOSITORY                                     */
+    /* ================================================================= */
+    const STORAGE_KEY = 'aether_minimal_pwa_v6';
+
+    const DEFAULT_SEED_PROJECTS = [
+      {
+        id: 'pwa_vector_canvas',
+        title: 'Vector Scope Simulator',
+        icon: 'VC',
+        desc: '陰極線管ベクトルオシレーターの高速Canvasレンダリング',
+        type: 'code',
+        code: `<!DOCTYPE html>
+<html lang="ja" class="h-full bg-black text-white">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"></head>
+<body class="h-full m-0 overflow-hidden bg-black flex flex-col justify-between p-6 select-none font-mono">
+  <div class="flex justify-between items-center text-[10px] text-neutral-400 border-b border-neutral-800 pb-2">
+    <span>CRT VECTOR CORE</span>
+    <span class="text-neutral-500">60 FPS AUTO</span>
+  </div>
+  <canvas id="c" class="w-full flex-1 my-4 block"></canvas>
+  <div class="text-[9px] text-neutral-600 text-center uppercase tracking-wider">TOUCH AND DRAG TO INTERACT</div>
+  <script>
+    const cv = document.getElementById('c'); const ctx = cv.getContext('2d');
+    let w, h, t = 0, px = 0, py = 0;
+    function resize() { cv.width = w = window.innerWidth; cv.height = h = window.innerHeight * 0.7; }
+    window.addEventListener('resize', resize); resize();
+    window.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0]; px = (touch.clientX / w - 0.5) * 50; py = (touch.clientY / h - 0.5) * 50;
+    }, {passive:true});
+    function loop() {
+      ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.2; ctx.beginPath();
+      for(let x=0; x<w; x+=2) {
+        const y = h/2 + Math.sin(x*0.02 + t) * (30 + py) * Math.cos(t*0.6 + px*0.05);
+        if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke(); t += 0.04; requestAnimationFrame(loop);
+    }
+    loop();
+  <\/script>
+</body>
+</html>`,
+        isArchived: false,
+        isStarred: true,
+        runCount: 14,
+        createdAt: '2026-09-01'
+      },
+      {
+        id: 'pwa_chrono_timer',
+        title: 'Focus Chronometer',
+        icon: 'FC',
+        desc: '装飾を極限まで削いだミニマルポモドーロ計測器',
+        type: 'code',
+        code: `<!DOCTYPE html>
+<html lang="ja" class="h-full bg-black text-white">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"></head>
+<body class="h-full m-0 bg-black flex flex-col justify-between items-center p-8 select-none font-sans">
+  <div class="text-[10px] font-mono tracking-widest text-neutral-500 pt-6">INTERVAL • 25 MIN</div>
+  <div class="text-7xl font-mono font-light tracking-tighter" id="display">25:00</div>
+  <div class="flex items-center space-x-4 w-full max-w-xs pb-6">
+    <button onclick="toggle()" id="btn" class="flex-1 py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase active:opacity-80">START</button>
+    <button onclick="reset()" class="px-5 py-3.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono text-xs uppercase active:opacity-80">RESET</button>
+  </div>
+  <script>
+    let sec = 25 * 60; let timer = null;
+    function render() {
+      const m = Math.floor(sec/60).toString().padStart(2,'0');
+      const s = (sec%60).toString().padStart(2,'0');
+      document.getElementById('display').innerText = \`\${m}:\${s}\`;
+    }
+    function toggle() {
+      const b = document.getElementById('btn');
+      if (timer) { clearInterval(timer); timer = null; b.innerText = 'RESUME'; }
+      else {
+        timer = setInterval(() => { if (sec > 0) { sec--; render(); } else { clearInterval(timer); timer = null; } }, 1000);
+        b.innerText = 'PAUSE';
       }
     }
+    function reset() { if(timer) { clearInterval(timer); timer = null; } sec = 25 * 60; render(); document.getElementById('btn').innerText = 'START'; }
+  <\/script>
+</body>
+</html>`,
+        isArchived: false,
+        isStarred: false,
+        runCount: 22,
+        createdAt: '2026-08-20'
+      },
+      {
+        id: 'pwa_vault_sample_2025',
+        title: '【アーカイブ】オシロ旧プロトタイプ',
+        icon: 'AR',
+        desc: '初期検証用の旧コード。保管庫からいつでも呼び出して即時実行可能',
+        type: 'code',
+        code: `<!DOCTYPE html>
+<html lang="ja" class="h-full bg-black text-neutral-400 font-mono">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body class="h-full m-0 p-6 flex flex-col justify-between bg-black">
+  <div class="text-[10px] text-neutral-500 border-b border-neutral-800 pb-2">TIME-CAPSULE ARCHIVE • RESTORED INSTANTLY</div>
+  <div class="my-auto text-center">
+    <div class="text-xs text-neutral-300">ARCHIVED SANDBOX SESSION</div>
+    <div class="text-[10px] text-neutral-600 mt-1">Status: Read-only Isolated Execution</div>
+  </div>
+  <div class="text-[9px] text-neutral-700 text-center">AETHER TIME MACHINE REPOSITORY</div>
+</body>
+</html>`,
+        isArchived: true,
+        isStarred: false,
+        runCount: 41,
+        createdAt: '2025-10-15'
+      }
+    ];
 
-    // --- PASTE ---
-    async function pasteFromClipboard() {
-      editor.focus();
+    let projects = [];
+    let currentFilter = 'active'; // 'active' | 'vault' | 'starred'
+    let currentLayout = 'list';   // 'list' | 'grid'
+    let currentActiveApp = null;
+    let isIslandExpanded = false;
+
+    function loadStorage() {
       try {
-        const text = await navigator.clipboard.readText();
-        insert(text);
-      } catch (err) {
-        const success = document.execCommand('paste');
-        if (!success) {
-          alert("ペーストできませんでした。長押しで貼り付けてください。");
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          projects = JSON.parse(raw);
+        } else {
+          projects = [...DEFAULT_SEED_PROJECTS];
+          saveStorage();
         }
+      } catch (e) {
+        projects = [...DEFAULT_SEED_PROJECTS];
       }
+      refreshStats();
     }
 
-    // --- EDITOR ---
-    editor.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const cursor = editor.selectionStart;
-        const indent = (editor.value.substr(0, cursor).split('\n').pop().match(/^(\s*)/) || ['',''])[1];
-        document.execCommand('insertText', false, '\n' + indent);
-        // iOSでエンター時にカーソルが隠れないよう微調整
-        setTimeout(() => editor.blur(), 1);
-        setTimeout(() => editor.focus(), 5);
-      }
-    });
-
-    function updateGutter() { 
-        const lineCount = editor.value.split('\n').length;
-        gutter.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('<br>'); 
-    }
-    
-    function onInput() {
-      localStorage.setItem('code_edit_final', editor.value); 
-      updateGutter();
-      if (previewPane.classList.contains('visible')) updatePreviewDebounced();
-    }
-    
-    editor.addEventListener('input', onInput);
-    editor.addEventListener('scroll', () => gutter.scrollTop = editor.scrollTop);
-    
-    // --- PREVIEW ---
-    let debounceTimer;
-    function updatePreviewDebounced() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(updatePreview, 600);
+    function saveStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      refreshStats();
     }
 
-    function updatePreview() {
-      const code = editor.value;
-      const previewFrame = document.getElementById('previewFrame');
-      const errScript = `<script>window.onerror=function(m){window.parent.postMessage({type:'error',msg:m},'*');}<\/script>`;
-      document.getElementById('previewHeader').classList.remove('error'); 
-      document.getElementById('errorDisplay').textContent="";
-      
-      let final = code.includes('<head>') ? code.replace('<head>', '<head>'+errScript) : errScript+code;
-      if (!final.includes('<meta name="viewport"')) final = '<meta name="viewport" content="width=device-width,initial-scale=1">' + final;
-      previewFrame.srcdoc = final;
+    function refreshStats() {
+      const activeCount = projects.filter(p => !p.isArchived).length;
+      const vaultCount = projects.filter(p => p.isArchived).length;
+      document.getElementById('countActive').innerText = activeCount;
+      document.getElementById('countVault').innerText = vaultCount;
+
+      try {
+        const bytes = new Blob([localStorage.getItem(STORAGE_KEY) || '']).size;
+        document.getElementById('storageSizeLabel').innerText = `${(bytes / 1024).toFixed(1)} KB`;
+      } catch(e) {}
     }
 
-    window.addEventListener('message', (e) => {
-      if (e.data?.type === 'error') { 
-        document.getElementById('previewHeader').classList.add('error'); 
-        document.getElementById('errorDisplay').textContent = e.data.msg; 
-      }
-    });
+    /* Minimal Web Audio Taptic Engine */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function haptic() {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.02);
+        gain.gain.setValueAtTime(0.03, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.02);
+      } catch (e) {}
+    }
 
-    function togglePreview() {
-      const isVisible = previewPane.classList.toggle('visible');
-      document.getElementById('toggleViewBtn').classList.toggle('active', isVisible);
-      
-      if (isVisible) {
-          resizer.style.display = 'flex';
-          toolbar.style.paddingBottom = '8px'; 
-          updatePreview();
+    /* ================================================================= */
+    /* 2. PROJECT REPOSITORY RENDERING                                   */
+    /* ================================================================= */
+    function renderProjects() {
+      const container = document.getElementById('projectsContainer');
+      const emptyNotice = document.getElementById('emptyNotice');
+      const vaultNotice = document.getElementById('vaultNotice');
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      container.innerHTML = '';
+
+      if (currentFilter === 'vault') {
+        vaultNotice.classList.remove('hidden');
       } else {
-          resizer.style.display = 'none';
-          toolbar.style.removeProperty('padding-bottom'); 
+        vaultNotice.classList.add('hidden');
       }
-    }
 
-    // --- UTILS ---
-    function insert(t) { 
-        const success = document.execCommand('insertText', false, t);
-        if(!success) {
-            const start = editor.selectionStart;
-            editor.setRangeText(t, start, editor.selectionEnd, 'end');
+      const filtered = projects.filter(p => {
+        if (currentFilter === 'active' && p.isArchived) return false;
+        if (currentFilter === 'vault' && !p.isArchived) return false;
+        if (currentFilter === 'starred' && !p.isStarred) return false;
+
+        if (query) {
+          const mTitle = p.title.toLowerCase().includes(query);
+          const mDesc = (p.desc || '').toLowerCase().includes(query);
+          const mCode = (p.code || '').toLowerCase().includes(query);
+          if (!mTitle && !mDesc && !mCode) return false;
         }
-        onInput(); 
-        editor.focus();
-    }
-    function insertTab() { insert('  '); }
-    function move(s) { 
-        const p = editor.selectionStart + s; 
-        editor.setSelectionRange(p, p); 
-        editor.focus(); 
-        detectColor();
-    }
-    
-    function copyAll() {
-      navigator.clipboard.writeText(editor.value).then(() => {
-        const btn=document.getElementById('copyBtn');
-        btn.classList.add('copied');
-        setTimeout(()=> btn.classList.remove('copied'), 2000);
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        emptyNotice.classList.remove('hidden');
+      } else {
+        emptyNotice.classList.add('hidden');
+      }
+
+      if (currentLayout === 'grid') {
+        container.className = 'grid grid-cols-2 gap-2.5';
+      } else {
+        container.className = 'grid grid-cols-1 gap-1.5';
+      }
+
+      filtered.forEach(p => {
+        const el = document.createElement('div');
+        
+        if (currentLayout === 'grid') {
+          // Compact Grid Card
+          el.className = `titanium-panel hairline-border p-3.5 rounded-2xl flex flex-col justify-between press-responsive cursor-pointer transition-all ${
+            p.isArchived ? 'border-brand-secondary/20 bg-white/[0.02]' : ''
+          }`;
+          el.innerHTML = `
+            <div>
+              <div class="flex items-start justify-between">
+                <div class="w-10 h-10 squircle bg-black border border-white/10 flex items-center justify-center text-xs font-mono font-bold text-white shadow-sm">
+                  ${escapeHtml(p.icon || 'PW')}
+                </div>
+                <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
+                  <svg class="w-3.5 h-3.5 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                </button>
+              </div>
+              <h3 class="text-xs font-semibold text-white tracking-tight mt-2.5 truncate">${escapeHtml(p.title)}</h3>
+              <p class="text-[10px] text-brand-secondary truncate mt-0.5">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
+            </div>
+            
+            <div class="flex items-center justify-between pt-3 mt-2 hairline-t text-[10px]">
+              <span class="font-mono text-brand-tertiary">${p.isArchived ? '保管中' : `${p.runCount || 0}回実行`}</span>
+              <div class="flex items-center space-x-1">
+                <button onclick="openEditor('${p.id}', event)" class="p-1 text-brand-secondary hover:text-white">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button onclick="toggleArchive('${p.id}', event)" class="p-1 text-brand-secondary hover:text-white">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // Precision Minimal List Row
+          el.className = `monolith-plate hairline-border p-2.5 px-3 rounded-xl flex items-center justify-between press-responsive cursor-pointer transition-all ${
+            p.isArchived ? 'border-white/[0.05] opacity-80' : ''
+          }`;
+          el.innerHTML = `
+            <div class="flex items-center space-x-3 min-w-0 flex-1">
+              <div class="w-8 h-8 squircle bg-black border border-white/10 flex items-center justify-center text-[11px] font-mono font-bold text-white shrink-0">
+                ${escapeHtml(p.icon || 'PW')}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center space-x-1.5">
+                  <h3 class="text-xs font-medium text-white tracking-tight truncate">${escapeHtml(p.title)}</h3>
+                  ${p.isArchived ? '<span class="text-[8px] font-mono text-brand-tertiary px-1 py-0.2 rounded bg-white/[0.04]">VAULT</span>' : ''}
+                </div>
+                <p class="text-[10px] text-brand-secondary truncate">${escapeHtml(p.desc || 'スタンドアロンアプリ')}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2 shrink-0">
+              <button onclick="toggleStar('${p.id}', event)" class="p-1 text-brand-tertiary hover:text-white">
+                <svg class="w-3 h-3 ${p.isStarred ? 'text-white fill-current' : 'stroke-current fill-none'}" viewBox="0 0 24 24" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              </button>
+              <button onclick="openEditor('${p.id}', event)" title="編集" class="p-1 text-brand-secondary hover:text-white">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              </button>
+              <button onclick="toggleArchive('${p.id}', event)" title="${p.isArchived ? '現役に復帰' : '保管庫へ'}" class="p-1 text-brand-secondary hover:text-white">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+              </button>
+              <button onclick="launchProject('${p.id}')" class="h-6 px-2.5 rounded-full bg-white text-black font-semibold text-[10px] flex items-center justify-center">
+                起動
+              </button>
+            </div>
+          `;
+        }
+
+        el.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          launchProject(p.id);
+        };
+
+        container.appendChild(el);
       });
     }
 
-    function clearAll() { if(confirm('全消去しますか？')) { editor.value=""; onInput(); } }
-    function launch() { const b=new Blob([editor.value],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
+    /* ================================================================= */
+    /* 3. NATIVE SANDBOX RUNNER & DYNAMIC ISLAND                         */
+    /* ================================================================= */
+    function launchProject(projectId) {
+      haptic();
+      const app = projects.find(p => p.id === projectId);
+      if (!app) return;
 
-    const colorBtn = document.getElementById('colorBtn'), swatch = document.getElementById('swatch'), picker = document.getElementById('nativePicker');
-    let colorRange = null;
+      currentActiveApp = app;
+      app.runCount = (app.runCount || 0) + 1;
+      saveStorage();
 
-    editor.addEventListener('click', detectColor); 
-    editor.addEventListener('keyup', detectColor);
-    
-    function detectColor() {
-      const pos = editor.selectionStart, text = editor.value;
-      const regex = /#([0-9a-fA-F]{3,6})\b/g;
-      let match, found = null;
-      const startScan = Math.max(0, pos-20), slice = text.substring(startScan, Math.min(text.length, pos+20));
-      while ((match = regex.exec(slice)) !== null) {
-        const absStart = startScan + match.index;
-        const absEnd = absStart + match[0].length;
-        if (pos >= absStart && pos <= absEnd) {
-          found = { hex: match[0], start: absStart, end: absEnd }; break;
-        }
+      const viewport = document.getElementById('sandboxViewport');
+      const frame = document.getElementById('sandboxFrame');
+      const header = document.getElementById('appHeader');
+      const dock = document.getElementById('appDock');
+
+      syncIsland(app);
+
+      if (app.type === 'url') {
+        frame.removeAttribute('srcdoc');
+        frame.src = app.url;
+      } else {
+        frame.removeAttribute('src');
+        frame.srcdoc = app.code || '<h1 style="color:#fff;font-family:sans-serif;padding:20px;">Empty PWA</h1>';
       }
-      if (found) { 
-        colorBtn.style.display='flex'; swatch.style.background=found.hex; 
-        colorRange=found; 
-        let h = found.hex;
-        if(h.length===4) h = `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
-        picker.value=h; 
-      }
-      else { colorBtn.style.display='none'; colorRange=null; }
+
+      header.classList.add('opacity-0', 'pointer-events-none');
+      dock.classList.add('opacity-0', 'pointer-events-none');
+
+      viewport.classList.remove('hidden', 'pointer-events-none');
+      requestAnimationFrame(() => {
+        viewport.classList.remove('scale-95', 'opacity-0');
+        viewport.classList.add('scale-100', 'opacity-100');
+      });
+
+      showToast(`「${app.title}」を起動中`);
     }
-    
-    picker.addEventListener('input', (e)=>{
-      if(!colorRange) return; 
-      const n=e.target.value;
-      editor.setSelectionRange(colorRange.start, colorRange.end);
-      document.execCommand('insertText', false, n);
-      colorRange.hex = n; colorRange.end = colorRange.start + n.length;
-      swatch.style.background=n;
+
+    function exitSandbox() {
+      haptic();
+      const viewport = document.getElementById('sandboxViewport');
+      const frame = document.getElementById('sandboxFrame');
+      const header = document.getElementById('appHeader');
+      const dock = document.getElementById('appDock');
+
+      collapseIsland();
+
+      viewport.classList.remove('scale-100', 'opacity-100');
+      viewport.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+
+      setTimeout(() => {
+        frame.removeAttribute('srcdoc');
+        frame.src = 'about:blank';
+        viewport.classList.add('hidden');
+      }, 300);
+
+      header.classList.remove('opacity-0', 'pointer-events-none');
+      dock.classList.remove('opacity-0', 'pointer-events-none');
+
+      resetIsland();
+      currentActiveApp = null;
+    }
+
+    function reloadSandbox() {
+      haptic();
+      if (!currentActiveApp) return;
+      const frame = document.getElementById('sandboxFrame');
+      if (currentActiveApp.type === 'url') {
+        frame.src = currentActiveApp.url;
+      } else {
+        frame.srcdoc = currentActiveApp.code;
+      }
+      collapseIsland();
+      showToast('再読込完了');
+    }
+
+    /* Dynamic Island Controller */
+    const island = document.getElementById('islandCapsule');
+    const islandCollapsed = document.getElementById('islandCollapsed');
+    const islandExpanded = document.getElementById('islandExpanded');
+
+    function syncIsland(app) {
+      document.getElementById('islandTitle').innerText = app.title;
+      document.getElementById('islandStateBadge').innerText = app.isArchived ? 'VAULT' : 'RUN';
+      document.getElementById('islandIndicator').className = 'w-1.5 h-1.5 rounded-full bg-white';
+
+      document.getElementById('islandExpandedTitle').innerText = app.title;
+      document.getElementById('islandAppIcon').innerText = app.icon || 'PW';
+      document.getElementById('islandExpandedMeta').innerText = app.isArchived ? 'Archived Session' : '100% Native Container';
+    }
+
+    function resetIsland() {
+      document.getElementById('islandTitle').innerText = 'Aether';
+      document.getElementById('islandStateBadge').innerText = 'Idle';
+      document.getElementById('islandIndicator').className = 'w-1.5 h-1.5 rounded-full bg-white/40';
+    }
+
+    function expandIsland() {
+      if (!currentActiveApp) return;
+      haptic();
+      isIslandExpanded = true;
+      island.style.width = '300px';
+      island.style.height = '126px';
+      island.style.borderRadius = '24px';
+
+      islandCollapsed.classList.add('hidden');
+      islandExpanded.classList.remove('hidden');
+      setTimeout(() => {
+        islandExpanded.classList.remove('opacity-0');
+        islandExpanded.classList.add('opacity-100');
+      }, 40);
+    }
+
+    function collapseIsland() {
+      if (!isIslandExpanded) return;
+      isIslandExpanded = false;
+      islandExpanded.classList.remove('opacity-100');
+      islandExpanded.classList.add('opacity-0');
+
+      setTimeout(() => {
+        islandExpanded.classList.add('hidden');
+        islandCollapsed.classList.remove('hidden');
+        island.style.width = '156px';
+        island.style.height = '34px';
+        island.style.borderRadius = '9999px';
+      }, 140);
+    }
+
+    island.onclick = () => {
+      if (!isIslandExpanded && currentActiveApp) expandIsland();
+    };
+
+    document.getElementById('btnIslandDismiss').onclick = (e) => {
+      e.stopPropagation();
+      collapseIsland();
+    };
+    document.getElementById('btnIslandReload').onclick = reloadSandbox;
+    document.getElementById('btnIslandExit').onclick = exitSandbox;
+    document.getElementById('btnIslandInspect').onclick = () => {
+      collapseIsland();
+      if (currentActiveApp) openInspector(currentActiveApp.id);
+    };
+    document.getElementById('btnIslandToggleArchive').onclick = () => {
+      if (currentActiveApp) {
+        toggleArchive(currentActiveApp.id);
+        collapseIsland();
+      }
+    };
+
+    /* Physical Home Indicator Gesture */
+    const homeArea = document.getElementById('sandboxHomeArea');
+    let touchY = 0;
+    let isDragging = false;
+
+    homeArea.addEventListener('touchstart', (e) => {
+      touchY = e.touches[0].clientY;
+      isDragging = true;
+    }, { passive: true });
+
+    homeArea.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const curY = e.touches[0].clientY;
+      const diff = touchY - curY;
+      if (diff > 0) {
+        const scale = Math.max(0.88, 1 - (diff / 500));
+        const vp = document.getElementById('sandboxViewport');
+        vp.style.transform = `translateY(-${diff * 0.3}px) scale(${scale})`;
+      }
+    }, { passive: true });
+
+    homeArea.addEventListener('touchend', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diff = touchY - e.changedTouches[0].clientY;
+      const vp = document.getElementById('sandboxViewport');
+      vp.style.transform = '';
+      if (diff > 50) {
+        exitSandbox();
+      }
     });
 
-    let isResizing=false;
-    resizer.addEventListener('touchstart', (e)=>{ isResizing=true; e.preventDefault(); }, {passive:false});
-    document.addEventListener('touchmove', (e)=>{ 
-      if(isResizing) {
-        const rect = document.getElementById('app').getBoundingClientRect();
-        const h = rect.bottom - e.touches[0].clientY;
-        if(h > 50 && h < rect.height * 0.8) previewPane.style.height = h + 'px';
-      }
-    }, {passive:false});
-    document.addEventListener('touchend', ()=>{ isResizing=false; });
+    homeArea.onclick = exitSandbox;
+    document.getElementById('sandboxPullZone').onclick = expandIsland;
 
-    updateGutter();
+    /* ================================================================= */
+    /* 4. CREATIVE STUDIO & PRESET HANDLER                               */
+    /* ================================================================= */
+    let currentEditorMode = 'code';
+
+    const PRESETS = {
+      oscillo: DEFAULT_SEED_PROJECTS[0].code,
+      metronome: DEFAULT_SEED_PROJECTS[1].code,
+      scratchpad: `<!DOCTYPE html>
+<html lang="ja" class="h-full bg-black text-white font-sans">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body class="h-full m-0 p-6 flex flex-col justify-between bg-black">
+  <div class="text-[10px] text-neutral-500 font-mono">AUTOSAVED LOCAL SCRATCHPAD</div>
+  <textarea id="pad" placeholder="思考を書き留める..." class="w-full flex-1 bg-transparent text-sm text-neutral-200 border-none outline-none resize-none pt-4 font-mono leading-relaxed"></textarea>
+  <script>
+    const el = document.getElementById('pad');
+    el.value = localStorage.getItem('aether_scratch_text') || '';
+    el.oninput = () => localStorage.setItem('aether_scratch_text', el.value);
+  <\/script>
+</body>
+</html>`
+    };
+
+    function resetStudio() {
+      document.getElementById('formProjectId').value = '';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formIcon').value = 'PW';
+      document.getElementById('studioIconText').innerText = 'PW';
+      document.getElementById('formDesc').value = '';
+      document.getElementById('formCode').value = PRESETS.oscillo;
+      document.getElementById('formUrl').value = '';
+      document.getElementById('formIsArchived').checked = (currentFilter === 'vault');
+      document.getElementById('btnSubmitLabel').innerText = '保存して登録';
+      document.getElementById('studioHeadline').innerText = '新規PWAを設計・登録';
+      setEditorMode('code');
+      updateCodeCount();
+    }
+
+    function openEditor(projectId, event) {
+      if (event) event.stopPropagation();
+      haptic();
+      const app = projects.find(p => p.id === projectId);
+      if (!app) return;
+
+      switchView('studio');
+      document.getElementById('studioHeadline').innerText = 'プロジェクトを再編集';
+      document.getElementById('btnSubmitLabel').innerText = '更新内容を保存';
+      document.getElementById('formProjectId').value = app.id;
+      document.getElementById('formTitle').value = app.title;
+      document.getElementById('formIcon').value = app.icon || 'PW';
+      document.getElementById('studioIconText').innerText = app.icon || 'PW';
+      document.getElementById('formDesc').value = app.desc || '';
+      document.getElementById('formCode').value = app.code || '';
+      document.getElementById('formUrl').value = app.url || '';
+      document.getElementById('formIsArchived').checked = !!app.isArchived;
+
+      setEditorMode(app.type === 'url' ? 'url' : 'code');
+      updateCodeCount();
+    }
+
+    function setEditorMode(mode) {
+      currentEditorMode = mode;
+      const tabCode = document.getElementById('tabModeCode');
+      const tabUrl = document.getElementById('tabModeUrl');
+      const boxCode = document.getElementById('boxEditorCode');
+      const boxUrl = document.getElementById('boxEditorUrl');
+
+      if (mode === 'code') {
+        tabCode.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
+        tabUrl.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white';
+        boxCode.classList.remove('hidden');
+        boxUrl.classList.add('hidden');
+      } else {
+        tabUrl.className = 'py-1 rounded-lg font-medium text-white bg-white/10';
+        tabCode.className = 'py-1 rounded-lg font-medium text-brand-secondary hover:text-white';
+        boxUrl.classList.remove('hidden');
+        boxCode.classList.add('hidden');
+      }
+    }
+
+    function updateCodeCount() {
+      const code = document.getElementById('formCode').value;
+      document.getElementById('codeLengthCounter').innerText = `${code.length} chars`;
+    }
+
+    document.getElementById('formCode').addEventListener('input', updateCodeCount);
+    document.getElementById('formIcon').addEventListener('input', (e) => {
+      document.getElementById('studioIconText').innerText = e.target.value.toUpperCase() || 'PW';
+    });
+
+    document.getElementById('selectPresets').onchange = (e) => {
+      const key = e.target.value;
+      if (key && PRESETS[key]) {
+        haptic();
+        document.getElementById('formCode').value = PRESETS[key];
+        setEditorMode('code');
+        updateCodeCount();
+        showToast('プリセットコードを挿入');
+      }
+      e.target.value = '';
+    };
+
+    document.getElementById('studioForm').onsubmit = (e) => {
+      e.preventDefault();
+      haptic();
+
+      const id = document.getElementById('formProjectId').value || ('pwa_' + Date.now());
+      const title = document.getElementById('formTitle').value.trim();
+      const icon = (document.getElementById('formIcon').value.trim() || 'PW').toUpperCase();
+      const desc = document.getElementById('formDesc').value.trim();
+      const code = document.getElementById('formCode').value;
+      const url = document.getElementById('formUrl').value.trim();
+      const isArchived = document.getElementById('formIsArchived').checked;
+
+      const idx = projects.findIndex(p => p.id === id);
+      const item = {
+        id,
+        title,
+        icon,
+        desc,
+        type: currentEditorMode,
+        code: currentEditorMode === 'code' ? code : '',
+        url: currentEditorMode === 'url' ? url : '',
+        isArchived,
+        isStarred: idx >= 0 ? projects[idx].isStarred : false,
+        runCount: idx >= 0 ? projects[idx].runCount : 0,
+        createdAt: idx >= 0 ? projects[idx].createdAt : new Date().toISOString().split('T')[0]
+      };
+
+      if (idx >= 0) {
+        projects[idx] = item;
+        showToast('プロジェクトを更新');
+      } else {
+        projects.unshift(item);
+        showToast('新しいPWAを登録');
+      }
+
+      saveStorage();
+      switchView('projects');
+      currentFilter = isArchived ? 'vault' : 'active';
+      updateSegmentTabs();
+      renderProjects();
+    };
+
+    document.getElementById('btnTestRunSandbox').onclick = () => {
+      const tempItem = {
+        id: 'preview_temp',
+        title: document.getElementById('formTitle').value || 'プレビュー実行',
+        icon: document.getElementById('formIcon').value || 'PW',
+        type: currentEditorMode,
+        code: document.getElementById('formCode').value,
+        url: document.getElementById('formUrl').value,
+        isArchived: false
+      };
+      launchDirectPreview(tempItem);
+    };
+
+    function launchDirectPreview(item) {
+      haptic();
+      currentActiveApp = item;
+      const viewport = document.getElementById('sandboxViewport');
+      const frame = document.getElementById('sandboxFrame');
+      const header = document.getElementById('appHeader');
+      const dock = document.getElementById('appDock');
+
+      syncIsland(item);
+
+      if (item.type === 'url') frame.src = item.url;
+      else frame.srcdoc = item.code;
+
+      header.classList.add('opacity-0', 'pointer-events-none');
+      dock.classList.add('opacity-0', 'pointer-events-none');
+
+      viewport.classList.remove('hidden', 'pointer-events-none');
+      requestAnimationFrame(() => {
+        viewport.classList.remove('scale-95', 'opacity-0');
+        viewport.classList.add('scale-100', 'opacity-100');
+      });
+    }
+
+    /* ================================================================= */
+    /* 5. ARCHIVE & STAR SUBSYSTEM                                       */
+    /* ================================================================= */
+    function toggleStar(id, event) {
+      if (event) event.stopPropagation();
+      haptic();
+      const p = projects.find(item => item.id === id);
+      if (p) {
+        p.isStarred = !p.isStarred;
+        saveStorage();
+        renderProjects();
+        showToast(p.isStarred ? 'スターに追加' : 'スターを解除');
+      }
+    }
+
+    function toggleArchive(id, event) {
+      if (event) event.stopPropagation();
+      haptic();
+      const p = projects.find(item => item.id === id);
+      if (p) {
+        p.isArchived = !p.isArchived;
+        saveStorage();
+        renderProjects();
+        showToast(p.isArchived ? `「${p.title}」を保管庫へ退避` : `「${p.title}」を現役へ復帰`);
+      }
+    }
+
+    document.getElementById('btnRestoreAllVault').onclick = () => {
+      haptic();
+      projects.forEach(p => p.isArchived = false);
+      saveStorage();
+      renderProjects();
+      showToast('保管庫の全アプリを現役へ復帰');
+    };
+
+    /* ================================================================= */
+    /* 6. CODE INSPECTOR & EXPORT                                        */
+    /* ================================================================= */
+    function openInspector(id, event) {
+      if (event) event.stopPropagation();
+      haptic();
+      const p = projects.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('inspectTitle').innerText = p.title;
+      document.getElementById('inspectMeta').innerText = p.type === 'url' ? `External PWA (${p.url})` : 'Single Embedded HTML';
+      const content = p.type === 'url' ? p.url : (p.code || '');
+      document.getElementById('inspectCodeArea').innerText = content;
+
+      document.getElementById('btnInspectCopy').onclick = () => {
+        copySafe(content);
+        showToast('クリップボードにコピー');
+      };
+
+      document.getElementById('btnInspectLaunch').onclick = () => {
+        closeInspector();
+        launchProject(p.id);
+      };
+
+      document.getElementById('inspectorModal').classList.remove('hidden');
+      document.getElementById('inspectorModal').classList.add('flex');
+    }
+
+    function closeInspector() {
+      document.getElementById('inspectorModal').classList.add('hidden');
+      document.getElementById('inspectorModal').classList.remove('flex');
+    }
+
+    document.getElementById('btnInspectDismiss').onclick = closeInspector;
+
+    function copySafe(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(el);
+    }
+
+    /* ================================================================= */
+    /* 7. SYSTEM BACKUP, RESET & DIALOG                                  */
+    /* ================================================================= */
+    document.getElementById('btnExportJSON').onclick = () => {
+      haptic();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+      const anchor = document.createElement('a');
+      anchor.setAttribute("href", dataStr);
+      anchor.setAttribute("download", `aether_vault_backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      showToast('全アーカイブJSONを出力');
+    };
+
+    document.getElementById('btnImportJSON').onclick = () => {
+      document.getElementById('fileImportInput').click();
+    };
+
+    document.getElementById('fileImportInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (Array.isArray(parsed)) {
+            projects = parsed;
+            saveStorage();
+            renderProjects();
+            showToast(`${parsed.length}件のプロジェクトを復元`);
+          } else {
+            showToast('JSONフォーマットが無効です');
+          }
+        } catch(err) {
+          showToast('JSON読み込みエラー');
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    document.getElementById('btnResetDefaults').onclick = () => {
+      haptic();
+      openDialog({
+        title: '初期状態へのリセット',
+        message: 'サンプル構成へリセットしますか？\n（現在の全データが初期化されます）',
+        onConfirm: () => {
+          projects = [...DEFAULT_SEED_PROJECTS];
+          saveStorage();
+          renderProjects();
+          showToast('初期状態にリセット完了');
+        }
+      });
+    };
+
+    let dialogConfirmAction = null;
+    function openDialog({ title, message, onConfirm }) {
+      document.getElementById('dialogTitle').innerText = title;
+      document.getElementById('dialogMessage').innerText = message;
+      dialogConfirmAction = onConfirm;
+
+      const m = document.getElementById('dialogModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeDialog() {
+      dialogConfirmAction = null;
+      const m = document.getElementById('dialogModal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    document.getElementById('btnDialogConfirm').onclick = () => {
+      if (dialogConfirmAction) dialogConfirmAction();
+      closeDialog();
+    };
+    document.getElementById('btnDialogCancel').onclick = closeDialog;
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      el.classList.remove('opacity-0', 'pointer-events-none');
+      el.classList.add('opacity-100');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.remove('opacity-100');
+        el.classList.add('opacity-0', 'pointer-events-none');
+      }, 2000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    /* ================================================================= */
+    /* 8. NAVIGATION & CORE LIFECYCLE                                    */
+    /* ================================================================= */
+    function switchView(target) {
+      haptic();
+
+      document.getElementById('viewProjects').classList.add('hidden');
+      document.getElementById('viewStudio').classList.add('hidden');
+      document.getElementById('viewSettings').classList.add('hidden');
+
+      document.querySelectorAll('.dock-btn').forEach(b => {
+        const match = b.dataset.nav === target;
+        b.classList.toggle('text-white', match);
+        b.classList.toggle('text-brand-secondary', !match);
+      });
+
+      if (target === 'projects') {
+        currentFilter = 'active';
+        updateSegmentTabs();
+        document.getElementById('viewProjects').classList.remove('hidden');
+        renderProjects();
+      } else if (target === 'vault') {
+        currentFilter = 'vault';
+        updateSegmentTabs();
+        document.getElementById('viewProjects').classList.remove('hidden');
+        renderProjects();
+      } else if (target === 'studio') {
+        resetStudio();
+        document.getElementById('viewStudio').classList.remove('hidden');
+      } else if (target === 'settings') {
+        document.getElementById('viewSettings').classList.remove('hidden');
+      }
+    }
+
+    function updateSegmentTabs() {
+      document.querySelectorAll('.segment-tab').forEach(b => {
+        const active = b.dataset.tab === currentFilter;
+        b.classList.toggle('bg-white/10', active);
+        b.classList.toggle('text-white', active);
+        b.classList.toggle('text-brand-secondary', !active);
+      });
+    }
+
+    document.querySelectorAll('.segment-tab').forEach(b => {
+      b.onclick = () => {
+        haptic();
+        currentFilter = b.dataset.tab;
+        updateSegmentTabs();
+        renderProjects();
+      };
+    });
+
+    document.querySelectorAll('.dock-btn').forEach(b => {
+      b.onclick = () => switchView(b.dataset.nav);
+    });
+
+    document.getElementById('btnOpenStudio').onclick = () => switchView('studio');
+    document.getElementById('btnStudioClose').onclick = () => switchView('projects');
+
+    document.getElementById('tabModeCode').onclick = () => setEditorMode('code');
+    document.getElementById('tabModeUrl').onclick = () => setEditorMode('url');
+
+    /* Layout Toggle (List vs Grid) */
+    document.getElementById('btnLayoutToggle').onclick = () => {
+      haptic();
+      currentLayout = (currentLayout === 'list') ? 'grid' : 'list';
+      document.getElementById('iconLayoutGrid').classList.toggle('hidden', currentLayout === 'grid');
+      document.getElementById('iconLayoutList').classList.toggle('hidden', currentLayout === 'list');
+      renderProjects();
+    };
+
+    /* Search Controller */
+    const searchInput = document.getElementById('searchInput');
+    const searchClear = document.getElementById('btnSearchClear');
+    searchInput.oninput = () => {
+      searchClear.classList.toggle('hidden', !searchInput.value);
+      renderProjects();
+    };
+    searchClear.onclick = () => {
+      searchInput.value = '';
+      searchClear.classList.add('hidden');
+      renderProjects();
+    };
+
+    // Initialize application
+    window.onload = () => {
+      loadStorage();
+      renderProjects();
+    };
   </script>
 </body>
 </html>
